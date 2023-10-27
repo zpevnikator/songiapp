@@ -53,7 +53,7 @@ export function transposeChord(chord: string, d: number) {
     if (chord.startsWith(tone)) {
       const height = TONE_HEIGHTS[tone];
       const newHeight = (height + 5 * 12 + d) % 12;
-      return TONE_BASE_NAMES[newHeight] + chord.substring(tone.length);
+      return `${TONE_BASE_NAMES[newHeight]}${chord.substring(tone.length)}`;
     }
   }
 
@@ -79,5 +79,8 @@ export function transposeText(text: string, d: number) {
   if ((d + 5 * 12) % 12 == 0) {
     return text;
   }
-  return text.replace(/\[([^\]]+)\]/g, (m) => `[${transposeChord(m[1], d)}]`);
+  return text.replace(
+    /\[([^\]]+)\]/g,
+    (m) => `[${transposeChord(m.slice(1, -1), d)}]`
+  );
 }
