@@ -38,3 +38,7 @@ code {
 .song-chords-group {
   display: flex;
 }
+
+.selected-transpose {
+  color: blue;
+}

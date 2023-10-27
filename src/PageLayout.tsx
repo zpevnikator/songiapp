@@ -14,6 +14,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -21,8 +23,27 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DownloadIcon from "@mui/icons-material/Download";
 import PeopleIcon from "@mui/icons-material/People";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
-function PageLayout({ title = "", children, showBack = false }) {
+interface PageLayoutProps {
+  title?: string;
+  children: any;
+  showBack?: boolean;
+  menuItems?: MenuItemDefinition[];
+}
+
+interface MenuItemDefinition {
+  text: string;
+  onClick: Function;
+}
+
+function PageLayout(props: PageLayoutProps) {
+  const { title = "", children, showBack = false, menuItems = null } = props;
+
+  const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
+    null
+  );
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -43,7 +64,42 @@ function PageLayout({ title = "", children, showBack = false }) {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {title || "SongiApp"}
           </Typography>
-          <Button color="inherit">Login</Button>
+
+          {menuItems && (
+            <IconButton
+              size="large"
+              aria-label="display more actions"
+              edge="end"
+              color="inherit"
+              onClick={(e) => setMenuAnchorEl(e?.currentTarget)}
+            >
+              <MoreVertIcon />
+            </IconButton>
+          )}
+
+          {menuItems && (
+            <Menu
+              id="basic-menu"
+              anchorEl={menuAnchorEl}
+              open={!!menuAnchorEl}
+              onClose={() => setMenuAnchorEl(null)}
+              MenuListProps={{
+                "aria-labelledby": "basic-button",
+              }}
+            >
+              {menuItems.map((item, index) => (
+                <MenuItem
+                  key={index}
+                  onClick={() => {
+                    item.onClick();
+                    setMenuAnchorEl(null);
+                  }}
+                >
+                  {item.text}
+                </MenuItem>
+              ))}
+            </Menu>
+          )}
         </Toolbar>
       </AppBar>
 
