@@ -39,6 +39,18 @@ export class ChordLineFormatter {
         continue;
       }
 
+      if (text[index] == " " && current.length > 15) {
+        // split long lines
+        current += text[index];
+        index += 1;
+        this.segments.push({
+          type: "text",
+          text: current,
+        });
+        current = "";
+        continue;
+      }
+
       current += text[index];
       index += 1;
     }
