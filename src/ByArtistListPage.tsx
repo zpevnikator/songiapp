@@ -46,7 +46,7 @@ export default function ByArtistListPage() {
                   textOverflow: "ellipsis",
                 }}
                 primary={song.title}
-                secondary={song?.text?.substring(0, 100)}
+                secondary={song?.text?.replace(/^\..*$/m, "")?.substring(0, 200)}
               />
             </ListItemButton>
           ))}
