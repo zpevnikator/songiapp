@@ -1,4 +1,5 @@
 export interface SongDbListItem {
+  id?: string;
   title: string;
   description: string;
   size: string;
@@ -25,5 +26,5 @@ export interface LocalSong {
   artist: string;
   lang: string;
   text: string;
-  databaseUrl: string;
+  databaseId: string;
 }
