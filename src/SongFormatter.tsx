@@ -65,12 +65,35 @@ export class ChordLineFormatter {
     this.hasChords = !!this.segments.find((x) => x.type == "chord");
   }
 
-  format(key: any) {
+  format(key: any, label: string, showLabel: boolean) {
     if (!this.hasChords) {
-      return <div key={key}>{this.text}</div>;
+      return (
+        <div key={key}>
+          {label && (
+            <span className={showLabel ? "song-label" : "song-label hidden"}>
+              {label}
+            </span>
+          )}
+          {this.text}
+        </div>
+      );
     }
 
     const res: JSX.Element[] = [];
+
+    if (label) {
+      res.push(
+        <div className="song-chord-line-item">
+          <div className="song-chords-group">{"\u00A0"}</div>
+          <div
+            className={showLabel ? "song-label" : "song-label hidden"}
+            key="label"
+          >
+            {label}
+          </div>
+        </div>
+      );
+    }
 
     let current = {
       text: "",
@@ -143,16 +166,25 @@ export default class SongFormatter {
 
   format() {
     const res: JSX.Element[] = [];
+    let label = "";
+    let showLabel = false;
 
     for (const line of this.text?.split("\n") || "") {
       if (line.startsWith(".")) {
-        res.push(
-          <div key={res.length}>
-            <span className="song-label">{line.substring(1)}</span>
-          </div>
-        );
+        if (label && showLabel) {
+          res.push(
+            <div key={res.length}>
+              <span className="song-label">{label}</span>
+            </div>
+          );
+        }
+        label = line.substring(1);
+        showLabel = true;
       } else {
-        res.push(new ChordLineFormatter(line).format(res.length));
+        res.push(
+          new ChordLineFormatter(line).format(res.length, label, showLabel)
+        );
+        showLabel = false;
       }
     }
 

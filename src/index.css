@@ -14,9 +14,14 @@ code {
 
 .song-label {
   text-decoration: underline;
+  margin-right: 3px;
 }
 
 .song-text {
+}
+
+.hidden {
+  visibility: hidden;
 }
 
 .song-chord {
