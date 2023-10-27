@@ -57,18 +57,42 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
   );
 
   const storeSongs = tx?.objectStore("songs");
-  const databaseId = db.id ?? db.url;
   for (const song of data.songs) {
     await storeSongs?.put?.({
       ...song,
       artist: Array.isArray(song.artist) ? song.artist : [song.artist],
-      databaseId,
-      id: `${databaseId}-${song.id}`,
+      databaseId: db.id,
+      id: `${db.id}/${song.id}`,
     });
   }
 
   const storeDatabases = tx?.objectStore("databases");
-  storeDatabases?.put?.({ ...db, id: db.id ?? db.url });
+  storeDatabases?.put?.(db);
+  await tx?.done;
+}
+
+export async function deleteSongDb(db: SongDbListItem) {
+  const tx = (await localDbPromise).transaction(
+    ["songs", "databases"],
+    "readwrite"
+  );
+
+  const deletedSongs: string[] = [];
+  const songStore = tx.objectStore("songs");
+  let cursor = await songStore.openCursor();
+  while (cursor) {
+    if (cursor.value.databaseId == db.id) {
+      deletedSongs.push(cursor.key);
+    }
+    cursor = await cursor.continue();
+  }
+
+  for (const key of deletedSongs) {
+    await songStore.delete(key);
+  }
+
+  await tx.objectStore("databases").delete(db.id);
+
   await tx?.done;
 }
 
@@ -94,4 +118,13 @@ export async function findArtists(): Promise<LocalArtist[]> {
 
   await tx?.done;
   return _.sortBy(_.values(res), (x) => x.name);
+}
+
+export async function findDatabases(): Promise<SongDbListItem[]> {
+  const tx = (await localDbPromise).transaction("databases", "readonly");
+
+  const res = await tx.objectStore("databases").getAll();
+
+  await tx?.done;
+  return res;
 }

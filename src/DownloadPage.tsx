@@ -15,46 +15,71 @@ import {
 import CloudIcon from "@mui/icons-material/Cloud";
 import DownloadIcon from "@mui/icons-material/Download";
 import DownloadingIcon from "@mui/icons-material/Downloading";
-import { saveSongDb } from "./localdb";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { deleteSongDb, findDatabases, saveSongDb } from "./localdb";
 import type { SongDbList, SongDbListItem } from "./types";
 import { getErrorMessage } from "./utils";
 
 export default function DownloadPage() {
   const [loadingDatabases, setLoadingDatabases] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [localDbToken, setLocalDbToken] = useState(0);
 
-  const query = useQuery<SongDbList>({
-    queryKey: ["databases"],
+  const remoteDbQuery = useQuery<SongDbList>({
+    queryKey: ["remoteDatabases"],
     queryFn: () =>
       fetch(
         "https://raw.githubusercontent.com/songiapp/songidb/main/index.json"
       ).then((res) => res.json()),
   });
 
+  const localDbQuery = useQuery<SongDbListItem[]>({
+    queryKey: ["localDatabases", localDbToken],
+    queryFn: findDatabases,
+  });
+
   async function downloadDatabase(db: SongDbListItem) {
-    setLoadingDatabases((a) => [...a, db.url]);
+    setLoadingDatabases((a) => [...a, db.id]);
     try {
       const dbData = await fetch(db.url).then((res) => res.json());
       await saveSongDb(db, dbData);
     } catch (err) {
       setError(getErrorMessage(err));
     }
-    setLoadingDatabases((a) => a.filter((x) => x != db.url));
+    setLoadingDatabases((a) => a.filter((x) => x != db.id));
+    setLocalDbToken((x) => x + 1);
+  }
+
+  async function deleteDatabase(db: SongDbListItem) {
+    setLoadingDatabases((a) => [...a, db.id]);
+    await deleteSongDb(db);
+    setLoadingDatabases((a) => a.filter((x) => x != db.id));
+    setLocalDbToken((x) => x + 1);
   }
 
   return (
     <PageLayout title="Databases">
-      {query.isPending ? (
+      {remoteDbQuery.isPending || localDbQuery.isPending ? (
         <CircularProgress />
-      ) : query.error ? (
-        <Alert severity="error">{query.error.message}</Alert>
+      ) : remoteDbQuery.error ? (
+        <Alert severity="error">{remoteDbQuery.error.message}</Alert>
+      ) : localDbQuery.error ? (
+        <Alert severity="error">{localDbQuery.error.message}</Alert>
       ) : (
-        query.data.databases.map((db) => (
+        remoteDbQuery.data.databases.map((db) => (
           <List>
             <ListItem
               secondaryAction={
-                loadingDatabases.includes(db.url) ? (
+                loadingDatabases.includes(db.id) ? (
                   <DownloadingIcon />
+                ) : localDbQuery.data.find((x) => x.id == db.id) ? (
+                  <IconButton
+                    edge="end"
+                    aria-label="download"
+                    onClick={() => deleteDatabase(db)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
                 ) : (
                   <IconButton
                     edge="end"
