@@ -6,7 +6,7 @@ export default function TransposePanel({ tone, onChange, onClose }) {
   return (
     <Paper
       style={{
-        position: "absolute",
+        position: "fixed",
         bottom: 0,
         padding: 10,
         margin: 5,
