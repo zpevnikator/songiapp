@@ -19,6 +19,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { deleteSongDb, findDatabases, saveSongDb } from "./localdb";
 import type { SongDbList, SongDbListItem } from "./types";
 import { getErrorMessage } from "./utils";
+import _ from "lodash";
 
 export default function DownloadPage() {
   const [loadingDatabases, setLoadingDatabases] = useState<string[]>([]);
@@ -66,12 +67,16 @@ export default function DownloadPage() {
       ) : localDbQuery.error ? (
         <Alert severity="error">{localDbQuery.error.message}</Alert>
       ) : (
-        remoteDbQuery.data.databases.map((db) => (
+        _.uniqBy(
+          [...remoteDbQuery.data.databases, ...localDbQuery.data],
+          (x) => x.id
+        ).map((db) => (
           <List>
             <ListItem
               secondaryAction={
                 loadingDatabases.includes(db.id) ? (
-                  <DownloadingIcon />
+                  <CircularProgress />
+                  // <DownloadingIcon />
                 ) : localDbQuery.data.find((x) => x.id == db.id) ? (
                   <IconButton
                     edge="end"
