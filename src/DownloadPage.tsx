@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import CloudIcon from "@mui/icons-material/Cloud";
 import DownloadIcon from "@mui/icons-material/Download";
-import DownloadingIcon from "@mui/icons-material/Downloading";
+import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { deleteSongDb, findDatabases, saveSongDb } from "./localdb";
 import type { SongDbList, SongDbListItem } from "./types";
@@ -76,8 +76,8 @@ export default function DownloadPage() {
               secondaryAction={
                 loadingDatabases.includes(db.id) ? (
                   <CircularProgress />
-                  // <DownloadingIcon />
-                ) : localDbQuery.data.find((x) => x.id == db.id) ? (
+                ) : // <DownloadingIcon />
+                localDbQuery.data.find((x) => x.id == db.id) ? (
                   <IconButton
                     edge="end"
                     aria-label="download"
@@ -97,7 +97,11 @@ export default function DownloadPage() {
               }
             >
               <ListItemIcon>
-                <CloudIcon />
+                {localDbQuery.data.find((x) => x.id == db.id) ? (
+                  <FileDownloadDoneIcon />
+                ) : (
+                  <CloudIcon />
+                )}
               </ListItemIcon>
               <ListItemText
                 primary={db.title}
