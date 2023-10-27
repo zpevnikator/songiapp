@@ -31,6 +31,7 @@ export default function ArtistListPage() {
         <List>
           {query.data.map((artist) => (
             <ListItemButton
+              key={artist.name}
               onClick={() =>
                 navigate(`/by-artist/${encodeURIComponent(artist.name)}`)
               }

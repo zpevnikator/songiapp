@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
-import { findArtists, fondSongsByArtist } from "./localdb";
+import { findArtists, findSongsByArtist } from "./localdb";
 import {
   Alert,
   CircularProgress,
@@ -20,7 +20,7 @@ export default function ByArtistListPage() {
 
   const query = useQuery<LocalSong[]>({
     queryKey: ["songs-by-artist", artist],
-    queryFn: () => fondSongsByArtist(artist!),
+    queryFn: () => findSongsByArtist(artist!),
   });
 
   return (
@@ -32,7 +32,10 @@ export default function ByArtistListPage() {
       ) : (
         <List>
           {query.data.map((song) => (
-            <ListItemButton onClick={() => navigate(`/songs/${song.id}`)}>
+            <ListItemButton
+              key={song.id}
+              onClick={() => navigate(`/songs/${encodeURIComponent(song.id)}`)}
+            >
               <ListItemIcon>
                 <LyricsIcon />
               </ListItemIcon>

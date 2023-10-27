@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-query";
 import ArtistListPage from "./ArtistListPage";
 import ByArtistListPage from "./ByArtistListPage";
+import SongPage from "./SongPage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
   {
     path: "/by-artist/:artist",
     element: <ByArtistListPage />,
+  },
+  {
+    path: "/songs/:songid",
+    element: <SongPage />,
   },
   {
     path: "*",

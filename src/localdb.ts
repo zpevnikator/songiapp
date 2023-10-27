@@ -62,7 +62,7 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
       ...song,
       artist: Array.isArray(song.artist) ? song.artist : [song.artist],
       databaseId: db.id,
-      id: `${db.id}/${song.id}`,
+      id: `${db.id}-${song.id}`,
     });
   }
 
@@ -129,11 +129,20 @@ export async function findDatabases(): Promise<SongDbListItem[]> {
   return res;
 }
 
-export async function fondSongsByArtist(artist: string): Promise<LocalSong[]> {
+export async function findSongsByArtist(artist: string): Promise<LocalSong[]> {
   const tx = (await localDbPromise).transaction("songs", "readonly");
 
   const res = await tx.objectStore("songs").index("by-artist").getAll(artist);
 
   await tx?.done;
   return _.sortBy(res, (x) => x.title);
+}
+
+export async function getSong(songid: string): Promise<LocalSong | undefined> {
+  const tx = (await localDbPromise).transaction("songs", "readonly");
+
+  const res = await tx.objectStore("songs").get(songid);
+
+  await tx?.done;
+  return res;
 }
