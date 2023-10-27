@@ -86,7 +86,6 @@ export default function DownloadPage() {
           {error}
         </Alert>
       </Snackbar>
-      ;
     </PageLayout>
   );
 }

@@ -12,12 +12,17 @@ import {
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
+import ArtistListPage from "./ArtistListPage";
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
     path: "/",
+    element: <ArtistListPage />,
+  },
+  {
+    path: "/download",
     element: <DownloadPage />,
   },
   {

@@ -14,7 +14,7 @@ export interface SongDatabase {
   songs: {
     id: string;
     title: string;
-    artist: string;
+    artist: string | string[];
     lang: string;
     text: string;
   }[];
@@ -23,7 +23,7 @@ export interface SongDatabase {
 export interface LocalSong {
   id: string;
   title: string;
-  artist: string;
+  artist: string[];
   lang: string;
   text: string;
   databaseId: string;

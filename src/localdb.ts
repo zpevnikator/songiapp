@@ -1,10 +1,12 @@
 import { openDB, deleteDB, wrap, unwrap, DBSchema } from "idb";
 import type { LocalSong, SongDatabase, SongDbListItem } from "./types";
+import _ from "lodash";
 
 interface LocalDb extends DBSchema {
   songs: {
     key: string;
     value: LocalSong;
+    indexes: { "by-artist": string };
   };
   databases: {
     key: string;
@@ -15,8 +17,9 @@ interface LocalDb extends DBSchema {
 const localDbPromise = openDB<LocalDb>("songiapp", 1, {
   upgrade(db, oldVersion, newVersion, transaction, event) {
     if (oldVersion < 1) {
-      db.createObjectStore("songs", { keyPath: "id" });
+      const songStore = db.createObjectStore("songs", { keyPath: "id" });
       db.createObjectStore("databases", { keyPath: "id" });
+      songStore.createIndex("by-artist", "artist", { multiEntry: true });
     }
   },
   blocked(currentVersion, blockedVersion, event) {
@@ -30,33 +33,54 @@ const localDbPromise = openDB<LocalDb>("songiapp", 1, {
   },
 });
 
-async function getSongsTransaction(mode: "readonly" | "readwrite") {
-  if (!localDbPromise) return null;
-  const tx = (await localDbPromise).transaction("songs", mode);
-  return tx;
-}
+// async function getSongsTransaction(mode: "readonly" | "readwrite") {
+//   if (!localDbPromise) return null;
+//   const tx = (await localDbPromise).transaction("songs", mode);
+//   return tx;
+// }
 
-async function getDatabasesTransaction(mode: "readonly" | "readwrite") {
-  if (!localDbPromise) return null;
-  const tx = (await localDbPromise).transaction("databases", mode);
-  return tx;
-}
+// async function getDatabasesTransaction(mode: "readonly" | "readwrite") {
+//   if (!localDbPromise) return null;
+//   const tx = (await localDbPromise).transaction("databases", mode);
+//   return tx;
+// }
 
 export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
-  const txSongs = await getSongsTransaction("readwrite");
-  const storeSongs = txSongs?.objectStore("songs");
+  const tx = (await localDbPromise).transaction(
+    ["songs", "databases"],
+    "readwrite"
+  );
+
+  const storeSongs = tx?.objectStore("songs");
   const databaseId = db.id ?? db.url;
   for (const song of data.songs) {
     await storeSongs?.put?.({
       ...song,
+      artist: Array.isArray(song.artist) ? song.artist : [song.artist],
       databaseId,
       id: `${databaseId}@${song.id}`,
     });
   }
-  await txSongs?.done;
 
-  const txDatabases = await getDatabasesTransaction("readwrite");
-  const storeDatabases = txDatabases?.objectStore("databases");
+  const storeDatabases = tx?.objectStore("databases");
   storeDatabases?.put?.({ ...db, id: db.id ?? db.url });
-  await txDatabases?.done;
+  await tx?.done;
+}
+
+export async function findArtists() {
+  const tx = (await localDbPromise).transaction("songs", "readonly");
+
+  let cursor = await tx.objectStore("songs").openCursor();
+
+  const res = new Set<string>();
+
+  while (cursor) {
+    for (const artist of cursor.value.artist) {
+      res.add(artist);
+    }
+    cursor = await cursor.continue();
+  }
+
+  await tx?.done;
+  return _.sortBy([...res]);
 }

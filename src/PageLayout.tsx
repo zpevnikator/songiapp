@@ -1,6 +1,7 @@
 import logo from "./logo.svg";
 import React from "react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AppBar,
   Box,
@@ -17,15 +18,16 @@ import {
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
+import DownloadIcon from "@mui/icons-material/Download";
+import PeopleIcon from "@mui/icons-material/People";
 
 function PageLayout({ title = "", children }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div>
-      <AppBar position="static">
+      <AppBar position="sticky">
         <Toolbar>
           <IconButton
             size="large"
@@ -56,18 +58,24 @@ function PageLayout({ title = "", children }) {
           onKeyDown={() => setDrawerOpen(false)}
         >
           <List>
-            {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                  </ListItemIcon>
-                  <ListItemText primary={text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/download")}>
+                <ListItemIcon>
+                  <DownloadIcon />
+                </ListItemIcon>
+                <ListItemText primary="Download" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/")}>
+                <ListItemIcon>
+                  <PeopleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Artists" />
+              </ListItemButton>
+            </ListItem>
           </List>
-          <Divider />
+          {/* <Divider />
           <List>
             {["All mail", "Trash", "Spam"].map((text, index) => (
               <ListItem key={text} disablePadding>
@@ -79,7 +87,7 @@ function PageLayout({ title = "", children }) {
                 </ListItemButton>
               </ListItem>
             ))}
-          </List>
+          </List> */}
         </Box>
       </Drawer>
       {children}
