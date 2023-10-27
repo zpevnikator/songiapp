@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect, useState } from "react";
 import PageLayout from "./PageLayout";
 import { useQuery } from "@tanstack/react-query";
@@ -15,10 +16,12 @@ import CloudIcon from "@mui/icons-material/Cloud";
 import DownloadIcon from "@mui/icons-material/Download";
 import DownloadingIcon from "@mui/icons-material/Downloading";
 import { saveSongDb } from "./localdb";
+import type { SongDbListItem } from "./types";
+import { getErrorMessage } from "./utils";
 
 export default function DownloadPage() {
-  const [loadingDatabases, setLoadingDatabases] = useState([]);
-  const [error, setError] = useState(null);
+  const [loadingDatabases, setLoadingDatabases] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const query = useQuery({
     queryKey: ["databases"],
@@ -28,13 +31,13 @@ export default function DownloadPage() {
       ).then((res) => res.json()),
   });
 
-  async function downloadDatabase(db) {
+  async function downloadDatabase(db: SongDbListItem) {
     setLoadingDatabases((a) => [...a, db.url]);
     try {
-      const dbData = await fetch(db.url).next((res) => res.json());
+      const dbData = await fetch(db.url).then((res) => res.json());
       await saveSongDb(db, dbData);
     } catch (err) {
-      setError(err.message);
+      setError(getErrorMessage(err));
     }
     setLoadingDatabases((a) => a.filter((x) => x != db.url));
   }
@@ -50,7 +53,7 @@ export default function DownloadPage() {
           <List>
             <ListItem
               secondaryAction={
-                loadingDatabases.ioncludes(db.url) ? (
+                loadingDatabases.includes(db.url) ? (
                   <DownloadingIcon />
                 ) : (
                   <IconButton

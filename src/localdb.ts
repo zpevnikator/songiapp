@@ -1,34 +1,5 @@
 import { openDB, deleteDB, wrap, unwrap } from "idb";
-
-export interface SongDbListItem {
-  title: string;
-  description: string;
-  size: string;
-  url: string;
-}
-
-export interface SongDbList {
-  databases: SongDbListItem[];
-}
-
-export interface SongDatabase {
-  songs: {
-    id: string;
-    title: string;
-    artist: string;
-    lang: string;
-    text: string;
-  }[];
-}
-
-export interface LocalSong {
-  id: string;
-  title: string;
-  artist: string;
-  lang: string;
-  text: string;
-  databaseUrl: string;
-}
+import type { SongDatabase, SongDbListItem } from "./types";
 
 const localDbPromise = openDB("songiapp", 1, {
   upgrade(db, oldVersion, newVersion, transaction, event) {

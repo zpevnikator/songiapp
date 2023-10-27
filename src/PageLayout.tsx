@@ -1,4 +1,5 @@
 import logo from "./logo.svg";
+import React from "react";
 import { useEffect, useState } from "react";
 import {
   AppBar,
@@ -19,7 +20,20 @@ import MenuIcon from "@mui/icons-material/Menu";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 
-function App() {
+function PageLayout({ title = "", children }) {
+  async function loadSong() {
+    const resp = await fetch(
+      // "https://www.velkyzpevnik.cz/marien/a-bylo-leto"
+      // "https://www.riverlog.info/api/diary-info/stats?accountId=google:116106201198693582561&fromTm=1695620453830&apikey=certaky"
+      "https://raw.githubusercontent.com/dbgate/dbgate/master/app/src/electron.js"
+    );
+    console.log(await resp.text());
+  }
+
+  useEffect(() => {
+    loadSong();
+  });
+
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -37,7 +51,7 @@ function App() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            SongiApp
+            {title || "SongiApp"}
           </Typography>
           <Button color="inherit">Login</Button>
         </Toolbar>
@@ -81,8 +95,9 @@ function App() {
           </List>
         </Box>
       </Drawer>
+      {children}
     </div>
   );
 }
 
-export default App;
+export default PageLayout;
