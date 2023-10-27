@@ -24,7 +24,7 @@ export default function ByArtistListPage() {
   });
 
   return (
-    <PageLayout title={artist}>
+    <PageLayout title={artist} showBack>
       {query.isPending ? (
         <CircularProgress />
       ) : query.error ? (

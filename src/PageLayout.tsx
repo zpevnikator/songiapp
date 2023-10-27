@@ -20,8 +20,9 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import DownloadIcon from "@mui/icons-material/Download";
 import PeopleIcon from "@mui/icons-material/People";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
-function PageLayout({ title = "", children }) {
+function PageLayout({ title = "", children, showBack = false }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -35,9 +36,9 @@ function PageLayout({ title = "", children }) {
             color="inherit"
             aria-label="menu"
             sx={{ mr: 2 }}
-            onClick={() => setDrawerOpen(true)}
+            onClick={() => (showBack ? navigate(-1) : setDrawerOpen(true))}
           >
-            <MenuIcon />
+            {showBack ? <ArrowBackIcon /> : <MenuIcon />}
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {title || "SongiApp"}

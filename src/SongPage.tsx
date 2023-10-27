@@ -24,7 +24,7 @@ export default function SongPage() {
   });
 
   return (
-    <PageLayout title={query.data?.title ?? "Loading..."}>
+    <PageLayout title={query.data?.title ?? "Loading..."} showBack>
       {query.isPending ? (
         <CircularProgress />
       ) : query.error ? (
