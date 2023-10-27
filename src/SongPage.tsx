@@ -14,6 +14,7 @@ import {
 import { LocalArtist, LocalSong } from "./types";
 import PeopleIcon from "@mui/icons-material/People";
 import { useNavigate, useParams } from "react-router-dom";
+import SongFormatter from "./SongFormatter";
 
 export default function SongPage() {
   const { songid } = useParams();
@@ -30,7 +31,9 @@ export default function SongPage() {
       ) : query.error ? (
         <Alert severity="error">{query.error.message}</Alert>
       ) : (
-        <Typography>{query.data?.text}</Typography>
+        <Typography sx={{ m: 1 }}>
+          {new SongFormatter(query.data?.text).format()}
+        </Typography>
       )}
     </PageLayout>
   );
