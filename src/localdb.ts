@@ -1,7 +1,18 @@
-import { openDB, deleteDB, wrap, unwrap } from "idb";
-import type { SongDatabase, SongDbListItem } from "./types";
+import { openDB, deleteDB, wrap, unwrap, DBSchema } from "idb";
+import type { LocalSong, SongDatabase, SongDbListItem } from "./types";
 
-const localDbPromise = openDB("songiapp", 1, {
+interface LocalDb extends DBSchema {
+  songs: {
+    key: string;
+    value: LocalSong;
+  };
+  databases: {
+    key: string;
+    value: SongDbListItem;
+  };
+}
+
+const localDbPromise = openDB<LocalDb>("songiapp", 1, {
   upgrade(db, oldVersion, newVersion, transaction, event) {
     if (oldVersion < 1) {
       db.createObjectStore("songs", { keyPath: "id" });
@@ -37,6 +48,7 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
   for (const song of data.songs) {
     await storeSongs?.put?.({
       ...song,
+      databaseUrl: db.url,
       id: `${db.url}@${song.id}`,
     });
   }

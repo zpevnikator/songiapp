@@ -16,14 +16,14 @@ import CloudIcon from "@mui/icons-material/Cloud";
 import DownloadIcon from "@mui/icons-material/Download";
 import DownloadingIcon from "@mui/icons-material/Downloading";
 import { saveSongDb } from "./localdb";
-import type { SongDbListItem } from "./types";
+import type { SongDbList, SongDbListItem } from "./types";
 import { getErrorMessage } from "./utils";
 
 export default function DownloadPage() {
   const [loadingDatabases, setLoadingDatabases] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const query = useQuery({
+  const query = useQuery<SongDbList>({
     queryKey: ["databases"],
     queryFn: () =>
       fetch(
@@ -59,7 +59,7 @@ export default function DownloadPage() {
                   <IconButton
                     edge="end"
                     aria-label="download"
-                    onClick={() => downloadDatabase(db.url)}
+                    onClick={() => downloadDatabase(db)}
                   >
                     <DownloadIcon />
                   </IconButton>
