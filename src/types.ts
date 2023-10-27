@@ -28,3 +28,8 @@ export interface LocalSong {
   text: string;
   databaseId: string;
 }
+
+export interface LocalArtist {
+  name: string;
+  songCount: number;
+}

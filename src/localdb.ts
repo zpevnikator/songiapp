@@ -1,5 +1,10 @@
 import { openDB, deleteDB, wrap, unwrap, DBSchema } from "idb";
-import type { LocalSong, SongDatabase, SongDbListItem } from "./types";
+import type {
+  LocalArtist,
+  LocalSong,
+  SongDatabase,
+  SongDbListItem,
+} from "./types";
 import _ from "lodash";
 
 interface LocalDb extends DBSchema {
@@ -58,7 +63,7 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
       ...song,
       artist: Array.isArray(song.artist) ? song.artist : [song.artist],
       databaseId,
-      id: `${databaseId}@${song.id}`,
+      id: `${databaseId}-${song.id}`,
     });
   }
 
@@ -67,20 +72,26 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
   await tx?.done;
 }
 
-export async function findArtists() {
+export async function findArtists(): Promise<LocalArtist[]> {
   const tx = (await localDbPromise).transaction("songs", "readonly");
 
   let cursor = await tx.objectStore("songs").openCursor();
 
-  const res = new Set<string>();
+  const res: Record<string, LocalArtist> = {};
 
   while (cursor) {
     for (const artist of cursor.value.artist) {
-      res.add(artist);
+      if (!res[artist]) {
+        res[artist] = {
+          name: artist,
+          songCount: 0,
+        };
+      }
+      res[artist].songCount += 1;
     }
     cursor = await cursor.continue();
   }
 
   await tx?.done;
-  return _.sortBy([...res]);
+  return _.sortBy(_.values(res), (x) => x.name);
 }

@@ -1,22 +1,50 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
 import { findArtists } from "./localdb";
-import { Alert, CircularProgress } from "@mui/material";
+import {
+  Alert,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
+import { LocalArtist } from "./types";
+import PeopleIcon from "@mui/icons-material/People";
+import { useNavigate } from "react-router-dom";
 
 export default function ArtistListPage() {
-  const query = useQuery<string[]>({
+  const navigate = useNavigate();
+  const query = useQuery<LocalArtist[]>({
     queryKey: ["artists"],
     queryFn: findArtists,
   });
 
   return (
-    <PageLayout title='Artists'>
+    <PageLayout title="Artists">
       {query.isPending ? (
         <CircularProgress />
       ) : query.error ? (
         <Alert severity="error">{query.error.message}</Alert>
       ) : (
-        query.data.map((artist) => <div>{artist}</div>)
+        <List>
+          {query.data.map((artist) => (
+            <ListItemButton
+              onClick={() =>
+                navigate(`/by-artist/${encodeURIComponent(artist.name)}`)
+              }
+            >
+              <ListItemIcon>
+                <PeopleIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={artist.name}
+                secondary={`${artist.songCount} songs`}
+              />
+            </ListItemButton>
+          ))}
+        </List>
       )}
     </PageLayout>
   );
