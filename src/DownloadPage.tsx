@@ -30,7 +30,7 @@ export default function DownloadPage() {
     queryKey: ["remoteDatabases"],
     queryFn: () =>
       fetch(
-        "https://raw.githubusercontent.com/songiapp/songidb/main/index.json"
+        `https://raw.githubusercontent.com/songiapp/songidb/main/index.json?x=${new Date().getTime()}`
       ).then((res) => res.json()),
   });
 
@@ -68,12 +68,13 @@ export default function DownloadPage() {
       ) : localDbQuery.error ? (
         <Alert severity="error">{localDbQuery.error.message}</Alert>
       ) : (
-        _.uniqBy(
-          [...remoteDbQuery.data.databases, ...localDbQuery.data],
-          (x) => x.id
-        ).map((db) => (
-          <List>
+        <List>
+          {_.uniqBy(
+            [...remoteDbQuery.data.databases, ...localDbQuery.data],
+            (x) => x.id
+          ).map((db) => (
             <ListItem
+              key={db.id}
               secondaryAction={
                 loadingDatabases.includes(db.id) ? (
                   <CircularProgress />
@@ -109,8 +110,8 @@ export default function DownloadPage() {
                 secondary={`${db.description} (${db.size} songs)`}
               />
             </ListItem>
-          </List>
-        ))
+          ))}
+        </List>
       )}
       <Snackbar
         open={!!error}
