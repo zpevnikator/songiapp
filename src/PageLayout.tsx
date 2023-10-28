@@ -24,6 +24,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import PeopleIcon from "@mui/icons-material/People";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import InstallAppSnackbar from "./InstallAppSnackbar";
 
 interface PageLayoutProps {
   title?: string;
@@ -148,6 +149,8 @@ function PageLayout(props: PageLayoutProps) {
         </Box>
       </Drawer>
       {children}
+
+      <InstallAppSnackbar />
     </div>
   );
 }
