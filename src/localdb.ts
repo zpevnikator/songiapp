@@ -9,6 +9,7 @@ import _ from "lodash";
 import {
   compileSearchCriteria,
   localeSortByKey,
+  matchMandatorySearchCriteria,
   matchSearchCriteria,
 } from "./utils";
 import { removeChords } from "./chordTools";
@@ -195,13 +196,18 @@ export async function searchLocalDb(
       artistDict[artist].songCount += 1;
     }
 
-    if (matchSearchCriteria(cursor.value.title, tokens)) {
+    if (
+      matchMandatorySearchCriteria(
+        cursor.value.title,
+        (cursor.value.artist ?? []).join(" "),
+        tokens
+      )
+    ) {
       songsByTitle.push(cursor.value);
     } else if (
-      matchSearchCriteria(
-        `${cursor.value.title} ${cursor.value.artist}  ${removeChords(
-          String(cursor.value.text)
-        )}`,
+      matchMandatorySearchCriteria(
+        removeChords(String(cursor.value.text)),
+        (cursor.value.artist ?? []).join(" "),
         tokens
       )
     ) {
