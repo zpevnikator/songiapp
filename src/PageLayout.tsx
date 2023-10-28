@@ -1,9 +1,11 @@
 import logo from "./logo.svg";
 import React from "react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   AppBar,
+  BottomNavigation,
+  BottomNavigationAction,
   Box,
   Button,
   Divider,
@@ -16,6 +18,7 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Paper,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -25,6 +28,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import InstallAppSnackbar from "./InstallAppSnackbar";
+import _ from "lodash";
 
 interface PageLayoutProps {
   title?: string;
@@ -47,6 +51,8 @@ function PageLayout(props: PageLayoutProps) {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const bottomNavigationUrls = ["/", "/download"];
 
   return (
     <div>
@@ -148,7 +154,26 @@ function PageLayout(props: PageLayoutProps) {
           </List> */}
         </Box>
       </Drawer>
-      {children}
+      <Box sx={{ pb: 7 }}>{children}</Box>
+
+      <Paper
+        sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
+        elevation={3}
+      >
+        <BottomNavigation
+          showLabels
+          value={_.findIndex(
+            bottomNavigationUrls,
+            (x) => x == location.pathname
+          )}
+          onChange={(event, newValue) => {
+            navigate(bottomNavigationUrls[newValue]);
+          }}
+        >
+          <BottomNavigationAction label="Artists" icon={<PeopleIcon />} />
+          <BottomNavigationAction label="Download" icon={<DownloadIcon />} />
+        </BottomNavigation>
+      </Paper>
 
       <InstallAppSnackbar />
     </div>
