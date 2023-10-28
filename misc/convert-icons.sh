@@ -25,6 +25,8 @@ magick  \
     icon_maskable.png
 
 
-magick icon_maskable.png -resize 512x512! ../public/logo512.png
-magick icon_maskable.png -resize 192x192! ../public/logo192.png
+magick icon_maskable.png -resize 512x512! ../public/logo512_maskable.png
+magick icon_maskable.png -resize 192x192! ../public/logo192_maskable.png
+magick icon_circle.png -resize 512x512! ../public/logo512_circle.png
+magick icon_circle.png -resize 192x192! ../public/logo192_circle.png
 magick icon_circle.png -define icon:auto-resize="256,128,96,64,48,32,16" ../public/favicon.ico
