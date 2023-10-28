@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ArtistListPage from "./ArtistListPage";
 import ByArtistListPage from "./ByArtistListPage";
 import SongPage from "./SongPage";
+import SearchPage from "./SearchPage";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,10 @@ const router = createHashRouter([
   {
     path: "/download",
     element: <DownloadPage />,
+  },
+  {
+    path: "/search",
+    element: <SearchPage />,
   },
   {
     path: "/by-artist/:artist",

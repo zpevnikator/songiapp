@@ -1,14 +1,11 @@
-import logo from "./logo.svg";
 import React from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   AppBar,
   BottomNavigation,
   BottomNavigationAction,
   Box,
-  Button,
-  Divider,
   Drawer,
   IconButton,
   List,
@@ -26,14 +23,19 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DownloadIcon from "@mui/icons-material/Download";
 import PeopleIcon from "@mui/icons-material/People";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import InstallAppSnackbar from "./InstallAppSnackbar";
 import _ from "lodash";
+import SearchField from "./SearchField";
 
 interface PageLayoutProps {
   title?: string;
   children: any;
   showBack?: boolean;
+  showSearchLink?: boolean;
+  searchText?: string;
+  onChangeSearchText?: (value: string) => void;
   menuItems?: MenuItemDefinition[];
 }
 
@@ -43,7 +45,15 @@ interface MenuItemDefinition {
 }
 
 function PageLayout(props: PageLayoutProps) {
-  const { title = "", children, showBack = false, menuItems = null } = props;
+  const {
+    title,
+    children,
+    showBack = false,
+    menuItems = null,
+    showSearchLink = false,
+    searchText = "",
+    onChangeSearchText,
+  } = props;
 
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
     null
@@ -68,9 +78,15 @@ function PageLayout(props: PageLayoutProps) {
           >
             {showBack ? <ArrowBackIcon /> : <MenuIcon />}
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {title || "SongiApp"}
-          </Typography>
+          {title && (
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              {title}
+            </Typography>
+          )}
+
+          {onChangeSearchText && (
+            <SearchField value={searchText} onChange={onChangeSearchText} />
+          )}
 
           {menuItems && (
             <IconButton
@@ -81,6 +97,18 @@ function PageLayout(props: PageLayoutProps) {
               onClick={(e) => setMenuAnchorEl(e?.currentTarget)}
             >
               <MoreVertIcon />
+            </IconButton>
+          )}
+
+          {showSearchLink && (
+            <IconButton
+              size="large"
+              aria-label="display more actions"
+              edge="end"
+              color="inherit"
+              onClick={() => navigate("/search")}
+            >
+              <SearchIcon />
             </IconButton>
           )}
 

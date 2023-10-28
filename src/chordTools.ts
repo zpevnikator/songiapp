@@ -84,3 +84,7 @@ export function transposeText(text: string, d: number) {
     (m) => `[${transposeChord(m.slice(1, -1), d)}]`
   );
 }
+
+export function removeChords(text: string) {
+  return text.replace(/\[([^\]]+)\]/g, "");
+}

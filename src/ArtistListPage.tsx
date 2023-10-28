@@ -1,22 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
 import { findArtists } from "./localdb";
-import {
-  Alert,
-  Box,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
+import { Alert, Box, CircularProgress, List } from "@mui/material";
 import { LocalArtist } from "./types";
-import PeopleIcon from "@mui/icons-material/People";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import ArtistListItem from "./ArtistListItem";
 
 export default function ArtistListPage() {
-  const navigate = useNavigate();
   const query = useQuery<LocalArtist[]>({
     queryKey: ["artists"],
     queryFn: findArtists,
@@ -24,7 +14,7 @@ export default function ArtistListPage() {
   });
 
   return (
-    <PageLayout title="Artists">
+    <PageLayout title="Artists" showSearchLink>
       {query.isPending ? (
         <CircularProgress />
       ) : query.error ? (
@@ -32,8 +22,8 @@ export default function ArtistListPage() {
       ) : query.data.length == 0 ? (
         <>
           <Box sx={{ m: 1 }}>
-            You have no songs in your database. 
-            Please download some songs in "Downloads" section.
+            You have no songs in your database. Please download some songs in
+            "Downloads" section.
           </Box>
           <Box sx={{ m: 1 }}>
             <Link to="/download">Go to Downloads</Link>
@@ -42,20 +32,7 @@ export default function ArtistListPage() {
       ) : (
         <List>
           {query.data.map((artist) => (
-            <ListItemButton
-              key={artist.name}
-              onClick={() =>
-                navigate(`/by-artist/${encodeURIComponent(artist.name)}`)
-              }
-            >
-              <ListItemIcon>
-                <PeopleIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary={artist.name}
-                secondary={`${artist.songCount} songs`}
-              />
-            </ListItemButton>
+            <ArtistListItem artist={artist} key={artist.name} />
           ))}
         </List>
       )}

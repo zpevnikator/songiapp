@@ -6,6 +6,12 @@ import type {
   SongDbListItem,
 } from "./types";
 import _ from "lodash";
+import {
+  compileSearchCriteria,
+  localeSortByKey,
+  matchSearchCriteria,
+} from "./utils";
+import { removeChords } from "./chordTools";
 
 interface LocalDb extends DBSchema {
   songs: {
@@ -117,7 +123,7 @@ export async function findArtists(): Promise<LocalArtist[]> {
   }
 
   await tx?.done;
-  return _.sortBy(_.values(res), (x) => x.name);
+  return localeSortByKey(_.values(res), "name");
 }
 
 export async function findDatabases(): Promise<SongDbListItem[]> {
@@ -135,7 +141,7 @@ export async function findSongsByArtist(artist: string): Promise<LocalSong[]> {
   const res = await tx.objectStore("songs").index("by-artist").getAll(artist);
 
   await tx?.done;
-  return _.sortBy(res, (x) => x.title);
+  return localeSortByKey(res, "title");
 }
 
 export async function getSong(songid: string): Promise<LocalSong | undefined> {
@@ -145,4 +151,69 @@ export async function getSong(songid: string): Promise<LocalSong | undefined> {
 
   await tx?.done;
   return res;
+}
+
+export interface LocalDbSearchResult {
+  artists: LocalArtist[];
+  songs: LocalSong[];
+  searchDone: boolean;
+}
+
+export async function searchLocalDb(
+  criteria: string
+): Promise<LocalDbSearchResult> {
+  const tx = (await localDbPromise).transaction("songs", "readonly");
+
+  let cursor = await tx.objectStore("songs").openCursor();
+
+  const songsByTitle: LocalSong[] = [];
+  const songsByText: LocalSong[] = [];
+
+  const tokens = compileSearchCriteria(criteria);
+
+  if (!tokens.length) {
+    return {
+      searchDone: false,
+      songs: [],
+      artists: [],
+    };
+  }
+
+  const artistDict: Record<string, LocalArtist> = {};
+
+  while (cursor) {
+    for (const artist of cursor.value.artist) {
+      if (!matchSearchCriteria(artist, tokens)) {
+        continue;
+      }
+      if (!artistDict[artist]) {
+        artistDict[artist] = {
+          name: artist,
+          songCount: 0,
+        };
+      }
+      artistDict[artist].songCount += 1;
+    }
+
+    if (matchSearchCriteria(cursor.value.title, tokens)) {
+      songsByTitle.push(cursor.value);
+    } else if (
+      matchSearchCriteria(removeChords(String(cursor.value.text)), tokens)
+    ) {
+      songsByText.push(cursor.value);
+    }
+
+    cursor = await cursor.continue();
+  }
+
+  await tx?.done;
+
+  return {
+    searchDone: true,
+    songs: [
+      ...localeSortByKey(songsByTitle, "title"),
+      ...localeSortByKey(songsByText, "title"),
+    ],
+    artists: _.sortBy(_.values(artistDict), (x) => -x.songCount),
+  };
 }

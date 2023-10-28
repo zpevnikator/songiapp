@@ -12,9 +12,9 @@ import {
 import { LocalSong } from "./types";
 import LyricsIcon from "@mui/icons-material/Lyrics";
 import { useNavigate, useParams } from "react-router-dom";
+import SongListItem from "./SongListItem";
 
 export default function ByArtistListPage() {
-  const navigate = useNavigate();
   const { artist } = useParams();
 
   const query = useQuery<LocalSong[]>({
@@ -32,25 +32,7 @@ export default function ByArtistListPage() {
       ) : (
         <List>
           {query.data.map((song) => (
-            <ListItemButton
-              key={song.id}
-              onClick={() => navigate(`/songs/${encodeURIComponent(song.id)}`)}
-            >
-              <ListItemIcon>
-                <LyricsIcon />
-              </ListItemIcon>
-              <ListItemText
-                secondaryTypographyProps={{
-                  overflow: "hidden",
-                  whiteSpace: "nowrap",
-                  textOverflow: "ellipsis",
-                }}
-                primary={song.title}
-                secondary={song?.text
-                  ?.replace(/^\..*$/m, "")
-                  ?.substring(0, 200)}
-              />
-            </ListItemButton>
+            <SongListItem song={song} key={song.id} />
           ))}
         </List>
       )}
