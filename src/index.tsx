@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createHashRouter, RouterProvider } from "react-router-dom";
 import ErrorPage from "./ErrorPage";
 import DownloadPage from "./DownloadPage";
 
@@ -18,7 +18,7 @@ import SongPage from "./SongPage";
 
 const queryClient = new QueryClient();
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: "/",
     element: <ArtistListPage />,
