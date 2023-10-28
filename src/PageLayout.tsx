@@ -62,7 +62,7 @@ function PageLayout(props: PageLayoutProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const bottomNavigationUrls = ["/", "/download"];
+  const bottomNavigationUrls = ["/", "/download", "/search"];
 
   return (
     <div>
@@ -200,6 +200,7 @@ function PageLayout(props: PageLayoutProps) {
         >
           <BottomNavigationAction label="Artists" icon={<PeopleIcon />} />
           <BottomNavigationAction label="Download" icon={<DownloadIcon />} />
+          <BottomNavigationAction label="Search" icon={<SearchIcon />} />
         </BottomNavigation>
       </Paper>
 

@@ -3,8 +3,11 @@ import { LocalSong } from "./types";
 import LyricsIcon from "@mui/icons-material/Lyrics";
 import { useNavigate } from "react-router-dom";
 
-export default function SongListItem(props: { song: LocalSong }) {
-  const { song } = props;
+export default function SongListItem(props: {
+  song: LocalSong;
+  showArtist?: boolean;
+}) {
+  const { song, showArtist } = props;
   const navigate = useNavigate();
 
   return (
@@ -20,7 +23,7 @@ export default function SongListItem(props: { song: LocalSong }) {
           whiteSpace: "nowrap",
           textOverflow: "ellipsis",
         }}
-        primary={song.title}
+        primary={showArtist ? `${song.title} (${song.artist})` : song.title}
         secondary={song?.text?.replace(/^\..*$/m, "")?.substring(0, 200)}
       />
     </ListItemButton>

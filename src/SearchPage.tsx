@@ -47,7 +47,7 @@ export default function SearchPage() {
             <ArtistListItem key={artist.name} artist={artist} />
           ))}
           {query.data.songs.slice(0, 100).map((song) => (
-            <SongListItem key={song.id} song={song} />
+            <SongListItem key={song.id} song={song} showArtist />
           ))}
         </List>
       )}

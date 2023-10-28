@@ -1,17 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
 import { findSongsByArtist } from "./localdb";
-import {
-  Alert,
-  CircularProgress,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
+import { Alert, CircularProgress, List } from "@mui/material";
 import { LocalSong } from "./types";
-import LyricsIcon from "@mui/icons-material/Lyrics";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import SongListItem from "./SongListItem";
 
 export default function ByArtistListPage() {

@@ -198,7 +198,12 @@ export async function searchLocalDb(
     if (matchSearchCriteria(cursor.value.title, tokens)) {
       songsByTitle.push(cursor.value);
     } else if (
-      matchSearchCriteria(removeChords(String(cursor.value.text)), tokens)
+      matchSearchCriteria(
+        `${cursor.value.title} ${cursor.value.artist}  ${removeChords(
+          String(cursor.value.text)
+        )}`,
+        tokens
+      )
     ) {
       songsByText.push(cursor.value);
     }
