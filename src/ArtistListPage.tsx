@@ -19,6 +19,7 @@ export default function ArtistListPage() {
   const query = useQuery<LocalArtist[]>({
     queryKey: ["artists"],
     queryFn: findArtists,
+    networkMode: "always",
   });
 
   return (

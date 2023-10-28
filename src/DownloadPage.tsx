@@ -37,6 +37,7 @@ export default function DownloadPage() {
   const localDbQuery = useQuery<SongDbListItem[]>({
     queryKey: ["localDatabases", localDbToken],
     queryFn: findDatabases,
+    networkMode: "always",
   });
 
   async function downloadDatabase(db: SongDbListItem) {

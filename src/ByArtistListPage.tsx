@@ -1,18 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
-import { findArtists, findSongsByArtist } from "./localdb";
+import { findSongsByArtist } from "./localdb";
 import {
   Alert,
   CircularProgress,
   List,
-  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import { LocalArtist, LocalSong } from "./types";
+import { LocalSong } from "./types";
 import LyricsIcon from "@mui/icons-material/Lyrics";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function ByArtistListPage() {
   const navigate = useNavigate();
@@ -21,6 +20,7 @@ export default function ByArtistListPage() {
   const query = useQuery<LocalSong[]>({
     queryKey: ["songs-by-artist", artist],
     queryFn: () => findSongsByArtist(artist!),
+    networkMode: "always",
   });
 
   return (
@@ -46,7 +46,9 @@ export default function ByArtistListPage() {
                   textOverflow: "ellipsis",
                 }}
                 primary={song.title}
-                secondary={song?.text?.replace(/^\..*$/m, "")?.substring(0, 200)}
+                secondary={song?.text
+                  ?.replace(/^\..*$/m, "")
+                  ?.substring(0, 200)}
               />
             </ListItemButton>
           ))}

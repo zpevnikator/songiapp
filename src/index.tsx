@@ -7,11 +7,7 @@ import { createHashRouter, RouterProvider } from "react-router-dom";
 import ErrorPage from "./ErrorPage";
 import DownloadPage from "./DownloadPage";
 
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ArtistListPage from "./ArtistListPage";
 import ByArtistListPage from "./ByArtistListPage";
 import SongPage from "./SongPage";

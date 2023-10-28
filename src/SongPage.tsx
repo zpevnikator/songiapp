@@ -23,6 +23,7 @@ export default function SongPage() {
   const query = useQuery<LocalSong | undefined>({
     queryKey: ["song", songid],
     queryFn: () => getSong(songid!),
+    networkMode: "always",
   });
 
   const [showTranspose, setShowTranspose] = useState(false);
