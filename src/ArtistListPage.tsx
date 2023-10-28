@@ -3,6 +3,7 @@ import PageLayout from "./PageLayout";
 import { findArtists } from "./localdb";
 import {
   Alert,
+  Box,
   CircularProgress,
   List,
   ListItem,
@@ -12,7 +13,7 @@ import {
 } from "@mui/material";
 import { LocalArtist } from "./types";
 import PeopleIcon from "@mui/icons-material/People";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function ArtistListPage() {
   const navigate = useNavigate();
@@ -28,6 +29,16 @@ export default function ArtistListPage() {
         <CircularProgress />
       ) : query.error ? (
         <Alert severity="error">{query.error.message}</Alert>
+      ) : query.data.length == 0 ? (
+        <>
+          <Box sx={{ m: 1 }}>
+            You have no songs in your database. 
+            Please download some songs in "Downloads" section.
+          </Box>
+          <Box sx={{ m: 1 }}>
+            <Link to="/download">Go to Downloads</Link>
+          </Box>
+        </>
       ) : (
         <List>
           {query.data.map((artist) => (

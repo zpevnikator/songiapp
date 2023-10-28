@@ -121,7 +121,7 @@ function PageLayout(props: PageLayoutProps) {
                 <ListItemIcon>
                   <DownloadIcon />
                 </ListItemIcon>
-                <ListItemText primary="Download" />
+                <ListItemText primary="Download databases" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>

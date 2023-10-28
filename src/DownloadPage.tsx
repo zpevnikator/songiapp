@@ -60,7 +60,7 @@ export default function DownloadPage() {
   }
 
   return (
-    <PageLayout title="Databases">
+    <PageLayout title="Download databases">
       {remoteDbQuery.isPending || localDbQuery.isPending ? (
         <CircularProgress />
       ) : remoteDbQuery.error ? (
