@@ -7,11 +7,12 @@ export default function TransposePanel({ tone, onChange, onClose }) {
     <Paper
       style={{
         position: "fixed",
-        bottom: 0,
         padding: 10,
+        bottom: 0,
         margin: 5,
         display: "flex",
         flexWrap: "wrap",
+        zIndex: 1,
       }}
     >
       {TONE_BASE_NAMES.map((name) => (
