@@ -166,6 +166,14 @@ function PageLayout(props: PageLayoutProps) {
                 <ListItemText primary="Artists" />
               </ListItemButton>
             </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/search")}>
+                <ListItemIcon>
+                  <SearchIcon />
+                </ListItemIcon>
+                <ListItemText primary="Search" />
+              </ListItemButton>
+            </ListItem>
           </List>
           {/* <Divider />
           <List>
