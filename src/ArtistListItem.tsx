@@ -20,7 +20,7 @@ export default function ArtistListItem(props: {
       )}
       <ListItemText
         primary={artist.name}
-        secondary={`${artist.songCount} songs (${artist.databaseTitle.toLocaleLowerCase()})`}
+        secondary={`${artist.songCount} songs (${artist.databaseTitle?.toLocaleLowerCase()})`}
       />
     </ListItemButton>
   );
