@@ -5,6 +5,7 @@ import { Alert, Box, CircularProgress, Grid, List } from "@mui/material";
 import { LocalArtist } from "./types";
 import { Link } from "react-router-dom";
 import ArtistListItem from "./ArtistListItem";
+import BigListView from "./BigListView";
 
 export default function ArtistListPage() {
   const query = useQuery<LocalArtist[]>({
@@ -31,17 +32,17 @@ export default function ArtistListPage() {
           </Box>
         </>
       ) : (
-        <Grid container>
-          {query.data.map((artist) => (
-            <Grid item xs={6} sm={4} md={3} lg={2} key={artist.name}>
-              <ArtistListItem
-                artist={artist}
-                key={artist.name}
-                showIcon={false}
-              />
-            </Grid>
-          ))}
-        </Grid>
+        <BigListView
+          array={query.data}
+          factory={(artist, showIcon) => (
+            <ArtistListItem
+              artist={artist}
+              key={artist.name}
+              showIcon={false}
+            />
+          )}
+          extractKey={(artist) => artist.name}
+        />
       )}
     </PageLayout>
   );

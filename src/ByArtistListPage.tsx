@@ -5,6 +5,7 @@ import { Alert, CircularProgress, Grid, List } from "@mui/material";
 import { LocalSong } from "./types";
 import { useParams } from "react-router-dom";
 import SongListItem from "./SongListItem";
+import BigListView from "./BigListView";
 
 export default function ByArtistListPage() {
   const { artist } = useParams();
@@ -22,13 +23,13 @@ export default function ByArtistListPage() {
       ) : query.error ? (
         <Alert severity="error">{query.error.message}</Alert>
       ) : (
-        <Grid container>
-          {query.data.map((song) => (
-            <Grid item xs={6} sm={4} md={3} lg={2} key={song.id}>
-              <SongListItem song={song} key={song.id} showIcon={false} />
-            </Grid>
-          ))}
-        </Grid>
+        <BigListView
+          array={query.data}
+          factory={(song, showIcon) => (
+            <SongListItem song={song} key={song.id} showIcon={showIcon} />
+          )}
+          extractKey={(song) => song.isActive}
+        />
       )}
     </PageLayout>
   );
