@@ -29,6 +29,7 @@ export default function ByArtistListPage() {
             <SongListItem song={song} key={song.id} showIcon={showIcon} />
           )}
           extractKey={(song) => song.isActive}
+          extractTitle={(song) => song.title}
         />
       )}
     </PageLayout>

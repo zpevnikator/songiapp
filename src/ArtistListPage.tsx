@@ -42,6 +42,7 @@ export default function ArtistListPage() {
             />
           )}
           extractKey={(artist) => artist.name}
+          extractTitle={(artist) => artist.name}
         />
       )}
     </PageLayout>
