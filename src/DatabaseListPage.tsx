@@ -32,7 +32,7 @@ function DatabaseItem(props: {
   deleteDatabase: (x: SongDbListItem) => void;
   downloadDatabase: (x: SongDbListItem) => void;
   loadingDatabases: string[];
-  reloadLocalDbs: Function;
+  setActiveDb: (dbid: string, value: boolean) => void;
 }) {
   const {
     db,
@@ -40,7 +40,7 @@ function DatabaseItem(props: {
     downloadDatabase,
     loadingDatabases,
     localDatabases,
-    reloadLocalDbs,
+    setActiveDb,
   } = props;
 
   const localDb = localDatabases.find((x) => x.id == db.id);
@@ -77,10 +77,7 @@ function DatabaseItem(props: {
             checked={localDb.isActive ?? false}
             tabIndex={-1}
             disableRipple
-            onChange={(e) => {
-              setLocalDbActive(db.id, e.target.checked);
-              reloadLocalDbs();
-            }}
+            onChange={(e) => setActiveDb(db.id, e.target.checked)}
           />
         ) : (
           <CloudIcon />
@@ -98,6 +95,7 @@ export default function DownloadPage() {
   const [loadingDatabases, setLoadingDatabases] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [localDbToken, setLocalDbToken] = useState(0);
+  const [isActivating, setIsActivating] = useState(false);
 
   const remoteDbQuery = useQuery<SongDbList>({
     queryKey: ["remoteDatabases"],
@@ -134,7 +132,7 @@ export default function DownloadPage() {
 
   return (
     <PageLayout title="Databases">
-      {remoteDbQuery.isPending || localDbQuery.isPending ? (
+      {isActivating || remoteDbQuery.isPending || localDbQuery.isPending ? (
         <CircularProgress />
       ) : remoteDbQuery.error ? (
         <Alert severity="error">{remoteDbQuery.error.message}</Alert>
@@ -143,7 +141,7 @@ export default function DownloadPage() {
       ) : (
         <List>
           {_.uniqBy(
-            [...remoteDbQuery.data.databases, ...localDbQuery.data],
+            [...localDbQuery.data, ...remoteDbQuery.data.databases],
             (x) => x.id
           ).map((db) => (
             <DatabaseItem
@@ -153,7 +151,15 @@ export default function DownloadPage() {
               deleteDatabase={deleteDatabase}
               downloadDatabase={downloadDatabase}
               loadingDatabases={loadingDatabases}
-              reloadLocalDbs={() => setLocalDbToken((x) => x + 1)}
+              setActiveDb={async (dbid, value) => {
+                try {
+                  setIsActivating(true);
+                  await setLocalDbActive(db.id, value);
+                } finally {
+                  setIsActivating(false);
+                  setLocalDbToken((x) => x + 1);
+                }
+              }}
             />
           ))}
         </List>

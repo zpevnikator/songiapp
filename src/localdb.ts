@@ -88,7 +88,11 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
   }
 
   const storeDatabases = tx?.objectStore("databases");
-  storeDatabases?.put?.({ ...db, isActive: true });
+  storeDatabases?.put?.({
+    ...db,
+    isActive: true,
+    size: data.songs.length.toString(),
+  });
   await tx?.done;
 }
 
