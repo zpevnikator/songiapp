@@ -44,6 +44,12 @@ interface LocalDb extends DBSchema {
   };
 }
 
+if (localStorage.getItem("deleteLocalDatabase") == "songiapp") {
+  window.indexedDB.deleteDatabase("songiapp");
+  localStorage.removeItem("deleteLocalDatabase");
+  document.location.reload();
+}
+
 const localDbPromise = openDB<LocalDb>("songiapp", 1, {
   upgrade(db, oldVersion, newVersion, transaction, event) {
     if (oldVersion < 1) {

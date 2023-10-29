@@ -179,10 +179,8 @@ function PageLayout(props: PageLayoutProps) {
               <ListItemButton
                 onClick={() => {
                   if (window.confirm("Really delete all downloaded songs?")) {
-                    window.indexedDB.deleteDatabase("songiapp");
-                    setTimeout(() => {
-                      document.location.reload();
-                    }, 1000);
+                    localStorage.setItem("deleteLocalDatabase", "songiapp");
+                    document.location.reload();
                   }
                 }}
               >
