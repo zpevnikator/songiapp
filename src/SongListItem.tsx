@@ -6,17 +6,20 @@ import { useNavigate } from "react-router-dom";
 export default function SongListItem(props: {
   song: LocalSong;
   showArtist?: boolean;
+  showIcon?: boolean;
 }) {
-  const { song, showArtist } = props;
+  const { song, showArtist, showIcon = true } = props;
   const navigate = useNavigate();
 
   return (
     <ListItemButton
       onClick={() => navigate(`/songs/${encodeURIComponent(song.id)}`)}
     >
-      <ListItemIcon>
-        <LyricsIcon />
-      </ListItemIcon>
+      {showIcon && (
+        <ListItemIcon>
+          <LyricsIcon />
+        </ListItemIcon>
+      )}
       <ListItemText
         secondaryTypographyProps={{
           overflow: "hidden",

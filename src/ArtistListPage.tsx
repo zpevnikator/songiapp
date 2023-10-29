@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
 import { findArtists } from "./localdb";
-import { Alert, Box, CircularProgress, List } from "@mui/material";
+import { Alert, Box, CircularProgress, Grid, List } from "@mui/material";
 import { LocalArtist } from "./types";
 import { Link } from "react-router-dom";
 import ArtistListItem from "./ArtistListItem";
@@ -22,19 +22,26 @@ export default function ArtistListPage() {
       ) : query.data.length == 0 ? (
         <>
           <Box sx={{ m: 1 }}>
-            You have no active songs in your database. Please download some songs in
-            "Databases" section. Only songs from checked databases are active.
+            You have no active songs in your database. Please download some
+            songs in "Databases" section. Only songs from checked databases are
+            active.
           </Box>
           <Box sx={{ m: 1 }}>
             <Link to="/databases">Go to Databases</Link>
           </Box>
         </>
       ) : (
-        <List>
+        <Grid container>
           {query.data.map((artist) => (
-            <ArtistListItem artist={artist} key={artist.name} />
+            <Grid item xs={6} sm={4} md={3} lg={2} key={artist.name}>
+              <ArtistListItem
+                artist={artist}
+                key={artist.name}
+                showIcon={false}
+              />
+            </Grid>
           ))}
-        </List>
+        </Grid>
       )}
     </PageLayout>
   );
