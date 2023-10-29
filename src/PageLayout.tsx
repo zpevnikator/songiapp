@@ -25,6 +25,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import InstallAppSnackbar from "./InstallAppSnackbar";
 import _ from "lodash";
 import SearchField from "./SearchField";
@@ -172,6 +173,23 @@ function PageLayout(props: PageLayoutProps) {
                   <SearchIcon />
                 </ListItemIcon>
                 <ListItemText primary="Search" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  if (window.confirm("Really delete all downloaded songs?")) {
+                    window.indexedDB.deleteDatabase("songiapp");
+                    setTimeout(() => {
+                      document.location.reload();
+                    }, 1000);
+                  }
+                }}
+              >
+                <ListItemIcon>
+                  <DeleteForeverIcon />
+                </ListItemIcon>
+                <ListItemText primary="Delete all data" />
               </ListItemButton>
             </ListItem>
           </List>

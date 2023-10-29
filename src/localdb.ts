@@ -44,7 +44,7 @@ interface LocalDb extends DBSchema {
   };
 }
 
-const localDbPromise = openDB<LocalDb>("songiapp2", 1, {
+const localDbPromise = openDB<LocalDb>("songiapp", 1, {
   upgrade(db, oldVersion, newVersion, transaction, event) {
     if (oldVersion < 1) {
       const songStore = db.createObjectStore("songs", { keyPath: "id" });
