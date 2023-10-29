@@ -20,7 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import DownloadIcon from "@mui/icons-material/Download";
+import CloudIcon from "@mui/icons-material/Cloud";
 import PeopleIcon from "@mui/icons-material/People";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SearchIcon from "@mui/icons-material/Search";
@@ -62,7 +62,7 @@ function PageLayout(props: PageLayoutProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const bottomNavigationUrls = ["/", "/download", "/search"];
+  const bottomNavigationUrls = ["/", "/databases", "/search"];
 
   return (
     <div>
@@ -151,11 +151,11 @@ function PageLayout(props: PageLayoutProps) {
         >
           <List>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/download")}>
+              <ListItemButton onClick={() => navigate("/databases")}>
                 <ListItemIcon>
-                  <DownloadIcon />
+                  <CloudIcon />
                 </ListItemIcon>
-                <ListItemText primary="Download databases" />
+                <ListItemText primary="Databases" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -207,7 +207,7 @@ function PageLayout(props: PageLayoutProps) {
           }}
         >
           <BottomNavigationAction label="Artists" icon={<PeopleIcon />} />
-          <BottomNavigationAction label="Download" icon={<DownloadIcon />} />
+          <BottomNavigationAction label="Databases" icon={<CloudIcon />} />
           <BottomNavigationAction label="Search" icon={<SearchIcon />} />
         </BottomNavigation>
       </Paper>

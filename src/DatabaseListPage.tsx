@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import CloudIcon from "@mui/icons-material/Cloud";
 import DownloadIcon from "@mui/icons-material/Download";
-import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   deleteSongDb,
@@ -134,7 +133,7 @@ export default function DownloadPage() {
   }
 
   return (
-    <PageLayout title="Download databases">
+    <PageLayout title="Databases">
       {remoteDbQuery.isPending || localDbQuery.isPending ? (
         <CircularProgress />
       ) : remoteDbQuery.error ? (

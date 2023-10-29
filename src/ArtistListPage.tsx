@@ -23,10 +23,10 @@ export default function ArtistListPage() {
         <>
           <Box sx={{ m: 1 }}>
             You have no songs in your database. Please download some songs in
-            "Downloads" section.
+            "Databases" section.
           </Box>
           <Box sx={{ m: 1 }}>
-            <Link to="/download">Go to Downloads</Link>
+            <Link to="/databases">Go to Databases</Link>
           </Box>
         </>
       ) : (
