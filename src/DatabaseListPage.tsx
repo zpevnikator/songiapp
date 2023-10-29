@@ -27,7 +27,7 @@ import { getErrorMessage } from "./utils";
 import _ from "lodash";
 
 function DatabaseItem(props: {
-  db: LocalDatabase;
+  db: SongDbListItem;
   localDatabases: LocalDatabase[];
   deleteDatabase: (x: SongDbListItem) => void;
   downloadDatabase: (x: SongDbListItem) => void;
@@ -85,7 +85,11 @@ function DatabaseItem(props: {
       </ListItemIcon>
       <ListItemText
         primary={db.title}
-        secondary={`${db.description} (${db.size} songs)`}
+        secondary={
+          localDb
+            ? `${localDb.description} (${localDb.songCount} songs, ${localDb.artistCount} artists)`
+            : `${db.description} (${db.size} songs)`
+        }
       />
     </ListItem>
   );

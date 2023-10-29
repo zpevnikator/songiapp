@@ -54,7 +54,7 @@ const localDbPromise = openDB<LocalDb>("songiapp", 5, {
 
     if (oldVersion < 5) {
       const songStore = db.createObjectStore("songs", { keyPath: "id" });
-      songStore.createIndex("by-artist", "artistId", { multiEntry: true });
+      songStore.createIndex("by-artist", "artistId");
       songStore.createIndex("by-databaseId", "databaseId");
       songStore.createIndex("by-isActive", "isActive");
 
@@ -126,7 +126,8 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
   storeDatabases?.put?.({
     ...db,
     isActive: true,
-    size: data.songs.length.toString(),
+    songCount: data.songs.length,
+    artistCount: data.artists.length,
   });
   await tx?.done;
 }

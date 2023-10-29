@@ -8,6 +8,8 @@ export interface SongDbListItem {
 
 export interface LocalDatabase extends SongDbListItem {
   isActive?: boolean;
+  songCount: number;
+  artistCount: number;
 }
 
 export interface SongDbList {
