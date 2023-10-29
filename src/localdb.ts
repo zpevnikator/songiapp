@@ -44,15 +44,9 @@ interface LocalDb extends DBSchema {
   };
 }
 
-const localDbPromise = openDB<LocalDb>("songiapp", 5, {
+const localDbPromise = openDB<LocalDb>("songiapp2", 1, {
   upgrade(db, oldVersion, newVersion, transaction, event) {
-    if (oldVersion < 5) {
-      db.deleteObjectStore("songs");
-      db.deleteObjectStore("databases");
-      db.deleteObjectStore("recents");
-    }
-
-    if (oldVersion < 5) {
+    if (oldVersion < 1) {
       const songStore = db.createObjectStore("songs", { keyPath: "id" });
       songStore.createIndex("by-artist", "artistId");
       songStore.createIndex("by-databaseId", "databaseId");
@@ -200,7 +194,9 @@ export async function getSong(songid: string): Promise<LocalSong | undefined> {
   return res;
 }
 
-export async function getArtist(artistid: string): Promise<LocalArtist | undefined> {
+export async function getArtist(
+  artistid: string
+): Promise<LocalArtist | undefined> {
   const tx = (await localDbPromise).transaction("artists", "readonly");
 
   const res = await tx.objectStore("artists").get(artistid);
