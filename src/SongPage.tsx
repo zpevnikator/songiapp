@@ -1,24 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
 import { getSong } from "./localdb";
-import {
-  Alert,
-  Card,
-  CircularProgress,
-  IconButton,
-  MenuItem,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Alert, CircularProgress, Typography } from "@mui/material";
 import { LocalSong } from "./types";
 import { useParams } from "react-router-dom";
 import SongFormatter from "./SongFormatter";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import TransposePanel from "./TransposePanel";
 import { getBaseTone, transposeText } from "./chordTools";
 
 export default function SongPage() {
   const { songid } = useParams();
+
+  const wakeLockRef = useRef<any>(null);
 
   const query = useQuery<LocalSong | undefined>({
     queryKey: ["song", songid],
@@ -39,6 +33,22 @@ export default function SongPage() {
         : query.data?.text,
     [query.data?.text, newBaseTone, baseTone]
   );
+
+  useEffect(() => {
+    if ("wakeLock" in navigator) {
+      const navigatorWakeLock = navigator.wakeLock as any;
+      navigatorWakeLock
+        .request("screen")
+        .then((lock) => (wakeLockRef.current = lock));
+    }
+    return () => {
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release().then(() => {
+          wakeLockRef.current = null;
+        });
+      }
+    };
+  }, []);
 
   return (
     <PageLayout

@@ -12,9 +12,7 @@ export default function BigListView<T>(props: {
 }) {
   const { array, factory, extractKey, extractTitle } = props;
 
-  const [visibleNavigation, setVisibleMavigation] = useState(
-    array.length > 100
-  );
+  const [visibleNavigation, setVisibleMavigation] = useState(false);
 
   const firstRefs = useRef<Record<string, Element | null>>({});
 
