@@ -29,7 +29,7 @@ const router = createHashRouter([
     element: <SearchPage />,
   },
   {
-    path: "/by-artist/:artist",
+    path: "/by-artist/:artistid",
     element: <ByArtistListPage />,
   },
   {

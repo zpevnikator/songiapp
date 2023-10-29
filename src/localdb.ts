@@ -30,29 +30,41 @@ interface LocalDb extends DBSchema {
     key: string;
     value: LocalDatabase;
   };
+  artists: {
+    key: string;
+    value: LocalArtist;
+    indexes: {
+      "by-databaseId": string;
+      "by-isActive": number;
+    };
+  };
   recents: {
     key: string;
     value: LocalRecentObject;
   };
 }
 
-const localDbPromise = openDB<LocalDb>("songiapp", 4, {
+const localDbPromise = openDB<LocalDb>("songiapp", 5, {
   upgrade(db, oldVersion, newVersion, transaction, event) {
-    if (oldVersion < 1) {
+    if (oldVersion < 5) {
+      db.deleteObjectStore("songs");
+      db.deleteObjectStore("databases");
+      db.deleteObjectStore("recents");
+    }
+
+    if (oldVersion < 5) {
       const songStore = db.createObjectStore("songs", { keyPath: "id" });
-      db.createObjectStore("databases", { keyPath: "id" });
-      songStore.createIndex("by-artist", "artist", { multiEntry: true });
-    }
-    if (oldVersion < 2) {
-      const songStore = transaction.objectStore("songs");
+      songStore.createIndex("by-artist", "artistId", { multiEntry: true });
       songStore.createIndex("by-databaseId", "databaseId");
-    }
-    if (oldVersion < 3) {
-      const songStore = transaction.objectStore("songs");
       songStore.createIndex("by-isActive", "isActive");
-    }
-    if (oldVersion < 4) {
+
+      db.createObjectStore("databases", { keyPath: "id" });
+
       db.createObjectStore("recents", { keyPath: "id" });
+
+      const artistStore = db.createObjectStore("artists", { keyPath: "id" });
+      artistStore.createIndex("by-databaseId", "databaseId");
+      artistStore.createIndex("by-isActive", "isActive");
     }
   },
   blocked(currentVersion, blockedVersion, event) {
@@ -80,17 +92,32 @@ const localDbPromise = openDB<LocalDb>("songiapp", 4, {
 
 export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
   const tx = (await localDbPromise).transaction(
-    ["songs", "databases"],
+    ["songs", "databases", "artists"],
     "readwrite"
   );
+
+  const artistMap = _.keyBy(data.artists, (x) => x.id);
 
   const storeSongs = tx?.objectStore("songs");
   for (const song of data.songs) {
     await storeSongs?.put?.({
       ...song,
-      artist: Array.isArray(song.artist) ? song.artist : [song.artist],
+      artistName: artistMap[song.artistId]?.name ?? song.artistId,
       databaseId: db.id,
       id: `${db.id}-${song.id}`,
+      artistId: `${db.id}-${song.artistId}`,
+      isActive: 1,
+    });
+  }
+
+  const storeArtists = tx?.objectStore("artists");
+  for (const artist of data.artists) {
+    await storeArtists?.put?.({
+      ...artist,
+      id: `${db.id}-${artist.id}`,
+      databaseId: db.id,
+      databaseTitle: db.title,
+      songCount: data.songs.filter((x) => x.artistId == artist.id).length,
       isActive: 1,
     });
   }
@@ -106,22 +133,22 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
 
 export async function deleteSongDb(db: SongDbListItem) {
   const tx = (await localDbPromise).transaction(
-    ["songs", "databases"],
+    ["songs", "databases", "artists"],
     "readwrite"
   );
 
-  const deletedSongs: string[] = [];
   const songStore = tx.objectStore("songs");
-  let cursor = await songStore.openCursor();
-  while (cursor) {
-    if (cursor.value.databaseId == db.id) {
-      deletedSongs.push(cursor.key);
-    }
-    cursor = await cursor.continue();
-  }
-
+  const deletedSongs = await songStore.index("by-databaseId").getAllKeys(db.id);
   for (const key of deletedSongs) {
     await songStore.delete(key);
+  }
+
+  const artistStore = tx.objectStore("artists");
+  const deletedArtists = await artistStore
+    .index("by-databaseId")
+    .getAllKeys(db.id);
+  for (const key of deletedArtists) {
+    await artistStore.delete(key);
   }
 
   await tx.objectStore("databases").delete(db.id);
@@ -130,27 +157,12 @@ export async function deleteSongDb(db: SongDbListItem) {
 }
 
 export async function findArtists(): Promise<LocalArtist[]> {
-  const tx = (await localDbPromise).transaction("songs", "readonly");
+  const tx = (await localDbPromise).transaction("artists", "readonly");
 
-  let cursor = await tx.objectStore("songs").index("by-isActive").openCursor(1);
-
-  const res: Record<string, LocalArtist> = {};
-
-  while (cursor) {
-    for (const artist of cursor.value.artist) {
-      if (!res[artist]) {
-        res[artist] = {
-          name: artist,
-          songCount: 0,
-        };
-      }
-      res[artist].songCount = (res[artist].songCount ?? 0) + 1;
-    }
-    cursor = await cursor.continue();
-  }
+  const res = await tx.objectStore("artists").index("by-isActive").getAll(1);
 
   await tx?.done;
-  return localeSortByKey(_.values(res), "name");
+  return localeSortByKey(res, "name");
 }
 
 export async function findDatabases(): Promise<LocalDatabase[]> {
@@ -167,16 +179,15 @@ export async function findDatabases(): Promise<LocalDatabase[]> {
 //   return dbs.filter((x) => x.isActive).map((x) => x.id);
 // }
 
-export async function findSongsByArtist(artist: string): Promise<LocalSong[]> {
+export async function findSongsByArtist(
+  artistId: string
+): Promise<LocalSong[]> {
   const tx = (await localDbPromise).transaction("songs", "readonly");
 
-  const res = await tx.objectStore("songs").index("by-artist").getAll(artist);
+  const res = await tx.objectStore("songs").index("by-artist").getAll(artistId);
 
   await tx?.done;
-  return localeSortByKey(
-    res.filter((x) => x.isActive),
-    "title"
-  );
+  return localeSortByKey(res, "title");
 }
 
 export async function getSong(songid: string): Promise<LocalSong | undefined> {
@@ -188,9 +199,18 @@ export async function getSong(songid: string): Promise<LocalSong | undefined> {
   return res;
 }
 
+export async function getArtist(artistid: string): Promise<LocalArtist | undefined> {
+  const tx = (await localDbPromise).transaction("artists", "readonly");
+
+  const res = await tx.objectStore("artists").get(artistid);
+
+  await tx?.done;
+  return res;
+}
+
 export async function setLocalDbActive(dbid: string, isActive: boolean) {
   const tx = (await localDbPromise).transaction(
-    ["databases", "songs"],
+    ["databases", "songs", "artists"],
     "readwrite"
   );
 
@@ -204,18 +224,32 @@ export async function setLocalDbActive(dbid: string, isActive: boolean) {
   db.isActive = isActive;
   await tx.objectStore("databases").put(db);
 
-  let cursor = await tx
+  let cursorSongs = await tx
     .objectStore("songs")
     .index("by-databaseId")
     .openCursor(dbid);
 
-  while (cursor) {
+  while (cursorSongs) {
     tx.objectStore("songs").put({
-      ...cursor.value,
+      ...cursorSongs.value,
       isActive: isActive ? 1 : 0,
     });
 
-    cursor = await cursor.continue();
+    cursorSongs = await cursorSongs.continue();
+  }
+
+  let cursorArtists = await tx
+    .objectStore("artists")
+    .index("by-databaseId")
+    .openCursor(dbid);
+
+  while (cursorArtists) {
+    tx.objectStore("artists").put({
+      ...cursorArtists.value,
+      isActive: isActive ? 1 : 0,
+    });
+
+    cursorArtists = await cursorArtists.continue();
   }
 
   await tx?.done;
@@ -283,12 +317,14 @@ export interface LocalDbSearchResult {
 export async function searchLocalDb(
   criteria: string
 ): Promise<LocalDbSearchResult> {
-  const tx = (await localDbPromise).transaction("songs", "readonly");
-
-  let cursor = await tx.objectStore("songs").index("by-isActive").openCursor(1);
+  const tx = (await localDbPromise).transaction(
+    ["songs", "artists"],
+    "readonly"
+  );
 
   const songsByTitle: LocalSong[] = [];
   const songsByText: LocalSong[] = [];
+  const artists: LocalArtist[] = [];
 
   const tokens = compileSearchCriteria(criteria);
 
@@ -300,42 +336,44 @@ export async function searchLocalDb(
     };
   }
 
-  const artistDict: Record<string, LocalArtist> = {};
+  let artistCursor = await tx
+    .objectStore("artists")
+    .index("by-isActive")
+    .openCursor(1);
 
-  while (cursor) {
-    for (const artist of cursor.value.artist) {
-      if (!matchSearchCriteria(artist, tokens)) {
-        continue;
-      }
-      if (!artistDict[artist]) {
-        artistDict[artist] = {
-          name: artist,
-          songCount: 0,
-        };
-      }
-
-      artistDict[artist].songCount = (artistDict[artist].songCount ?? 0) + 1;
+  while (artistCursor) {
+    if (matchSearchCriteria(artistCursor.value.name, tokens)) {
+      artists.push(artistCursor.value);
     }
 
+    artistCursor = await artistCursor.continue();
+  }
+
+  let songsCursor = await tx
+    .objectStore("songs")
+    .index("by-isActive")
+    .openCursor(1);
+
+  while (songsCursor) {
     if (
       matchMandatorySearchCriteria(
-        cursor.value.title,
-        (cursor.value.artist ?? []).join(" "),
+        songsCursor.value.title,
+        songsCursor.value.artistName,
         tokens
       )
     ) {
-      songsByTitle.push(cursor.value);
+      songsByTitle.push(songsCursor.value);
     } else if (
       matchMandatorySearchCriteria(
-        removeChords(String(cursor.value.text)),
-        (cursor.value.artist ?? []).join(" "),
+        removeChords(String(songsCursor.value.text)),
+        songsCursor.value.artistName,
         tokens
       )
     ) {
-      songsByText.push(cursor.value);
+      songsByText.push(songsCursor.value);
     }
 
-    cursor = await cursor.continue();
+    songsCursor = await songsCursor.continue();
   }
 
   await tx?.done;
@@ -346,6 +384,6 @@ export async function searchLocalDb(
       ...localeSortByKey(songsByTitle, "title"),
       ...localeSortByKey(songsByText, "title"),
     ],
-    artists: _.sortBy(_.values(artistDict), (x) => -(x.songCount ?? 0)),
+    artists,
   };
 }

@@ -11,7 +11,7 @@ export default function ArtistListItem(props: {
   const { artist, showIcon = true } = props;
   return (
     <ListItemButton
-      onClick={() => navigate(`/by-artist/${encodeURIComponent(artist.name)}`)}
+      onClick={() => navigate(`/by-artist/${encodeURIComponent(artist.id)}`)}
     >
       {showIcon && (
         <ListItemIcon>
@@ -20,9 +20,7 @@ export default function ArtistListItem(props: {
       )}
       <ListItemText
         primary={artist.name}
-        secondary={
-          artist.songCount != null ? `${artist.songCount} songs` : null
-        }
+        secondary={`${artist.songCount} songs (${artist.databaseTitle.toLocaleLowerCase()})`}
       />
     </ListItemButton>
   );

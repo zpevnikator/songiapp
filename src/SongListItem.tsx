@@ -26,7 +26,7 @@ export default function SongListItem(props: {
           whiteSpace: "nowrap",
           textOverflow: "ellipsis",
         }}
-        primary={showArtist ? `${song.title} (${song.artist})` : song.title}
+        primary={showArtist ? `${song.title} (${song.artistName})` : song.title}
         secondary={song?.text?.replace(/^\..*$/m, "")?.substring(0, 200)}
       />
     </ListItemButton>

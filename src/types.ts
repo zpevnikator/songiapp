@@ -15,10 +15,14 @@ export interface SongDbList {
 }
 
 export interface SongDatabase {
+  artists: {
+    id: string;
+    name: string;
+  }[];
   songs: {
     id: string;
     title: string;
-    artist: string | string[];
+    artistId: string;
     lang: string;
     text: string;
   }[];
@@ -27,7 +31,8 @@ export interface SongDatabase {
 export interface LocalSong {
   id: string;
   title: string;
-  artist: string[];
+  artistId: string;
+  artistName: string;
   lang: string;
   text: string;
   databaseId: string;
@@ -35,8 +40,12 @@ export interface LocalSong {
 }
 
 export interface LocalArtist {
+  id: string;
   name: string;
-  songCount?: number;
+  songCount: number;
+  databaseId: string;
+  databaseTitle: string;
+  isActive?: number;
 }
 
 export interface LocalRecentCommon {

@@ -1,37 +1,43 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
-import { addRecentArtist, findSongsByArtist } from "./localdb";
+import { addRecentArtist, findSongsByArtist, getArtist } from "./localdb";
 import { Alert, CircularProgress, Grid, List } from "@mui/material";
-import { LocalSong } from "./types";
+import { LocalArtist, LocalSong } from "./types";
 import { useParams } from "react-router-dom";
 import SongListItem from "./SongListItem";
 import BigListView from "./BigListView";
 import { useEffect } from "react";
 
 export default function ByArtistListPage() {
-  const { artist } = useParams();
+  const { artistid } = useParams();
 
-  const query = useQuery<LocalSong[]>({
-    queryKey: ["songs-by-artist", artist],
-    queryFn: () => findSongsByArtist(artist!),
+  const querySong = useQuery<LocalSong[]>({
+    queryKey: ["songs-by-artist", artistid],
+    queryFn: () => findSongsByArtist(artistid!),
+    networkMode: "always",
+  });
+
+  const queryArtist = useQuery<LocalArtist | undefined>({
+    queryKey: ["artist-by-id", artistid],
+    queryFn: () => getArtist(artistid!),
     networkMode: "always",
   });
 
   useEffect(() => {
-    if (query.data) {
-      addRecentArtist({ name: artist! });
+    if (queryArtist.data) {
+      addRecentArtist(queryArtist.data);
     }
-  }, [query.data]);
+  }, [queryArtist.data]);
 
   return (
-    <PageLayout title={artist} showBack>
-      {query.isPending ? (
+    <PageLayout title={queryArtist.data?.name ?? "Loading..."} showBack>
+      {querySong.isPending ? (
         <CircularProgress />
-      ) : query.error ? (
-        <Alert severity="error">{query.error.message}</Alert>
+      ) : querySong.error ? (
+        <Alert severity="error">{querySong.error.message}</Alert>
       ) : (
         <BigListView
-          array={query.data}
+          array={querySong.data}
           factory={(song, showIcon) => (
             <SongListItem song={song} key={song.id} showIcon={showIcon} />
           )}
