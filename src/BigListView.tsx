@@ -33,30 +33,33 @@ export default function BigListView<T>(props: {
     return { letters, firstIds };
   }, [array, extractTitle, extractKey]);
 
-  const sizing =
-    array.length > 40
-      ? {
-          xs: 6,
-          sm: 4,
-          md: 3,
-          lg: 3,
-        }
-      : array.length > 30
-      ? {
-          xs: 6,
-          sm: 4,
-          md: 3,
-        }
-      : array.length > 20
-      ? {
-          xs: 6,
-          sm: 4,
-        }
-      : array.length > 10
-      ? {
-          xs: 6,
-        }
-      : null;
+  const sizing = useMemo(
+    () =>
+      array.length > 40
+        ? {
+            xs: 6,
+            sm: 4,
+            md: 3,
+            lg: 3,
+          }
+        : array.length > 30
+        ? {
+            xs: 6,
+            sm: 4,
+            md: 3,
+          }
+        : array.length > 20
+        ? {
+            xs: 6,
+            sm: 4,
+          }
+        : array.length > 10
+        ? {
+            xs: 6,
+          }
+        : null,
+    [array]
+  );
 
   if (sizing == null) {
     return <List>{array.map((item) => factory(item, true))}</List>;
@@ -99,8 +102,8 @@ export default function BigListView<T>(props: {
             <IconButton
               key={letter}
               onClick={() => {
-                console.log("firstRefs.current", firstRefs.current);
-                firstRefs.current[letter]?.scrollIntoView();
+                firstRefs.current[letter]?.scrollIntoView(true);
+                window.scrollBy(0, -70);
               }}
             >
               <span>{letter}</span>

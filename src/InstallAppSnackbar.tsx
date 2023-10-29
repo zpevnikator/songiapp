@@ -7,10 +7,18 @@ export default function InstallAppSnackbar() {
   const [installClicked, setInstallClicked] = useState(false);
 
   useEffect(() => {
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    });
+    if (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    ) {
+      // is mobile..
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        setDeferredPrompt(e);
+      });
+    }
   }, []);
 
   return (

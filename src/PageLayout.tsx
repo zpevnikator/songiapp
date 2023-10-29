@@ -66,7 +66,7 @@ function PageLayout(props: PageLayoutProps) {
 
   return (
     <div>
-      <AppBar position="sticky">
+      <AppBar position="fixed">
         <Toolbar>
           <IconButton
             size="large"
@@ -190,7 +190,7 @@ function PageLayout(props: PageLayoutProps) {
           </List> */}
         </Box>
       </Drawer>
-      <Box sx={{ pb: 7 }}>{children}</Box>
+      <Box sx={{ pb: 7, pt: 8 }}>{children}</Box>
 
       <Paper
         sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}

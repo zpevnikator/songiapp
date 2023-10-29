@@ -6,6 +6,7 @@ import { LocalArtist } from "./types";
 import { Link } from "react-router-dom";
 import ArtistListItem from "./ArtistListItem";
 import BigListView from "./BigListView";
+import { useCallback } from "react";
 
 export default function ArtistListPage() {
   const query = useQuery<LocalArtist[]>({
@@ -13,6 +14,9 @@ export default function ArtistListPage() {
     queryFn: findArtists,
     networkMode: "always",
   });
+
+  const extractKey = useCallback((artist) => artist.name, []);
+  const extractTitle = useCallback((artist) => artist.name, []);
 
   return (
     <PageLayout title="Artists" showSearchLink>
@@ -41,8 +45,8 @@ export default function ArtistListPage() {
               showIcon={false}
             />
           )}
-          extractKey={(artist) => artist.name}
-          extractTitle={(artist) => artist.name}
+          extractKey={extractKey}
+          extractTitle={extractTitle}
         />
       )}
     </PageLayout>
