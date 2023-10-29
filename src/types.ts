@@ -6,6 +6,10 @@ export interface SongDbListItem {
   url: string;
 }
 
+export interface LocalDatabase extends SongDbListItem {
+  isActive?: boolean;
+}
+
 export interface SongDbList {
   databases: SongDbListItem[];
 }

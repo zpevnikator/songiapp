@@ -4,6 +4,7 @@ import PageLayout from "./PageLayout";
 import { useQuery } from "@tanstack/react-query";
 import {
   Alert,
+  Checkbox,
   CircularProgress,
   IconButton,
   List,
@@ -16,10 +17,83 @@ import CloudIcon from "@mui/icons-material/Cloud";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { deleteSongDb, findDatabases, saveSongDb } from "./localdb";
-import type { SongDbList, SongDbListItem } from "./types";
+import {
+  deleteSongDb,
+  findDatabases,
+  saveSongDb,
+  setLocalDbActive,
+} from "./localdb";
+import type { LocalDatabase, SongDbList, SongDbListItem } from "./types";
 import { getErrorMessage } from "./utils";
 import _ from "lodash";
+
+function DatabaseItem(props: {
+  db: LocalDatabase;
+  localDatabases: LocalDatabase[];
+  deleteDatabase: (x: SongDbListItem) => void;
+  downloadDatabase: (x: SongDbListItem) => void;
+  loadingDatabases: string[];
+  reloadLocalDbs: Function;
+}) {
+  const {
+    db,
+    deleteDatabase,
+    downloadDatabase,
+    loadingDatabases,
+    localDatabases,
+    reloadLocalDbs,
+  } = props;
+
+  const localDb = localDatabases.find((x) => x.id == db.id);
+
+  return (
+    <ListItem
+      key={db.id}
+      secondaryAction={
+        loadingDatabases.includes(db.id) ? (
+          <CircularProgress />
+        ) : localDb ? (
+          <IconButton
+            edge="end"
+            aria-label="download"
+            onClick={() => deleteDatabase(db)}
+          >
+            <DeleteIcon />
+          </IconButton>
+        ) : (
+          <IconButton
+            edge="end"
+            aria-label="download"
+            onClick={() => downloadDatabase(db)}
+          >
+            <DownloadIcon />
+          </IconButton>
+        )
+      }
+    >
+      <ListItemIcon>
+        {localDb ? (
+          <Checkbox
+            edge="start"
+            checked={localDb.isActive ?? false}
+            tabIndex={-1}
+            disableRipple
+            onChange={(e) => {
+              setLocalDbActive(db.id, e.target.checked);
+              reloadLocalDbs();
+            }}
+          />
+        ) : (
+          <CloudIcon />
+        )}
+      </ListItemIcon>
+      <ListItemText
+        primary={db.title}
+        secondary={`${db.description} (${db.size} songs)`}
+      />
+    </ListItem>
+  );
+}
 
 export default function DownloadPage() {
   const [loadingDatabases, setLoadingDatabases] = useState<string[]>([]);
@@ -34,7 +108,7 @@ export default function DownloadPage() {
       ).then((res) => res.json()),
   });
 
-  const localDbQuery = useQuery<SongDbListItem[]>({
+  const localDbQuery = useQuery<LocalDatabase[]>({
     queryKey: ["localDatabases", localDbToken],
     queryFn: findDatabases,
     networkMode: "always",
@@ -73,43 +147,15 @@ export default function DownloadPage() {
             [...remoteDbQuery.data.databases, ...localDbQuery.data],
             (x) => x.id
           ).map((db) => (
-            <ListItem
+            <DatabaseItem
               key={db.id}
-              secondaryAction={
-                loadingDatabases.includes(db.id) ? (
-                  <CircularProgress />
-                ) : // <DownloadingIcon />
-                localDbQuery.data.find((x) => x.id == db.id) ? (
-                  <IconButton
-                    edge="end"
-                    aria-label="download"
-                    onClick={() => deleteDatabase(db)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                ) : (
-                  <IconButton
-                    edge="end"
-                    aria-label="download"
-                    onClick={() => downloadDatabase(db)}
-                  >
-                    <DownloadIcon />
-                  </IconButton>
-                )
-              }
-            >
-              <ListItemIcon>
-                {localDbQuery.data.find((x) => x.id == db.id) ? (
-                  <FileDownloadDoneIcon />
-                ) : (
-                  <CloudIcon />
-                )}
-              </ListItemIcon>
-              <ListItemText
-                primary={db.title}
-                secondary={`${db.description} (${db.size} songs)`}
-              />
-            </ListItem>
+              db={db}
+              localDatabases={localDbQuery.data}
+              deleteDatabase={deleteDatabase}
+              downloadDatabase={downloadDatabase}
+              loadingDatabases={loadingDatabases}
+              reloadLocalDbs={() => setLocalDbToken((x) => x + 1)}
+            />
           ))}
         </List>
       )}

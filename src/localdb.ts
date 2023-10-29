@@ -1,6 +1,7 @@
 import { openDB, deleteDB, wrap, unwrap, DBSchema } from "idb";
 import type {
   LocalArtist,
+  LocalDatabase,
   LocalSong,
   SongDatabase,
   SongDbListItem,
@@ -22,7 +23,7 @@ interface LocalDb extends DBSchema {
   };
   databases: {
     key: string;
-    value: SongDbListItem;
+    value: LocalDatabase;
   };
 }
 
@@ -74,7 +75,7 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
   }
 
   const storeDatabases = tx?.objectStore("databases");
-  storeDatabases?.put?.(db);
+  storeDatabases?.put?.({ ...db, isActive: true });
   await tx?.done;
 }
 
@@ -127,7 +128,7 @@ export async function findArtists(): Promise<LocalArtist[]> {
   return localeSortByKey(_.values(res), "name");
 }
 
-export async function findDatabases(): Promise<SongDbListItem[]> {
+export async function findDatabases(): Promise<LocalDatabase[]> {
   const tx = (await localDbPromise).transaction("databases", "readonly");
 
   const res = await tx.objectStore("databases").getAll();
@@ -152,6 +153,21 @@ export async function getSong(songid: string): Promise<LocalSong | undefined> {
 
   await tx?.done;
   return res;
+}
+
+export async function setLocalDbActive(dbid: string, isActive: boolean) {
+  const tx = (await localDbPromise).transaction("databases", "readwrite");
+
+  const db = await tx.objectStore("databases").get(dbid);
+
+  if (!db) {
+    await tx?.done;
+    return;
+  }
+
+  db.isActive = isActive;
+  await tx.objectStore("databases").put(db);
+  await tx?.done;
 }
 
 export interface LocalDbSearchResult {
