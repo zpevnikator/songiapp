@@ -20,7 +20,9 @@ export default function ArtistListItem(props: {
       )}
       <ListItemText
         primary={artist.name}
-        secondary={`${artist.songCount} songs`}
+        secondary={
+          artist.songCount != null ? `${artist.songCount} songs` : null
+        }
       />
     </ListItemButton>
   );

@@ -1,7 +1,8 @@
-import { openDB, deleteDB, wrap, unwrap, DBSchema } from "idb";
+import { openDB, deleteDB, wrap, unwrap, DBSchema, IDBPTransaction } from "idb";
 import type {
   LocalArtist,
   LocalDatabase,
+  LocalRecentObject,
   LocalSong,
   SongDatabase,
   SongDbListItem,
@@ -29,9 +30,13 @@ interface LocalDb extends DBSchema {
     key: string;
     value: LocalDatabase;
   };
+  recents: {
+    key: string;
+    value: LocalRecentObject;
+  };
 }
 
-const localDbPromise = openDB<LocalDb>("songiapp", 3, {
+const localDbPromise = openDB<LocalDb>("songiapp", 4, {
   upgrade(db, oldVersion, newVersion, transaction, event) {
     if (oldVersion < 1) {
       const songStore = db.createObjectStore("songs", { keyPath: "id" });
@@ -45,6 +50,9 @@ const localDbPromise = openDB<LocalDb>("songiapp", 3, {
     if (oldVersion < 3) {
       const songStore = transaction.objectStore("songs");
       songStore.createIndex("by-isActive", "isActive");
+    }
+    if (oldVersion < 4) {
+      db.createObjectStore("recents", { keyPath: "id" });
     }
   },
   blocked(currentVersion, blockedVersion, event) {
@@ -136,7 +144,7 @@ export async function findArtists(): Promise<LocalArtist[]> {
           songCount: 0,
         };
       }
-      res[artist].songCount += 1;
+      res[artist].songCount = (res[artist].songCount ?? 0) + 1;
     }
     cursor = await cursor.continue();
   }
@@ -213,6 +221,59 @@ export async function setLocalDbActive(dbid: string, isActive: boolean) {
   await tx?.done;
 }
 
+async function deleteOldRecents(
+  tx: IDBPTransaction<LocalDb, ["recents"], "readwrite">
+) {
+  const count = await tx.objectStore("recents").count();
+  if (count > 100) {
+    const all = _.sortBy(
+      await tx.objectStore("recents").getAll(),
+      (x) => x.date
+    );
+    for (const item of all.slice(0, -100)) {
+      await tx.objectStore("recents").delete(item.id);
+    }
+  }
+}
+
+export async function addRecentSong(song: LocalSong) {
+  const tx = (await localDbPromise).transaction("recents", "readwrite");
+
+  await tx.objectStore("recents").put({
+    type: "song",
+    date: new Date(),
+    id: `song:${song.id}`,
+    song,
+  });
+
+  await deleteOldRecents(tx);
+
+  await tx?.done;
+}
+
+export async function addRecentArtist(artist: LocalArtist) {
+  const tx = (await localDbPromise).transaction("recents", "readwrite");
+
+  await tx.objectStore("recents").put({
+    type: "artist",
+    date: new Date(),
+    id: `artist:${artist.name}`,
+    artist,
+  });
+
+  await deleteOldRecents(tx);
+
+  await tx?.done;
+}
+
+export async function findAllRecents(): Promise<LocalRecentObject[]> {
+  const tx = (await localDbPromise).transaction("recents", "readonly");
+  const res = await tx.objectStore("recents").getAll();
+  await tx?.done;
+  const sorted = _.sortBy(res, (x) => x.date);
+  sorted.reverse();
+  return sorted;
+}
 export interface LocalDbSearchResult {
   artists: LocalArtist[];
   songs: LocalSong[];
@@ -252,7 +313,8 @@ export async function searchLocalDb(
           songCount: 0,
         };
       }
-      artistDict[artist].songCount += 1;
+
+      artistDict[artist].songCount = (artistDict[artist].songCount ?? 0) + 1;
     }
 
     if (
@@ -284,6 +346,6 @@ export async function searchLocalDb(
       ...localeSortByKey(songsByTitle, "title"),
       ...localeSortByKey(songsByText, "title"),
     ],
-    artists: _.sortBy(_.values(artistDict), (x) => -x.songCount),
+    artists: _.sortBy(_.values(artistDict), (x) => -(x.songCount ?? 0)),
   };
 }

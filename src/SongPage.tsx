@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
-import { getSong } from "./localdb";
+import { addRecentSong, getSong } from "./localdb";
 import { Alert, CircularProgress, Typography } from "@mui/material";
 import { LocalSong } from "./types";
 import { useParams } from "react-router-dom";
@@ -33,6 +33,12 @@ export default function SongPage() {
         : query.data?.text,
     [query.data?.text, newBaseTone, baseTone]
   );
+
+  useEffect(() => {
+    if (query.data) {
+      addRecentSong(query.data);
+    }
+  }, [query.data]);
 
   useEffect(() => {
     if ("wakeLock" in navigator) {

@@ -36,5 +36,22 @@ export interface LocalSong {
 
 export interface LocalArtist {
   name: string;
-  songCount: number;
+  songCount?: number;
 }
+
+export interface LocalRecentCommon {
+  id: string;
+  date: Date;
+}
+
+export interface LocalRecentSong extends LocalRecentCommon {
+  type: "song";
+  song: LocalSong;
+}
+
+export interface LocalRecentArtist extends LocalRecentCommon {
+  type: "artist";
+  artist: LocalArtist;
+}
+
+export type LocalRecentObject = LocalRecentSong | LocalRecentArtist;

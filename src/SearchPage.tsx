@@ -1,12 +1,37 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
-import { LocalDbSearchResult, searchLocalDb } from "./localdb";
+import { LocalDbSearchResult, findAllRecents, searchLocalDb } from "./localdb";
 import { Alert, Box, CircularProgress, List } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ArtistListItem from "./ArtistListItem";
 import SongListItem from "./SongListItem";
 import _ from "lodash";
 import { useLocation, useNavigate } from "react-router-dom";
+import { LocalRecentObject } from "./types";
+
+function RecentObjectItem(props: { item: LocalRecentObject }) {
+  const { item } = props;
+
+  if (item.type == "song") {
+    return <SongListItem song={item.song} />;
+  }
+
+  if (item.type == "artist") {
+    return <ArtistListItem artist={item.artist} />;
+  }
+
+  return null;
+}
+
+function RecentObjectList(props: { list: LocalRecentObject[] }) {
+  return (
+    <List>
+      {props.list.map((item) => (
+        <RecentObjectItem key={item.id} item={item} />
+      ))}
+    </List>
+  );
+}
 
 export default function SearchPage() {
   const navigate = useNavigate();
@@ -14,9 +39,15 @@ export default function SearchPage() {
   const [searchText, setSearchText] = useState(location.state?.search ?? "");
   const [filter, setFilter] = useState(location.state?.search ?? "");
 
-  const query = useQuery<LocalDbSearchResult>({
+  const searchQuery = useQuery<LocalDbSearchResult>({
     queryKey: ["search", filter],
     queryFn: () => searchLocalDb(filter),
+    networkMode: "always",
+  });
+
+  const recentsQuery = useQuery<LocalRecentObject[]>({
+    queryKey: ["recents", filter],
+    queryFn: findAllRecents,
     networkMode: "always",
   });
 
@@ -35,22 +66,27 @@ export default function SearchPage() {
 
   return (
     <PageLayout onChangeSearchText={setSearchText} searchText={searchText}>
-      {query.isPending ? (
+      {searchQuery.isPending || recentsQuery.isPending ? (
         <CircularProgress />
-      ) : query.error ? (
-        <Alert severity="error">{query.error.message}</Alert>
-      ) : !query.data.searchDone ? (
-        <Box sx={{ m: 1 }}>Please specify some search criteria</Box>
-      ) : query.data.artists.length == 0 && query.data.songs.length == 0 ? (
+      ) : searchQuery.error ? (
+        <Alert severity="error">{searchQuery.error.message}</Alert>
+      ) : !searchQuery.data.searchDone ? (
+        (recentsQuery.data?.length ?? 0) > 0 ? (
+          <RecentObjectList list={recentsQuery.data!} />
+        ) : (
+          <Box sx={{ m: 1 }}>Please specify some search criteria</Box>
+        )
+      ) : searchQuery.data.artists.length == 0 &&
+        searchQuery.data.songs.length == 0 ? (
         <>
           <Box sx={{ m: 1 }}>No songs found</Box>
         </>
       ) : (
         <List>
-          {query.data.artists.slice(0, 100).map((artist) => (
+          {searchQuery.data.artists.slice(0, 100).map((artist) => (
             <ArtistListItem key={artist.name} artist={artist} />
           ))}
-          {query.data.songs.slice(0, 100).map((song) => (
+          {searchQuery.data.songs.slice(0, 100).map((song) => (
             <SongListItem key={song.id} song={song} showArtist />
           ))}
         </List>
