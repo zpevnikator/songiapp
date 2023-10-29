@@ -28,7 +28,7 @@ export default function ByArtistListPage() {
           factory={(song, showIcon) => (
             <SongListItem song={song} key={song.id} showIcon={showIcon} />
           )}
-          extractKey={(song) => song.isActive}
+          extractKey={(song) => song.id}
           extractTitle={(song) => song.title}
         />
       )}
