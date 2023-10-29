@@ -31,6 +31,7 @@ export interface LocalSong {
   lang: string;
   text: string;
   databaseId: string;
+  isActive?: number;
 }
 
 export interface LocalArtist {

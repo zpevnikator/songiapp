@@ -19,7 +19,11 @@ interface LocalDb extends DBSchema {
   songs: {
     key: string;
     value: LocalSong;
-    indexes: { "by-artist": string };
+    indexes: {
+      "by-artist": string;
+      "by-databaseId": string;
+      "by-isActive": number;
+    };
   };
   databases: {
     key: string;
@@ -27,12 +31,20 @@ interface LocalDb extends DBSchema {
   };
 }
 
-const localDbPromise = openDB<LocalDb>("songiapp", 1, {
+const localDbPromise = openDB<LocalDb>("songiapp", 3, {
   upgrade(db, oldVersion, newVersion, transaction, event) {
     if (oldVersion < 1) {
       const songStore = db.createObjectStore("songs", { keyPath: "id" });
       db.createObjectStore("databases", { keyPath: "id" });
       songStore.createIndex("by-artist", "artist", { multiEntry: true });
+    }
+    if (oldVersion < 2) {
+      const songStore = transaction.objectStore("songs");
+      songStore.createIndex("by-databaseId", "databaseId");
+    }
+    if (oldVersion < 3) {
+      const songStore = transaction.objectStore("songs");
+      songStore.createIndex("by-isActive", "isActive");
     }
   },
   blocked(currentVersion, blockedVersion, event) {
@@ -71,6 +83,7 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
       artist: Array.isArray(song.artist) ? song.artist : [song.artist],
       databaseId: db.id,
       id: `${db.id}-${song.id}`,
+      isActive: 1,
     });
   }
 
@@ -107,7 +120,7 @@ export async function deleteSongDb(db: SongDbListItem) {
 export async function findArtists(): Promise<LocalArtist[]> {
   const tx = (await localDbPromise).transaction("songs", "readonly");
 
-  let cursor = await tx.objectStore("songs").openCursor();
+  let cursor = await tx.objectStore("songs").index("by-isActive").openCursor(1);
 
   const res: Record<string, LocalArtist> = {};
 
@@ -137,13 +150,21 @@ export async function findDatabases(): Promise<LocalDatabase[]> {
   return res;
 }
 
+// export async function getActiveDatabaseIds(): Promise<string[]> {
+//   const dbs = await findDatabases();
+//   return dbs.filter((x) => x.isActive).map((x) => x.id);
+// }
+
 export async function findSongsByArtist(artist: string): Promise<LocalSong[]> {
   const tx = (await localDbPromise).transaction("songs", "readonly");
 
   const res = await tx.objectStore("songs").index("by-artist").getAll(artist);
 
   await tx?.done;
-  return localeSortByKey(res, "title");
+  return localeSortByKey(
+    res.filter((x) => x.isActive),
+    "title"
+  );
 }
 
 export async function getSong(songid: string): Promise<LocalSong | undefined> {
@@ -156,7 +177,10 @@ export async function getSong(songid: string): Promise<LocalSong | undefined> {
 }
 
 export async function setLocalDbActive(dbid: string, isActive: boolean) {
-  const tx = (await localDbPromise).transaction("databases", "readwrite");
+  const tx = (await localDbPromise).transaction(
+    ["databases", "songs"],
+    "readwrite"
+  );
 
   const db = await tx.objectStore("databases").get(dbid);
 
@@ -167,6 +191,21 @@ export async function setLocalDbActive(dbid: string, isActive: boolean) {
 
   db.isActive = isActive;
   await tx.objectStore("databases").put(db);
+
+  let cursor = await tx
+    .objectStore("songs")
+    .index("by-databaseId")
+    .openCursor(dbid);
+
+  while (cursor) {
+    tx.objectStore("songs").put({
+      ...cursor.value,
+      isActive: isActive ? 1 : 0,
+    });
+
+    cursor = await cursor.continue();
+  }
+
   await tx?.done;
 }
 
@@ -181,7 +220,7 @@ export async function searchLocalDb(
 ): Promise<LocalDbSearchResult> {
   const tx = (await localDbPromise).transaction("songs", "readonly");
 
-  let cursor = await tx.objectStore("songs").openCursor();
+  let cursor = await tx.objectStore("songs").index("by-isActive").openCursor(1);
 
   const songsByTitle: LocalSong[] = [];
   const songsByText: LocalSong[] = [];

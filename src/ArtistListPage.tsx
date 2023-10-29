@@ -22,8 +22,8 @@ export default function ArtistListPage() {
       ) : query.data.length == 0 ? (
         <>
           <Box sx={{ m: 1 }}>
-            You have no songs in your database. Please download some songs in
-            "Databases" section.
+            You have no active songs in your database. Please download some songs in
+            "Databases" section. Only songs from checked databases are active.
           </Box>
           <Box sx={{ m: 1 }}>
             <Link to="/databases">Go to Databases</Link>
