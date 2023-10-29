@@ -6,10 +6,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import ArtistListItem from "./ArtistListItem";
 import SongListItem from "./SongListItem";
 import _ from "lodash";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function SearchPage() {
-  const [searchText, setSearchText] = useState("");
-  const [filter, setFilter] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchText, setSearchText] = useState(location.state?.search ?? "");
+  const [filter, setFilter] = useState(location.state?.search ?? "");
 
   const query = useQuery<LocalDbSearchResult>({
     queryKey: ["search", filter],
@@ -26,6 +29,7 @@ export default function SearchPage() {
   }, [sendRequest]);
 
   useEffect(() => {
+    navigate(".", { replace: true, state: { search: searchText } });
     debouncedSendRequest(searchText);
   }, [searchText, debouncedSendRequest]);
 
