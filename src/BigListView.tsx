@@ -1,16 +1,27 @@
 import { Box, Fab, Grid, IconButton, List, Paper } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useMemo, useRef, useState } from "react";
-import { removeDiacritics } from "./utils";
+import { getFirstLetter } from "./utils";
 import NavigationIcon from "@mui/icons-material/Navigation";
+import SearchIcon from "@mui/icons-material/Search";
 
 export default function BigListView<T>(props: {
   array: T[];
   factory: (item: T, showIcon: boolean) => JSX.Element;
   extractKey: (item: T) => any;
   extractTitle: (item: T) => any;
+  prefix?: JSX.Element;
+  disableNavigation?: boolean;
+  onSwitchToFilter?: Function;
 }) {
-  const { array, factory, extractKey, extractTitle } = props;
+  const {
+    array,
+    factory,
+    extractKey,
+    extractTitle,
+    disableNavigation,
+    onSwitchToFilter,
+  } = props;
 
   const [visibleNavigation, setVisibleMavigation] = useState(false);
 
@@ -20,9 +31,7 @@ export default function BigListView<T>(props: {
     const letters: string[] = [];
     const firstIds: Record<string, string> = {};
     for (const item of array) {
-      const letter = removeDiacritics(extractTitle(item))
-        .trim()[0]
-        .toUpperCase();
+      const letter = getFirstLetter(extractTitle(item));
       if (!letters.includes(letter)) {
         letters.push(letter);
         firstIds[extractKey(item)] = letter;
@@ -60,11 +69,17 @@ export default function BigListView<T>(props: {
   );
 
   if (sizing == null) {
-    return <List>{array.map((item) => factory(item, true))}</List>;
+    return (
+      <>
+        {props.prefix}
+        <List>{array.map((item) => factory(item, true))}</List>{" "}
+      </>
+    );
   }
 
   return (
     <>
+      {props.prefix}
       <Grid container>
         {array.map((item) => (
           <Grid item {...sizing} key={extractKey(item)}>
@@ -84,7 +99,7 @@ export default function BigListView<T>(props: {
         ))}
       </Grid>
 
-      {visibleNavigation && (
+      {visibleNavigation && !disableNavigation && (
         <Paper
           style={{
             position: "fixed",
@@ -108,21 +123,28 @@ export default function BigListView<T>(props: {
             </IconButton>
           ))}
           <Box sx={{ flexGrow: 1 }} />
+          {onSwitchToFilter && (
+            <IconButton onClick={() => onSwitchToFilter()}>
+              <SearchIcon />
+            </IconButton>
+          )}
           <IconButton onClick={() => setVisibleMavigation(false)}>
             <CloseIcon />
           </IconButton>
         </Paper>
       )}
 
-      {!visibleNavigation && array.length > 100 && (
-        <Fab
-          color="primary"
-          style={{ position: "fixed", bottom: 40, right: 20 }}
-          onClick={() => setVisibleMavigation(true)}
-        >
-          <NavigationIcon sx={{ mr: 1 }} />
-        </Fab>
-      )}
+      {!visibleNavigation &&
+        (array.length > 100 || onSwitchToFilter) &&
+        !disableNavigation && (
+          <Fab
+            color="primary"
+            style={{ position: "fixed", bottom: 40, right: 20 }}
+            onClick={() => setVisibleMavigation(true)}
+          >
+            <NavigationIcon sx={{ mr: 1 }} />
+          </Fab>
+        )}
     </>
   );
 }

@@ -2,6 +2,7 @@ import { openDB, deleteDB, wrap, unwrap, DBSchema, IDBPTransaction } from "idb";
 import type {
   LocalArtist,
   LocalDatabase,
+  LocalLetter,
   LocalRecentObject,
   LocalSong,
   SongDatabase,
@@ -10,6 +11,7 @@ import type {
 import _ from "lodash";
 import {
   compileSearchCriteria,
+  getFirstLetter,
   localeSortByKey,
   matchMandatorySearchCriteria,
   matchSearchCriteria,
@@ -35,12 +37,17 @@ interface LocalDb extends DBSchema {
     value: LocalArtist;
     indexes: {
       "by-databaseId": string;
+      "by-letter": string;
       "by-isActive": number;
     };
   };
   recents: {
     key: string;
     value: LocalRecentObject;
+  };
+  letters: {
+    key: string;
+    value: LocalLetter;
   };
 }
 
@@ -50,7 +57,7 @@ if (localStorage.getItem("deleteLocalDatabase") == "songiapp") {
   document.location.reload();
 }
 
-const localDbPromise = openDB<LocalDb>("songiapp", 1, {
+const localDbPromise = openDB<LocalDb>("songiapp", 2, {
   upgrade(db, oldVersion, newVersion, transaction, event) {
     if (oldVersion < 1) {
       const songStore = db.createObjectStore("songs", { keyPath: "id" });
@@ -65,6 +72,11 @@ const localDbPromise = openDB<LocalDb>("songiapp", 1, {
       const artistStore = db.createObjectStore("artists", { keyPath: "id" });
       artistStore.createIndex("by-databaseId", "databaseId");
       artistStore.createIndex("by-isActive", "isActive");
+    }
+    if (oldVersion < 2) {
+      const artistStore = transaction.objectStore("artists");
+      artistStore.createIndex("by-letter", "letter");
+      db.createObjectStore("letters", { keyPath: "letter" });
     }
   },
   blocked(currentVersion, blockedVersion, event) {
@@ -89,6 +101,30 @@ const localDbPromise = openDB<LocalDb>("songiapp", 1, {
 //   const tx = (await localDbPromise).transaction("databases", mode);
 //   return tx;
 // }
+
+async function recomputeLetters() {
+  const tx = (await localDbPromise).transaction(
+    ["letters", "artists"],
+    "readwrite"
+  );
+
+  await tx.objectStore("letters").clear();
+
+  const artists = await tx
+    .objectStore("artists")
+    .index("by-isActive")
+    .getAll(1);
+
+  const grouped = _.groupBy(artists, (x) => x.letter);
+  for (const letter in grouped) {
+    await tx.objectStore("letters").put({
+      letter,
+      artistCount: grouped[letter].length,
+    });
+  }
+
+  await tx.done;
+}
 
 export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
   const tx = (await localDbPromise).transaction(
@@ -119,17 +155,20 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
       databaseTitle: db.title,
       songCount: data.songs.filter((x) => x.artistId == artist.id).length,
       isActive: 1,
+      letter: getFirstLetter(artist.name),
     });
   }
 
   const storeDatabases = tx?.objectStore("databases");
   storeDatabases?.put?.({
     ...db,
-    isActive: true,
+    isActive: 1,
     songCount: data.songs.length,
     artistCount: data.artists.length,
   });
   await tx?.done;
+
+  await recomputeLetters();
 }
 
 export async function deleteSongDb(db: SongDbListItem) {
@@ -161,6 +200,24 @@ export async function findArtists(): Promise<LocalArtist[]> {
   const tx = (await localDbPromise).transaction("artists", "readonly");
 
   const res = await tx.objectStore("artists").index("by-isActive").getAll(1);
+
+  await tx?.done;
+  return localeSortByKey(res, "name");
+}
+
+export async function findLetters(): Promise<LocalLetter[]> {
+  const tx = (await localDbPromise).transaction("letters", "readonly");
+  const res = await tx.objectStore("letters").getAll();
+  await tx?.done;
+  return _.sortBy(res, "letter");
+}
+
+export async function findArtistsByLetter(
+  letter: string
+): Promise<LocalArtist[]> {
+  const tx = (await localDbPromise).transaction("artists", "readonly");
+
+  const res = await tx.objectStore("artists").index("by-letter").getAll(letter);
 
   await tx?.done;
   return localeSortByKey(res, "name");
@@ -224,7 +281,7 @@ export async function setLocalDbActive(dbid: string, isActive: boolean) {
     return;
   }
 
-  db.isActive = isActive;
+  db.isActive = isActive ? 1 : 0;
   await tx.objectStore("databases").put(db);
 
   let cursorSongs = await tx
@@ -250,12 +307,14 @@ export async function setLocalDbActive(dbid: string, isActive: boolean) {
     tx.objectStore("artists").put({
       ...cursorArtists.value,
       isActive: isActive ? 1 : 0,
+      letter: isActive ? getFirstLetter(cursorArtists.value.name) : null,
     });
 
     cursorArtists = await cursorArtists.continue();
   }
 
   await tx?.done;
+  await recomputeLetters();
 }
 
 async function deleteOldRecents(

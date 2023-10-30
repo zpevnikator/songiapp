@@ -7,7 +7,7 @@ export interface SongDbListItem {
 }
 
 export interface LocalDatabase extends SongDbListItem {
-  isActive?: boolean;
+  isActive?: number;
   songCount: number;
   artistCount: number;
 }
@@ -48,6 +48,12 @@ export interface LocalArtist {
   databaseId: string;
   databaseTitle: string;
   isActive?: number;
+  letter: string | null;
+}
+
+export interface LocalLetter {
+  letter: string;
+  artistCount: number;
 }
 
 export interface LocalRecentCommon {

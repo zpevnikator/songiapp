@@ -74,7 +74,7 @@ function DatabaseItem(props: {
         {localDb ? (
           <Checkbox
             edge="start"
-            checked={localDb.isActive ?? false}
+            checked={!!localDb.isActive}
             tabIndex={-1}
             disableRipple
             onChange={(e) => setActiveDb(db.id, e.target.checked)}

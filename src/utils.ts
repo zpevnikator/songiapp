@@ -59,3 +59,8 @@ export function localeSortByKey(array: any[], field: string) {
     String(_.get(a, field)).localeCompare(String(_.get(b, field)))
   );
 }
+
+export function getFirstLetter(s: string) {
+  const letter = removeDiacritics(s).trim()[0].toUpperCase();
+  return letter || "-";
+}
