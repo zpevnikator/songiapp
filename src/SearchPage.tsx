@@ -13,7 +13,7 @@ function RecentObjectItem(props: { item: LocalRecentObject }) {
   const { item } = props;
 
   if (item.type == "song") {
-    return <SongListItem song={item.song} />;
+    return <SongListItem song={item.song} showDatabase />;
   }
 
   if (item.type == "artist") {

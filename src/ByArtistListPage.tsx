@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import SongListItem from "./SongListItem";
 import BigListView from "./BigListView";
 import { useEffect } from "react";
+import _ from "lodash";
 
 export default function ByArtistListPage() {
   const { artistid } = useParams();
@@ -30,7 +31,14 @@ export default function ByArtistListPage() {
   }, [queryArtist.data]);
 
   return (
-    <PageLayout title={queryArtist.data?.name ?? "Loading..."} showBack>
+    <PageLayout
+      title={
+        queryArtist.data
+          ? `${queryArtist.data?.name} (${queryArtist.data.databaseTitle?.toLocaleLowerCase()})`
+          : _.startCase(artistid?.replace(/^[^\-]*\-/, ""))
+      }
+      showBack
+    >
       {querySong.isPending ? (
         <CircularProgress />
       ) : querySong.error ? (

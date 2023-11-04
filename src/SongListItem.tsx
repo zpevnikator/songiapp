@@ -12,6 +12,8 @@ export default function SongListItem(props: {
   const { song, showArtist, showIcon = true, showDatabase } = props;
   const navigate = useNavigate();
 
+  const textPart = song?.text?.replace(/^\..*$/m, "")?.substring(0, 200);
+
   return (
     <ListItemButton
       onClick={() => navigate(`/songs/${encodeURIComponent(song.id)}`)}
@@ -28,9 +30,11 @@ export default function SongListItem(props: {
           textOverflow: "ellipsis",
         }}
         primary={showArtist ? `${song.title} (${song.artistName})` : song.title}
-        secondary={`${song?.databaseTitle?.toLocaleLowerCase()}: ${song?.text
-          ?.replace(/^\..*$/m, "")
-          ?.substring(0, 200)}`}
+        secondary={
+          showDatabase
+            ? `${song?.databaseTitle?.toLocaleLowerCase()}: ${textPart}`
+            : textPart
+        }
       />
     </ListItemButton>
   );
