@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
-import { findArtists, findArtistsByLetter, findLetters } from "./localdb";
+import { findArtists, findArtistsByLetter, findActiveLetters } from "./localdb";
 import {
   Alert,
   Box,
@@ -11,7 +11,7 @@ import {
   List,
   Paper,
 } from "@mui/material";
-import { LocalArtist, LocalLetter } from "./types";
+import { GroupedLetter, LocalArtist, LocalLetter } from "./types";
 import { Link } from "react-router-dom";
 import ArtistListItem from "./ArtistListItem";
 import BigListView from "./BigListView";
@@ -22,8 +22,8 @@ const startLetterKey = "artistsStartLetter";
 
 async function loadArtistsData(
   letter: string | null
-): Promise<[LocalLetter[], LocalArtist[]]> {
-  const letters = await findLetters();
+): Promise<[GroupedLetter[], LocalArtist[]]> {
+  const letters = await findActiveLetters();
 
   if (letter == "__all__") {
     return [letters, await findArtists()];
@@ -42,7 +42,7 @@ async function loadArtistsData(
 
 function LetterList(props: {
   letter: string | null;
-  letters: LocalLetter[];
+  letters: GroupedLetter[];
   onSetLetter?: Function;
 }) {
   return (
@@ -87,7 +87,7 @@ export default function ArtistListPage() {
 
   const showAll = letter == "__all__";
 
-  const query = useQuery<[LocalLetter[], LocalArtist[]]>({
+  const query = useQuery<[GroupedLetter[], LocalArtist[]]>({
     queryKey: ["artist-data", letter || "__no_selected__"],
     queryFn: () => loadArtistsData(letter),
     networkMode: "always",

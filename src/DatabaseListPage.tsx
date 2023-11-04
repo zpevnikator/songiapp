@@ -49,8 +49,10 @@ function DatabaseItem(props: {
     <ListItem
       key={db.id}
       secondaryAction={
-        loadingDatabases.includes(db.id) ? (
-          <CircularProgress />
+        loadingDatabases.length > 0 ? (
+          loadingDatabases.includes(db.id) ? (
+            <CircularProgress />
+          ) : null
         ) : localDb ? (
           <IconButton
             edge="end"

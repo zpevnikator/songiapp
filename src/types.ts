@@ -38,7 +38,7 @@ export interface LocalSong {
   lang: string;
   text: string;
   databaseId: string;
-  isActive?: number;
+  // isActive?: number;
   words:string[];
 }
 
@@ -48,16 +48,23 @@ export interface LocalArtist {
   songCount: number;
   databaseId: string;
   databaseTitle: string;
-  isActive?: number;
-  letter: string | null;
+  // isActive?: number;
+  letter: string;
+  letterId: string;
   words:string[];
 }
 
 export interface LocalLetter {
-  // id: string;
+  id: string;
   letter: string;
-  // databaseId: string;
+  databaseId: string;
   artistCount: number;
+}
+
+export interface GroupedLetter {
+  letter: string;
+  artistCount: number;
+  // letterIds: string[];
 }
 
 export interface LocalRecentCommon {

@@ -1,5 +1,6 @@
 import Dexie, { Table } from "dexie";
 import type {
+  GroupedLetter,
   LocalArtist,
   LocalDatabase,
   LocalLetter,
@@ -31,11 +32,11 @@ class LocalDb extends Dexie {
     super("LocalDb");
 
     this.version(1).stores({
-      songs: "id,artistId,databaseId,isActive,*words",
+      songs: "id,artistId,databaseId,*words",
       databases: "id,isActive",
-      artists: "id,artistId,databaseId,isActive,letter,*words",
+      artists: "id,artistId,databaseId,letterId,*words",
       recents: "id",
-      letters: "letter",
+      letters: "id,letter,databaseId",
     });
   }
 }
@@ -48,18 +49,18 @@ if (localStorage.getItem("deleteLocalDatabase") == "songiapp") {
   document.location.reload();
 }
 
-async function recomputeLetters() {
-  await locdb.letters.clear();
-  const artists = await locdb.artists.where({ isActive: 1 }).toArray();
+// async function recomputeLetters() {
+//   await locdb.letters.clear();
+//   const artists = await locdb.artists.where({ isActive: 1 }).toArray();
 
-  const grouped = _.groupBy(artists, (x) => x.letter);
-  await locdb.letters.bulkAdd(
-    _.keys(grouped).map((letter) => ({
-      letter,
-      artistCount: grouped[letter].length,
-    }))
-  );
-}
+//   const grouped = _.groupBy(artists, (x) => x.letter);
+//   await locdb.letters.bulkAdd(
+//     _.keys(grouped).map((letter) => ({
+//       letter,
+//       artistCount: grouped[letter].length,
+//     }))
+//   );
+// }
 
 function getSongWords(...texts: string[]): string[] {
   const res = new Set<string>();
@@ -86,6 +87,7 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
     locdb.songs,
     locdb.artists,
     locdb.databases,
+    locdb.letters,
     () => {
       const artistMap = _.keyBy(data.artists, (x) => x.id);
 
@@ -104,21 +106,22 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
         )
       );
 
-      locdb.artists.bulkAdd(
-        _.uniqBy(
-          data.artists.map((artist) => ({
-            ...artist,
-            id: `${db.id}-${artist.id}`,
-            databaseId: db.id,
-            databaseTitle: db.title,
-            songCount: data.songs.filter((x) => x.artistId == artist.id).length,
-            isActive: 1,
-            letter: getFirstLetter(artist.name),
-            words: getSongWords(artist.name),
-          })),
-          "id"
-        )
+      const artists = _.uniqBy(
+        data.artists.map((artist) => ({
+          ...artist,
+          id: `${db.id}-${artist.id}`,
+          databaseId: db.id,
+          databaseTitle: db.title,
+          songCount: data.songs.filter((x) => x.artistId == artist.id).length,
+          isActive: 1,
+          letter: getFirstLetter(artist.name),
+          letterId: `${db.id}-${getFirstLetter(artist.name)}`,
+          words: getSongWords(artist.name),
+        })),
+        "id"
       );
+
+      locdb.artists.bulkAdd(artists);
 
       locdb.databases.add({
         ...db,
@@ -126,10 +129,21 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
         songCount: data.songs.length,
         artistCount: data.artists.length,
       });
+
+      const artistsByLetters = _.groupBy(artists, (x) => x.letter);
+
+      locdb.letters.bulkAdd(
+        _.keys(artistsByLetters).map((letter) => ({
+          id: `${db.id}-${letter}`,
+          databaseId: db.id,
+          letter,
+          artistCount: artistsByLetters[letter].length,
+        }))
+      );
     }
   );
 
-  await recomputeLetters();
+  // await recomputeLetters();
 }
 
 export async function deleteSongDb(db: SongDbListItem) {
@@ -138,32 +152,57 @@ export async function deleteSongDb(db: SongDbListItem) {
     locdb.songs,
     locdb.artists,
     locdb.databases,
+    locdb.letters,
     () => {
       locdb.songs.where({ databaseId: db.id }).delete();
       locdb.artists.where({ databaseId: db.id }).delete();
       locdb.databases.where({ id: db.id }).delete();
+      locdb.letters.where({ id: db.id }).delete();
     }
   );
 
-  await recomputeLetters();
+  //   await recomputeLetters();
 }
 
 export async function findArtists(): Promise<LocalArtist[]> {
+  const activeDbs = await getActiveDatabaseIds();
+
   return localeSortByKey(
-    await locdb.artists.where({ isActive: 1 }).toArray(),
+    await locdb.artists.where("databaseId").anyOf(activeDbs).toArray(),
     "name"
   );
 }
 
-export async function findLetters(): Promise<LocalLetter[]> {
-  return _.sortBy(await locdb.letters.toArray(), "letter");
+export async function findActiveLetters(): Promise<GroupedLetter[]> {
+  const activeDbs = await getActiveDatabaseIds();
+
+  const allLetters = await locdb.letters
+    .where("databaseId")
+    .anyOf(activeDbs)
+    .toArray();
+
+  const groupedLetters = _.groupBy(allLetters, (x) => x.letter);
+
+  return _.sortBy(
+    Object.entries(groupedLetters).map(([k, v]) => ({
+      letter: k,
+      artistCount: _.sumBy(v, (x) => x.artistCount),
+      // letterIds: v.map((x) => x.id),
+    })),
+    "letter"
+  );
 }
 
 export async function findArtistsByLetter(
   letter: string
 ): Promise<LocalArtist[]> {
+  const activeDbs = await getActiveDatabaseIds();
+
   return localeSortByKey(
-    await locdb.artists.where({ letter }).toArray(),
+    await locdb.artists
+      .where("letterId")
+      .anyOf(activeDbs.map((db) => `${db}-${letter}`))
+      .toArray(),
     "name"
   );
 }
@@ -303,10 +342,6 @@ export async function searchLocalDb(
   //   "readonly"
   // );
 
-  const songsByTitle: LocalSong[] = [];
-  const songsByText: LocalSong[] = [];
-  const artists: LocalArtist[] = [];
-
   const tokens = compileSearchCriteria(criteria);
 
   if (!tokens.length) {
@@ -322,16 +357,35 @@ export async function searchLocalDb(
   const songs = await locdb.songs
     .where("words")
     .startsWith(_.maxBy(tokens, (x) => x.length)!)
-    .filter((song) => activeDbs.includes(song.databaseId))
-    // .limit(100)
+    .filter(
+      (song) =>
+        activeDbs.includes(song.databaseId) &&
+        tokens.every((token) =>
+          song.words.find((word) => word.startsWith(token))
+        )
+    )
+    .distinct()
+    .limit(100)
+    .toArray();
+
+  const artists = await locdb.artists
+    .where("words")
+    .startsWith(_.maxBy(tokens, (x) => x.length)!)
+    .filter(
+      (artist) =>
+        activeDbs.includes(artist.databaseId) &&
+        tokens.every((token) =>
+          artist.words.find((word) => word.startsWith(token))
+        )
+    )
+    .distinct()
+    .limit(100)
     .toArray();
 
   return {
     searchDone: true,
-    songs: songs.filter((song) =>
-      tokens.every((token) => song.words.find((word) => word.startsWith(token)))
-    ),
-    artists: [],
+    songs,
+    artists,
   };
 
   // let artistCursor = await tx

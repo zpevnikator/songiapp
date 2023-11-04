@@ -83,10 +83,10 @@ export default function SearchPage() {
         </>
       ) : (
         <List>
-          {searchQuery.data.artists.slice(0, 100).map((artist) => (
+          {searchQuery.data.artists.map((artist) => (
             <ArtistListItem key={artist.name} artist={artist} />
           ))}
-          {searchQuery.data.songs.slice(0, 100).map((song) => (
+          {searchQuery.data.songs.map((song) => (
             <SongListItem key={song.id} song={song} showArtist />
           ))}
         </List>
