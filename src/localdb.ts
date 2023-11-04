@@ -225,50 +225,38 @@ export async function setLocalDbActive(dbid: string, isActive: boolean) {
 }
 
 async function deleteOldRecents() {
-  // const count = await tx.objectStore("recents").count();
-  // if (count > 100) {
-  //   const all = _.sortBy(
-  //     await tx.objectStore("recents").getAll(),
-  //     (x) => x.date
-  //   );
-  //   for (const item of all.slice(0, -100)) {
-  //     await tx.objectStore("recents").delete(item.id);
-  //   }
-  // }
+  const count = await locdb.recents.count();
+  if (count > 100) {
+    const all = _.sortBy(await locdb.recents.toArray(), (x) => x.date);
+    await locdb.recents.bulkDelete(all.slice(0, -100).map((x) => x.id));
+  }
 }
 
 export async function addRecentSong(song: LocalSong) {
-  // const tx = (await localDbPromise).transaction("recents", "readwrite");
-  // await tx.objectStore("recents").put({
-  //   type: "song",
-  //   date: new Date(),
-  //   id: `song:${song.id}`,
-  //   song,
-  // });
-  // await deleteOldRecents(tx);
-  // await tx?.done;
+  await locdb.recents.put({
+    type: "song",
+    date: new Date(),
+    id: `song:${song.id}`,
+    song,
+  });
+  await deleteOldRecents();
 }
 
 export async function addRecentArtist(artist: LocalArtist) {
-  // const tx = (await localDbPromise).transaction("recents", "readwrite");
-  // await tx.objectStore("recents").put({
-  //   type: "artist",
-  //   date: new Date(),
-  //   id: `artist:${artist.name}`,
-  //   artist,
-  // });
-  // await deleteOldRecents(tx);
-  // await tx?.done;
+  await locdb.recents.put({
+    type: "artist",
+    date: new Date(),
+    id: `artist:${artist.name}`,
+    artist,
+  });
+  await deleteOldRecents();
 }
 
 export async function findAllRecents(): Promise<LocalRecentObject[]> {
-  // const tx = (await localDbPromise).transaction("recents", "readonly");
-  // const res = await tx.objectStore("recents").getAll();
-  // await tx?.done;
-  // const sorted = _.sortBy(res, (x) => x.date);
-  // sorted.reverse();
-  // return sorted;
-  return [];
+  const res = await locdb.recents.toArray();
+  const sorted = _.sortBy(res, (x) => x.date);
+  sorted.reverse();
+  return sorted;
 }
 export interface LocalDbSearchResult {
   artists: LocalArtist[];
@@ -279,11 +267,6 @@ export interface LocalDbSearchResult {
 export async function searchLocalDb(
   criteria: string
 ): Promise<LocalDbSearchResult> {
-  // const tx = (await localDbPromise).transaction(
-  //   ["songs", "artists"],
-  //   "readonly"
-  // );
-
   const tokens = compileSearchCriteria(criteria);
 
   if (!tokens.length) {
