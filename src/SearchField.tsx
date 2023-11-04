@@ -40,9 +40,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     transition: theme.transitions.create("width"),
     flex: 1,
     width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
-    },
+    // [theme.breakpoints.up("md")]: {
+    //   width: "20ch",
+    // },
   },
 }));
 
@@ -62,6 +62,7 @@ export default function SearchField(props: SearchFieldProps) {
         inputProps={{ "aria-label": "search" }}
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
+        autoComplete="off"
       />
     </SearchDiv>
   );
