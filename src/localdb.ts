@@ -157,7 +157,7 @@ export async function deleteSongDb(db: SongDbListItem) {
       locdb.songs.where({ databaseId: db.id }).delete();
       locdb.artists.where({ databaseId: db.id }).delete();
       locdb.databases.where({ id: db.id }).delete();
-      locdb.letters.where({ id: db.id }).delete();
+      locdb.letters.where({ databaseId: db.id }).delete();
     }
   );
 
