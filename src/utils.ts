@@ -16,7 +16,7 @@ export function removeDiacritics(s: string) {
 export function compileSearchCriteria(criteria: string): string[] {
   const tokens = _.compact(
     removeDiacritics(criteria ?? "")
-      .toUpperCase()
+      .toLowerCase()
       .split(/\s/)
       .map((x) => x.trim())
   );
@@ -63,4 +63,8 @@ export function localeSortByKey(array: any[], field: string) {
 export function getFirstLetter(s: string) {
   const letter = removeDiacritics(s).trim()[0].toUpperCase();
   return letter || "-";
+}
+
+export function removeHtmlTags(text: string) {
+  return text.replace(/<[^>]+>/g, "");
 }
