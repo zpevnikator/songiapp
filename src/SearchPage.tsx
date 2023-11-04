@@ -87,7 +87,7 @@ export default function SearchPage() {
             <ArtistListItem key={artist.name} artist={artist} />
           ))}
           {searchQuery.data.songs.map((song) => (
-            <SongListItem key={song.id} song={song} showArtist />
+            <SongListItem key={song.id} song={song} showArtist showDatabase />
           ))}
         </List>
       )}

@@ -7,8 +7,9 @@ export default function SongListItem(props: {
   song: LocalSong;
   showArtist?: boolean;
   showIcon?: boolean;
+  showDatabase?: boolean;
 }) {
-  const { song, showArtist, showIcon = true } = props;
+  const { song, showArtist, showIcon = true, showDatabase } = props;
   const navigate = useNavigate();
 
   return (
@@ -27,7 +28,9 @@ export default function SongListItem(props: {
           textOverflow: "ellipsis",
         }}
         primary={showArtist ? `${song.title} (${song.artistName})` : song.title}
-        secondary={song?.text?.replace(/^\..*$/m, "")?.substring(0, 200)}
+        secondary={`${song?.databaseTitle?.toLocaleLowerCase()}: ${song?.text
+          ?.replace(/^\..*$/m, "")
+          ?.substring(0, 200)}`}
       />
     </ListItemButton>
   );

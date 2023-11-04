@@ -9,13 +9,11 @@ import type {
   SongDatabase,
   SongDbListItem,
 } from "./types";
-import _, { trim } from "lodash";
+import _ from "lodash";
 import {
   compileSearchCriteria,
   getFirstLetter,
   localeSortByKey,
-  matchMandatorySearchCriteria,
-  matchSearchCriteria,
   removeDiacritics,
   removeHtmlTags,
 } from "./utils";
@@ -48,19 +46,6 @@ if (localStorage.getItem("deleteLocalDatabase") == "songiapp") {
   localStorage.removeItem("deleteLocalDatabase");
   document.location.reload();
 }
-
-// async function recomputeLetters() {
-//   await locdb.letters.clear();
-//   const artists = await locdb.artists.where({ isActive: 1 }).toArray();
-
-//   const grouped = _.groupBy(artists, (x) => x.letter);
-//   await locdb.letters.bulkAdd(
-//     _.keys(grouped).map((letter) => ({
-//       letter,
-//       artistCount: grouped[letter].length,
-//     }))
-//   );
-// }
 
 function getSongWords(...texts: string[]): string[] {
   const res = new Set<string>();
@@ -97,6 +82,7 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
             ...song,
             artistName: artistMap[song.artistId]?.name ?? song.artistId,
             databaseId: db.id,
+            databaseTitle: db.title,
             id: `${db.id}-${song.id}`,
             artistId: `${db.id}-${song.artistId}`,
             isActive: 1,
@@ -142,8 +128,6 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
       );
     }
   );
-
-  // await recomputeLetters();
 }
 
 export async function deleteSongDb(db: SongDbListItem) {
@@ -160,8 +144,6 @@ export async function deleteSongDb(db: SongDbListItem) {
       locdb.letters.where({ databaseId: db.id }).delete();
     }
   );
-
-  //   await recomputeLetters();
 }
 
 export async function findArtists(): Promise<LocalArtist[]> {
@@ -240,46 +222,6 @@ export async function setLocalDbActive(dbid: string, isActive: boolean) {
   await locdb.databases
     .where({ id: dbid })
     .modify({ isActive: isActive ? 1 : 0 });
-  // await locdb.transaction('rw', locdb.songs, locdb.artists, locdb.databases,()=>{
-  //   locdb.songs.where({databaseId})
-
-  // })
-  // const tx = (await localDbPromise).transaction(
-  //   ["databases", "songs", "artists"],
-  //   "readwrite"
-  // );
-  // const db = await tx.objectStore("databases").get(dbid);
-  // if (!db) {
-  //   await tx?.done;
-  //   return;
-  // }
-  // db.isActive = isActive ? 1 : 0;
-  // await tx.objectStore("databases").put(db);
-  // let cursorSongs = await tx
-  //   .objectStore("songs")
-  //   .index("by-databaseId")
-  //   .openCursor(dbid);
-  // while (cursorSongs) {
-  //   tx.objectStore("songs").put({
-  //     ...cursorSongs.value,
-  //     isActive: isActive ? 1 : 0,
-  //   });
-  //   cursorSongs = await cursorSongs.continue();
-  // }
-  // let cursorArtists = await tx
-  //   .objectStore("artists")
-  //   .index("by-databaseId")
-  //   .openCursor(dbid);
-  // while (cursorArtists) {
-  //   tx.objectStore("artists").put({
-  //     ...cursorArtists.value,
-  //     isActive: isActive ? 1 : 0,
-  //     letter: isActive ? getFirstLetter(cursorArtists.value.name) : null,
-  //   });
-  //   cursorArtists = await cursorArtists.continue();
-  // }
-  // await tx?.done;
-  // await recomputeLetters();
 }
 
 async function deleteOldRecents() {
@@ -387,55 +329,4 @@ export async function searchLocalDb(
     songs,
     artists,
   };
-
-  // let artistCursor = await tx
-  //   .objectStore("artists")
-  //   .index("by-isActive")
-  //   .openCursor(1);
-
-  // while (artistCursor) {
-  //   if (matchSearchCriteria(artistCursor.value.name, tokens)) {
-  //     artists.push(artistCursor.value);
-  //   }
-
-  //   artistCursor = await artistCursor.continue();
-  // }
-
-  // let songsCursor = await tx
-  //   .objectStore("songs")
-  //   .index("by-isActive")
-  //   .openCursor(1);
-
-  // while (songsCursor) {
-  //   if (
-  //     matchMandatorySearchCriteria(
-  //       songsCursor.value.title,
-  //       songsCursor.value.artistName,
-  //       tokens
-  //     )
-  //   ) {
-  //     songsByTitle.push(songsCursor.value);
-  //   } else if (
-  //     matchMandatorySearchCriteria(
-  //       removeChords(String(songsCursor.value.text)),
-  //       songsCursor.value.artistName,
-  //       tokens
-  //     )
-  //   ) {
-  //     songsByText.push(songsCursor.value);
-  //   }
-
-  //   songsCursor = await songsCursor.continue();
-  // }
-
-  // await tx?.done;
-
-  // return {
-  //   searchDone: true,
-  //   songs: [
-  //     ...localeSortByKey(songsByTitle, "title"),
-  //     ...localeSortByKey(songsByText, "title"),
-  //   ],
-  //   artists,
-  // };
 }
