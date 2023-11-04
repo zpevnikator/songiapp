@@ -6,6 +6,7 @@ import {
   BottomNavigation,
   BottomNavigationAction,
   Box,
+  Button,
   Drawer,
   IconButton,
   List,
@@ -25,6 +26,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import InstallAppSnackbar from "./InstallAppSnackbar";
 import _ from "lodash";
@@ -86,7 +88,20 @@ function PageLayout(props: PageLayoutProps) {
           )}
 
           {onChangeSearchText && (
-            <SearchField value={searchText} onChange={onChangeSearchText} />
+            <>
+              <SearchField value={searchText} onChange={onChangeSearchText} />
+              {searchText && (
+                <IconButton
+                  size="large"
+                  aria-label="cancel search"
+                  edge="end"
+                  color="inherit"
+                  onClick={() => onChangeSearchText("")}
+                >
+                  <CancelIcon />
+                </IconButton>
+              )}
+            </>
           )}
 
           {menuItems && (
@@ -104,7 +119,7 @@ function PageLayout(props: PageLayoutProps) {
           {showSearchLink && (
             <IconButton
               size="large"
-              aria-label="display more actions"
+              aria-label="search"
               edge="end"
               color="inherit"
               onClick={() => navigate("/search")}
