@@ -65,7 +65,7 @@ export class ChordLineFormatter {
     this.hasChords = !!this.segments.find((x) => x.type == "chord");
   }
 
-  format(key: any, label: string, showLabel: boolean) {
+  format(key: any, label: string, showLabel: boolean, chordColor?: string) {
     if (!this.hasChords) {
       return (
         <div key={key}>
@@ -110,7 +110,11 @@ export class ChordLineFormatter {
           <div className="song-chord-line-item">
             <div className="song-chords-group">
               {current.chords.map((x, i) => (
-                <div key={i} className="song-chord">
+                <div
+                  key={i}
+                  className="song-chord"
+                  style={{ color: chordColor }}
+                >
                   {x}
                 </div>
               ))}
@@ -162,7 +166,7 @@ export class ChordLineFormatter {
 }
 
 export default class SongFormatter {
-  constructor(public text?: string) {}
+  constructor(public text?: string, public chordColor?: string) {}
 
   format() {
     const res: JSX.Element[] = [];
@@ -182,7 +186,12 @@ export default class SongFormatter {
         showLabel = true;
       } else {
         res.push(
-          new ChordLineFormatter(line).format(res.length, label, showLabel)
+          new ChordLineFormatter(line).format(
+            res.length,
+            label,
+            showLabel,
+            this.chordColor
+          )
         );
         showLabel = false;
       }

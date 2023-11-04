@@ -39,7 +39,7 @@ export interface LocalSong {
   text: string;
   databaseId: string;
   databaseTitle: string;
-  words:string[];
+  words: string[];
 }
 
 export interface LocalArtist {
@@ -50,7 +50,7 @@ export interface LocalArtist {
   databaseTitle: string;
   letter: string;
   letterId: string;
-  words:string[];
+  words: string[];
 }
 
 export interface LocalLetter {
@@ -78,6 +78,11 @@ export interface LocalRecentSong extends LocalRecentCommon {
 export interface LocalRecentArtist extends LocalRecentCommon {
   type: "artist";
   artist: LocalArtist;
+}
+
+export interface AppSettings {
+  showAllArtists: boolean;
+  useDarkTheme: boolean;
 }
 
 export type LocalRecentObject = LocalRecentSong | LocalRecentArtist;

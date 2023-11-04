@@ -25,7 +25,6 @@ code {
 }
 
 .song-chord {
-  color: blue;
   font-weight: bold;
   margin-right: 3px;
 }
@@ -37,8 +36,4 @@ code {
 
 .song-chords-group {
   display: flex;
-}
-
-.selected-transpose {
-  color: blue;
 }

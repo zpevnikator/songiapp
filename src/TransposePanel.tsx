@@ -1,8 +1,9 @@
-import { Box, IconButton, Paper } from "@mui/material";
+import { Box, IconButton, Paper, useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { TONE_BASE_NAMES, TONE_HEIGHTS } from "./chordTools";
 
 export default function TransposePanel({ tone, onChange, onClose }) {
+  const theme = useTheme();
   return (
     <Paper
       style={{
@@ -18,7 +19,11 @@ export default function TransposePanel({ tone, onChange, onClose }) {
       {TONE_BASE_NAMES.map((name) => (
         <IconButton onClick={() => onChange(TONE_HEIGHTS[name])}>
           <span
-            className={tone == TONE_HEIGHTS[name] ? "selected-transpose" : ""}
+            style={
+              tone == TONE_HEIGHTS[name]
+                ? { color: theme.palette.primary.main }
+                : {}
+            }
           >
             {name}
           </span>

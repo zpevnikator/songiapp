@@ -13,6 +13,8 @@ import ByArtistListPage from "./ByArtistListPage";
 import SongPage from "./SongPage";
 import SearchPage from "./SearchPage";
 import SettingsPage from "./SettingsPage";
+import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import SettingsProvider, { useSettings } from "./SettingsProvider";
 
 const queryClient = new QueryClient();
 
@@ -47,12 +49,38 @@ const router = createHashRouter([
   },
 ]);
 
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+  },
+});
+
+const lighTheme = createTheme({
+  palette: {
+    mode: "light",
+  },
+});
+
+function CurrentThemeProvider({ children }) {
+  const settings = useSettings();
+  return (
+    <ThemeProvider theme={settings.useDarkTheme ? darkTheme : lighTheme}>
+      {children}
+    </ThemeProvider>
+  );
+}
+
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <SettingsProvider>
+      <CurrentThemeProvider>
+        <CssBaseline />
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </CurrentThemeProvider>
+    </SettingsProvider>
   </React.StrictMode>
 );
 

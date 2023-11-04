@@ -10,6 +10,7 @@ import {
   IconButton,
   List,
   Paper,
+  useTheme,
 } from "@mui/material";
 import { GroupedLetter, LocalArtist, LocalLetter } from "./types";
 import { Link } from "react-router-dom";
@@ -17,17 +18,17 @@ import ArtistListItem from "./ArtistListItem";
 import BigListView from "./BigListView";
 import { useCallback, useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { showAllArtistsKey } from "./SettingsPage";
+import { useSettings } from "./SettingsProvider";
 
 const startLetterKey = "artistsStartLetter";
 
 async function loadArtistsData(
   letter: string | null,
-  showAll: boolean
+  showAllArtists: boolean
 ): Promise<[GroupedLetter[], LocalArtist[]]> {
   const letters = await findActiveLetters();
 
-  if (showAll) {
+  if (showAllArtists) {
     return [letters, await findArtists()];
   }
 
@@ -47,6 +48,8 @@ function LetterList(props: {
   letters: GroupedLetter[];
   onSetLetter?: Function;
 }) {
+  const theme = useTheme();
+
   return (
     <Paper
       sx={{
@@ -64,10 +67,10 @@ function LetterList(props: {
           }}
         >
           <span
-            className={
+            style={
               props.letter == x.letter || (props.letter == null && index == 0)
-                ? "selected-transpose"
-                : ""
+                ? { color: theme.palette.primary.main }
+                : {}
             }
           >
             {x.letter}
@@ -83,11 +86,11 @@ export default function ArtistListPage() {
     localStorage.getItem(startLetterKey)
   );
 
-  const showAll = localStorage.getItem(showAllArtistsKey) == "1";
+  const { showAllArtists } = useSettings();
 
   const query = useQuery<[GroupedLetter[], LocalArtist[]]>({
     queryKey: ["artist-data", letter || "__no_selected__"],
-    queryFn: () => loadArtistsData(letter, showAll),
+    queryFn: () => loadArtistsData(letter, showAllArtists),
     networkMode: "always",
   });
 
@@ -95,7 +98,7 @@ export default function ArtistListPage() {
   const extractTitle = useCallback((artist) => artist.name, []);
 
   useEffect(() => {
-    if (query.data && letter && !showAll) {
+    if (query.data && letter && !showAllArtists) {
       if (!query.data[0].find((x) => x.letter == letter)) {
         // if does not exist in active DBs
         setLetter(null);
@@ -131,7 +134,7 @@ export default function ArtistListPage() {
               zIndex: 100,
             }}
           >
-            {!showAll && (
+            {!showAllArtists && (
               <LetterList
                 letters={query.data[0]}
                 letter={letter}
@@ -143,7 +146,7 @@ export default function ArtistListPage() {
             )}
           </Box>
           <BigListView
-            disableNavigation={!showAll}
+            disableNavigation={!showAllArtists}
             array={query.data[1]}
             factory={(artist, showIcon) => (
               <ArtistListItem
@@ -155,7 +158,7 @@ export default function ArtistListPage() {
             extractKey={extractKey}
             extractTitle={extractTitle}
             prefix={
-              showAll ? undefined : (
+              showAllArtists ? undefined : (
                 <Box sx={{ visibility: "hidden" }}>
                   <LetterList letters={query.data[0]} letter={letter} />
                 </Box>

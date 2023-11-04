@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
 import { addRecentSong, getSong } from "./localdb";
-import { Alert, CircularProgress, Typography } from "@mui/material";
+import { Alert, CircularProgress, Typography, useTheme } from "@mui/material";
 import { LocalSong } from "./types";
 import { useParams } from "react-router-dom";
 import SongFormatter from "./SongFormatter";
@@ -56,6 +56,8 @@ export default function SongPage() {
     };
   }, []);
 
+  const theme = useTheme();
+
   return (
     <PageLayout
       title={query.data?.title ?? "Loading..."}
@@ -73,7 +75,7 @@ export default function SongPage() {
         <Alert severity="error">{query.error.message}</Alert>
       ) : (
         <Typography sx={{ m: 1 }}>
-          {new SongFormatter(transposedText).format()}
+          {new SongFormatter(transposedText, theme.palette.primary.main).format()}
         </Typography>
       )}
       {showTranspose && (
