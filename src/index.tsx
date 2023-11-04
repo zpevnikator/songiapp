@@ -12,6 +12,7 @@ import ArtistListPage from "./ArtistListPage";
 import ByArtistListPage from "./ByArtistListPage";
 import SongPage from "./SongPage";
 import SearchPage from "./SearchPage";
+import SettingsPage from "./SettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,10 @@ const router = createHashRouter([
   {
     path: "/search",
     element: <SearchPage />,
+  },
+  {
+    path: "/settings",
+    element: <SettingsPage />,
   },
   {
     path: "/by-artist/:artistid",

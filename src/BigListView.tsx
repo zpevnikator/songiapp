@@ -12,16 +12,8 @@ export default function BigListView<T>(props: {
   extractTitle: (item: T) => any;
   prefix?: JSX.Element;
   disableNavigation?: boolean;
-  onSwitchToFilter?: Function;
 }) {
-  const {
-    array,
-    factory,
-    extractKey,
-    extractTitle,
-    disableNavigation,
-    onSwitchToFilter,
-  } = props;
+  const { array, factory, extractKey, extractTitle, disableNavigation } = props;
 
   const [visibleNavigation, setVisibleMavigation] = useState(false);
 
@@ -123,28 +115,21 @@ export default function BigListView<T>(props: {
             </IconButton>
           ))}
           <Box sx={{ flexGrow: 1 }} />
-          {onSwitchToFilter && (
-            <IconButton onClick={() => onSwitchToFilter()}>
-              <SearchIcon />
-            </IconButton>
-          )}
           <IconButton onClick={() => setVisibleMavigation(false)}>
             <CloseIcon />
           </IconButton>
         </Paper>
       )}
 
-      {!visibleNavigation &&
-        (array.length > 100 || onSwitchToFilter) &&
-        !disableNavigation && (
-          <Fab
-            color="primary"
-            style={{ position: "fixed", bottom: 40, right: 20 }}
-            onClick={() => setVisibleMavigation(true)}
-          >
-            <NavigationIcon sx={{ mr: 1 }} />
-          </Fab>
-        )}
+      {!visibleNavigation && array.length > 100 && !disableNavigation && (
+        <Fab
+          color="primary"
+          style={{ position: "fixed", bottom: 40, right: 20 }}
+          onClick={() => setVisibleMavigation(true)}
+        >
+          <NavigationIcon sx={{ mr: 1 }} />
+        </Fab>
+      )}
     </>
   );
 }

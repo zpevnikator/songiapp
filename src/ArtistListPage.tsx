@@ -17,15 +17,17 @@ import ArtistListItem from "./ArtistListItem";
 import BigListView from "./BigListView";
 import { useCallback, useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import { showAllArtistsKey } from "./SettingsPage";
 
 const startLetterKey = "artistsStartLetter";
 
 async function loadArtistsData(
-  letter: string | null
+  letter: string | null,
+  showAll: boolean
 ): Promise<[GroupedLetter[], LocalArtist[]]> {
   const letters = await findActiveLetters();
 
-  if (letter == "__all__") {
+  if (showAll) {
     return [letters, await findArtists()];
   }
 
@@ -72,10 +74,6 @@ function LetterList(props: {
           </span>
         </IconButton>
       ))}
-      <Box sx={{ flexGrow: 1 }} />
-      <Button variant="text" onClick={() => props.onSetLetter?.("__all__")}>
-        Show all
-      </Button>
     </Paper>
   );
 }
@@ -85,11 +83,11 @@ export default function ArtistListPage() {
     localStorage.getItem(startLetterKey)
   );
 
-  const showAll = letter == "__all__";
+  const showAll = localStorage.getItem(showAllArtistsKey) == "1";
 
   const query = useQuery<[GroupedLetter[], LocalArtist[]]>({
     queryKey: ["artist-data", letter || "__no_selected__"],
-    queryFn: () => loadArtistsData(letter),
+    queryFn: () => loadArtistsData(letter, showAll),
     networkMode: "always",
   });
 
@@ -97,7 +95,7 @@ export default function ArtistListPage() {
   const extractTitle = useCallback((artist) => artist.name, []);
 
   useEffect(() => {
-    if (query.data && letter && letter != "__all__") {
+    if (query.data && letter && !showAll) {
       if (!query.data[0].find((x) => x.letter == letter)) {
         // if does not exist in active DBs
         setLetter(null);
@@ -146,14 +144,6 @@ export default function ArtistListPage() {
           </Box>
           <BigListView
             disableNavigation={!showAll}
-            onSwitchToFilter={
-              showAll
-                ? () => {
-                    setLetter(null);
-                    localStorage.removeItem(startLetterKey);
-                  }
-                : undefined
-            }
             array={query.data[1]}
             factory={(artist, showIcon) => (
               <ArtistListItem

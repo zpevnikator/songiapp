@@ -27,6 +27,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CancelIcon from "@mui/icons-material/Cancel";
+import SettingsIcon from "@mui/icons-material/Settings";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import InstallAppSnackbar from "./InstallAppSnackbar";
 import _ from "lodash";
@@ -65,7 +66,7 @@ function PageLayout(props: PageLayoutProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const bottomNavigationUrls = ["/", "/databases", "/search"];
+  const bottomNavigationUrls = ["/", "/databases", "/search", "/settings"];
 
   return (
     <div>
@@ -191,6 +192,14 @@ function PageLayout(props: PageLayoutProps) {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/settings")}>
+                <ListItemIcon>
+                  <SettingsIcon />
+                </ListItemIcon>
+                <ListItemText primary="Settings" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
               <ListItemButton
                 onClick={() => {
                   if (window.confirm("Really delete all downloaded songs?")) {
@@ -240,6 +249,7 @@ function PageLayout(props: PageLayoutProps) {
           <BottomNavigationAction label="Artists" icon={<PeopleIcon />} />
           <BottomNavigationAction label="Databases" icon={<CloudIcon />} />
           <BottomNavigationAction label="Search" icon={<SearchIcon />} />
+          <BottomNavigationAction label="Settings" icon={<SettingsIcon />} />
         </BottomNavigation>
       </Paper>
 
