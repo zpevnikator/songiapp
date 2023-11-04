@@ -136,7 +136,7 @@ export default function DownloadPage() {
 
   return (
     <PageLayout title="Databases">
-      {isActivating || remoteDbQuery.isPending || localDbQuery.isPending ? (
+      {isActivating || localDbQuery.isPending ? (
         <CircularProgress />
       ) : remoteDbQuery.error ? (
         <Alert severity="error">{remoteDbQuery.error.message}</Alert>
@@ -145,7 +145,10 @@ export default function DownloadPage() {
       ) : (
         <List>
           {_.uniqBy(
-            [...localDbQuery.data, ...remoteDbQuery.data.databases],
+            [
+              ...localDbQuery.data,
+              ...(remoteDbQuery.data ? remoteDbQuery.data.databases : []),
+            ],
             (x) => x.id
           ).map((db) => (
             <DatabaseItem
