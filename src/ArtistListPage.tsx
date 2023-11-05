@@ -1,6 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
-import { findArtists, findArtistsByLetter, findActiveLetters } from "./localdb";
+import {
+  findArtists,
+  findArtistsByLetter,
+  findActiveLetters,
+  getDatabase,
+} from "./localdb";
 import {
   Alert,
   Box,
@@ -12,8 +17,13 @@ import {
   Paper,
   useTheme,
 } from "@mui/material";
-import { GroupedLetter, LocalArtist, LocalLetter } from "./types";
-import { Link } from "react-router-dom";
+import {
+  GroupedLetter,
+  LocalArtist,
+  LocalDatabase,
+  LocalLetter,
+} from "./types";
+import { Link, useParams } from "react-router-dom";
 import ArtistListItem from "./ArtistListItem";
 import BigListView from "./BigListView";
 import { useCallback, useEffect, useState } from "react";
@@ -24,23 +34,24 @@ const startLetterKey = "artistsStartLetter";
 
 async function loadArtistsData(
   letter: string | null,
-  showAllArtists: boolean
+  showAllArtists: boolean,
+  dbid?: string
 ): Promise<[GroupedLetter[], LocalArtist[]]> {
-  const letters = await findActiveLetters();
+  const letters = await findActiveLetters(dbid);
 
   if (showAllArtists) {
-    return [letters, await findArtists()];
+    return [letters, await findArtists(dbid)];
   }
 
   if (letter) {
-    return [letters, await findArtistsByLetter(letter)];
+    return [letters, await findArtistsByLetter(letter, dbid)];
   }
 
   if (letters.length > 0) {
-    return [letters, await findArtistsByLetter(letters[0].letter)];
+    return [letters, await findArtistsByLetter(letters[0].letter, dbid)];
   }
 
-  return [letters, await findArtists()];
+  return [letters, await findArtists(dbid)];
 }
 
 function LetterList(props: {
@@ -82,6 +93,8 @@ function LetterList(props: {
 }
 
 export default function ArtistListPage() {
+  const { dbid } = useParams();
+
   const [letter, setLetter] = useState<string | null>(
     localStorage.getItem(startLetterKey)
   );
@@ -89,8 +102,14 @@ export default function ArtistListPage() {
   const { showAllArtists } = useSettings();
 
   const query = useQuery<[GroupedLetter[], LocalArtist[]]>({
-    queryKey: ["artist-data", letter || "__no_selected__"],
-    queryFn: () => loadArtistsData(letter, showAllArtists),
+    queryKey: ["artist-data", letter || "__no_selected__", dbid],
+    queryFn: () => loadArtistsData(letter, showAllArtists, dbid),
+    networkMode: "always",
+  });
+
+  const dbQuery = useQuery<LocalDatabase | undefined>({
+    queryKey: ["selected-database", dbid],
+    queryFn: () => getDatabase(dbid ?? ""),
     networkMode: "always",
   });
 
@@ -108,7 +127,14 @@ export default function ArtistListPage() {
   }, [letter, query]);
 
   return (
-    <PageLayout title="Artists" showSearchLink>
+    <PageLayout
+      title={
+        dbQuery.data
+          ? `Artists (${dbQuery.data.title?.toLocaleLowerCase()})`
+          : "Artists"
+      }
+      showSearchLink
+    >
       {query.isPending ? (
         <CircularProgress />
       ) : query.error ? (

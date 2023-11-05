@@ -146,8 +146,8 @@ export async function deleteSongDb(db: SongDbListItem) {
   );
 }
 
-export async function findArtists(): Promise<LocalArtist[]> {
-  const activeDbs = await getActiveDatabaseIds();
+export async function findArtists(dbid?: string): Promise<LocalArtist[]> {
+  const activeDbs = dbid ? [dbid] : await getActiveDatabaseIds();
 
   return localeSortByKey(
     await locdb.artists.where("databaseId").anyOf(activeDbs).toArray(),
@@ -155,8 +155,10 @@ export async function findArtists(): Promise<LocalArtist[]> {
   );
 }
 
-export async function findActiveLetters(): Promise<GroupedLetter[]> {
-  const activeDbs = await getActiveDatabaseIds();
+export async function findActiveLetters(
+  dbid?: string
+): Promise<GroupedLetter[]> {
+  const activeDbs = dbid ? [dbid] : await getActiveDatabaseIds();
 
   const allLetters = await locdb.letters
     .where("databaseId")
@@ -176,9 +178,10 @@ export async function findActiveLetters(): Promise<GroupedLetter[]> {
 }
 
 export async function findArtistsByLetter(
-  letter: string
+  letter: string,
+  dbid?: string
 ): Promise<LocalArtist[]> {
-  const activeDbs = await getActiveDatabaseIds();
+  const activeDbs = dbid ? [dbid] : await getActiveDatabaseIds();
 
   return localeSortByKey(
     await locdb.artists
@@ -216,6 +219,12 @@ export async function getArtist(
   artistid: string
 ): Promise<LocalArtist | undefined> {
   return locdb.artists.get(artistid);
+}
+
+export async function getDatabase(
+  dbid: string
+): Promise<LocalDatabase | undefined> {
+  return locdb.databases.get(dbid);
 }
 
 export async function setLocalDbActive(dbid: string, isActive: boolean) {

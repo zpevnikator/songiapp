@@ -44,6 +44,10 @@ const router = createHashRouter([
     element: <SongPage />,
   },
   {
+    path: "/databases/:dbid",
+    element: <ArtistListPage />,
+  },
+  {
     path: "*",
     element: <ErrorPage />,
   },

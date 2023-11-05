@@ -9,13 +9,17 @@ import {
   IconButton,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
   Snackbar,
 } from "@mui/material";
 import CloudIcon from "@mui/icons-material/Cloud";
 import DownloadIcon from "@mui/icons-material/Download";
 import DeleteIcon from "@mui/icons-material/Delete";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   deleteSongDb,
   findDatabases,
@@ -25,6 +29,7 @@ import {
 import type { LocalDatabase, SongDbList, SongDbListItem } from "./types";
 import { getErrorMessage } from "./utils";
 import _ from "lodash";
+import { useNavigate } from "react-router-dom";
 
 function DatabaseItem(props: {
   db: SongDbListItem;
@@ -44,6 +49,11 @@ function DatabaseItem(props: {
   } = props;
 
   const localDb = localDatabases.find((x) => x.id == db.id);
+  const navigate = useNavigate();
+
+  const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
+    null
+  );
 
   return (
     <ListItem
@@ -55,13 +65,22 @@ function DatabaseItem(props: {
           ) : null
         ) : localDb ? (
           <IconButton
+            size="large"
+            aria-label="display more actions"
             edge="end"
-            aria-label="download"
-            onClick={() => deleteDatabase(db)}
+            color="inherit"
+            onClick={(e) => setMenuAnchorEl(e?.currentTarget)}
           >
-            <DeleteIcon />
+            <MoreVertIcon />
           </IconButton>
         ) : (
+          // <IconButton
+          //   edge="end"
+          //   aria-label="download"
+          //   onClick={() => deleteDatabase(db)}
+          // >
+          //   <DeleteIcon />
+          // </IconButton>
           <IconButton
             edge="end"
             aria-label="download"
@@ -93,6 +112,35 @@ function DatabaseItem(props: {
             : `${db.description} (${db.size} songs)`
         }
       />
+
+      <Menu
+        id="basic-menu"
+        anchorEl={menuAnchorEl}
+        open={!!menuAnchorEl}
+        onClose={() => setMenuAnchorEl(null)}
+        MenuListProps={{
+          "aria-labelledby": "basic-button",
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            if (window.confirm(`Really delete database ${db.title}?`)) {
+              deleteDatabase(db);
+            }
+            setMenuAnchorEl(null);
+          }}
+        >
+          Delete
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setMenuAnchorEl(null);
+            navigate(`/databases/${encodeURIComponent(db.id)}`);
+          }}
+        >
+          Show artists
+        </MenuItem>
+      </Menu>
     </ListItem>
   );
 }
