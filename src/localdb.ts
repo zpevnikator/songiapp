@@ -130,6 +130,33 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
   );
 }
 
+export async function upgradeAllDatabases() {
+  const dbs = await locdb.databases.toArray();
+  const data = await Promise.all(
+    dbs.map((db) =>
+      fetch(db.url).then((res) => res.json() as Promise<SongDatabase>)
+    )
+  );
+
+  await locdb.transaction(
+    "rw",
+    locdb.songs,
+    locdb.artists,
+    locdb.databases,
+    locdb.letters,
+    async () => {
+      await locdb.songs.clear();
+      await locdb.artists.clear();
+      await locdb.databases.clear();
+      await locdb.letters.clear();
+
+      for (const item of _.zip(dbs, data)) {
+        await saveSongDb(item[0]!, item[1]!);
+      }
+    }
+  );
+}
+
 export async function deleteSongDb(db: SongDbListItem) {
   await locdb.transaction(
     "rw",

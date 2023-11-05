@@ -25,6 +25,7 @@ import {
   findDatabases,
   saveSongDb,
   setLocalDbActive,
+  upgradeAllDatabases,
 } from "./localdb";
 import type { LocalDatabase, SongDbList, SongDbListItem } from "./types";
 import { getErrorMessage } from "./utils";
@@ -149,7 +150,7 @@ export default function DownloadPage() {
   const [loadingDatabases, setLoadingDatabases] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [localDbToken, setLocalDbToken] = useState(0);
-  const [isActivating, setIsActivating] = useState(false);
+  const [isWorking, setIsWorking] = useState(false);
 
   const remoteDbQuery = useQuery<SongDbList>({
     queryKey: ["remoteDatabases"],
@@ -184,9 +185,28 @@ export default function DownloadPage() {
     setLocalDbToken((x) => x + 1);
   }
 
+  async function upgradeAll() {
+    setIsWorking(true);
+    await upgradeAllDatabases();
+    setLocalDbToken((x) => x + 1);
+    setIsWorking(false);
+  }
+
   return (
-    <PageLayout title="Databases">
-      {isActivating || localDbQuery.isPending ? (
+    <PageLayout
+      title="Databases"
+      menuItems={
+        isWorking
+          ? []
+          : [
+              {
+                text: "Upgrade all",
+                onClick: upgradeAll,
+              },
+            ]
+      }
+    >
+      {isWorking || localDbQuery.isPending ? (
         <CircularProgress />
       ) : remoteDbQuery.error ? (
         <Alert severity="error">{remoteDbQuery.error.message}</Alert>
@@ -210,10 +230,10 @@ export default function DownloadPage() {
               loadingDatabases={loadingDatabases}
               setActiveDb={async (dbid, value) => {
                 try {
-                  setIsActivating(true);
+                  setIsWorking(true);
                   await setLocalDbActive(db.id, value);
                 } finally {
-                  setIsActivating(false);
+                  setIsWorking(false);
                   setLocalDbToken((x) => x + 1);
                 }
               }}
