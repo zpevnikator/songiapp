@@ -1,18 +1,46 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
 import { addRecentSong, getSong } from "./localdb";
-import { Alert, CircularProgress, Typography, useTheme } from "@mui/material";
+import {
+  Alert,
+  CircularProgress,
+  Grid,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { LocalSong } from "./types";
 import { useParams } from "react-router-dom";
 import SongFormatter from "./SongFormatter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import TransposePanel from "./TransposePanel";
 import { getBaseTone, transposeText } from "./chordTools";
+import LayoutPanel, { LayoutOptions } from "./LayoutPanel";
+import _ from "lodash";
+
+function divideText(text: string, columns: number): string[] {
+  if (columns == 1) {
+    return [text];
+  }
+  const lines = text.split("\n");
+
+  return _.range(0, columns).map((index) =>
+    lines
+      .slice(
+        Math.round((lines.length / columns) * index),
+        index == columns - 1
+          ? undefined
+          : Math.round((lines.length / columns) * (index + 1))
+      )
+      .join("\n")
+  );
+}
 
 export default function SongPage() {
   const { songid } = useParams();
 
   const wakeLockRef = useRef<any>(null);
+
+  const [layout, setLayout] = useState<LayoutOptions>({ columns: 1 });
 
   const query = useQuery<LocalSong | undefined>({
     queryKey: ["song", songid],
@@ -20,7 +48,9 @@ export default function SongPage() {
     networkMode: "always",
   });
 
-  const [showTranspose, setShowTranspose] = useState(false);
+  const [toolPanel, setToolPanel] = useState<"transpose" | "layout" | null>(
+    null
+  );
   const baseTone = useMemo(
     () => getBaseTone(query.data?.text),
     [query.data?.text]
@@ -32,6 +62,10 @@ export default function SongPage() {
         ? transposeText(query.data?.text ?? "", newBaseTone - baseTone)
         : query.data?.text,
     [query.data?.text, newBaseTone, baseTone]
+  );
+  const textColumns = useMemo(
+    () => divideText(transposedText ?? "", layout.columns),
+    [transposedText, layout.columns]
   );
 
   useEffect(() => {
@@ -65,7 +99,11 @@ export default function SongPage() {
       menuItems={[
         {
           text: "Transpose",
-          onClick: () => setShowTranspose(true),
+          onClick: () => setToolPanel("transpose"),
+        },
+        {
+          text: "Layout",
+          onClick: () => setToolPanel("layout"),
         },
       ]}
     >
@@ -74,15 +112,31 @@ export default function SongPage() {
       ) : query.error ? (
         <Alert severity="error">{query.error.message}</Alert>
       ) : (
-        <Typography sx={{ m: 1 }}>
-          {new SongFormatter(transposedText, theme.palette.primary.main).format()}
-        </Typography>
+        <Grid container>
+          {textColumns.map((textColumn, index) => (
+            <Grid item xs={12 / layout.columns} key={index}>
+              <Typography sx={{ m: 1 }}>
+                {new SongFormatter(
+                  textColumn,
+                  theme.palette.primary.main
+                ).format()}
+              </Typography>
+            </Grid>
+          ))}
+        </Grid>
       )}
-      {showTranspose && (
+      {toolPanel == "transpose" && (
         <TransposePanel
           tone={newBaseTone ?? baseTone}
           onChange={setNewBaseTone}
-          onClose={() => setShowTranspose(false)}
+          onClose={() => setToolPanel(null)}
+        />
+      )}
+      {toolPanel == "layout" && (
+        <LayoutPanel
+          value={layout}
+          onChange={setLayout}
+          onClose={() => setToolPanel(null)}
         />
       )}
     </PageLayout>
