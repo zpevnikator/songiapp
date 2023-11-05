@@ -74,7 +74,7 @@ export default function SearchPage() {
         (recentsQuery.data?.length ?? 0) > 0 ? (
           <RecentObjectList list={recentsQuery.data!} />
         ) : (
-          <Box sx={{ m: 1 }}>Please specify some search criteria</Box>
+          <Box sx={{ m: 1 }}>Please specify some search criteria. Each searched word must contain at least two letters, single letters and numbers are ignored.</Box>
         )
       ) : searchQuery.data.artists.length == 0 &&
         searchQuery.data.songs.length == 0 ? (

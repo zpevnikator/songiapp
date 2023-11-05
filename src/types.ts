@@ -39,7 +39,8 @@ export interface LocalSong {
   text: string;
   databaseId: string;
   databaseTitle: string;
-  words: string[];
+  titleWords: string[];
+  textWords: string[];
 }
 
 export interface LocalArtist {
@@ -50,7 +51,7 @@ export interface LocalArtist {
   databaseTitle: string;
   letter: string;
   letterId: string;
-  words: string[];
+  nameWords: string[];
 }
 
 export interface LocalLetter {

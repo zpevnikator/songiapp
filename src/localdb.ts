@@ -11,7 +11,6 @@ import type {
 } from "./types";
 import _ from "lodash";
 import {
-  compileSearchCriteria,
   getFirstLetter,
   localeSortByKey,
   removeDiacritics,
@@ -29,10 +28,10 @@ class LocalDb extends Dexie {
   public constructor() {
     super("LocalDb");
 
-    this.version(1).stores({
-      songs: "id,artistId,databaseId,*words",
+    this.version(2).stores({
+      songs: "id,artistId,databaseId,*titleWords,*textWords",
       databases: "id,isActive",
-      artists: "id,artistId,databaseId,letterId,*words",
+      artists: "id,artistId,databaseId,letterId,*nameWords",
       recents: "id",
       letters: "id,letter,databaseId",
     });
@@ -47,7 +46,7 @@ if (localStorage.getItem("deleteLocalDatabase") == "songiapp") {
   document.location.reload();
 }
 
-function getSongWords(...texts: string[]): string[] {
+function tokenize(...texts: string[]): string[] {
   const res = new Set<string>();
 
   for (const text of texts) {
@@ -56,8 +55,8 @@ function getSongWords(...texts: string[]): string[] {
     )
       .toLocaleLowerCase()
       .split(/[\s\-\(\)\.\,\;\!\?\"\'\/\+\*\&]/)) {
-      const trimmed = word.replace(/[^a-z0-9]/g, "").trim();
-      if (trimmed) {
+      const trimmed = word.replace(/[^a-z]/g, "").trim();
+      if (trimmed.length >= 2) {
         res.add(trimmed);
       }
     }
@@ -86,7 +85,8 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
             id: `${db.id}-${song.id}`,
             artistId: `${db.id}-${song.artistId}`,
             isActive: 1,
-            words: getSongWords(song.title, song.text),
+            textWords: tokenize(song.text),
+            titleWords: tokenize(song.text),
           })),
           "id"
         )
@@ -102,7 +102,7 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
           isActive: 1,
           letter: getFirstLetter(artist.name),
           letterId: `${db.id}-${getFirstLetter(artist.name)}`,
-          words: getSongWords(artist.name),
+          nameWords: tokenize(artist.name),
         })),
         "id"
       );
@@ -267,7 +267,9 @@ export interface LocalDbSearchResult {
 export async function searchLocalDb(
   criteria: string
 ): Promise<LocalDbSearchResult> {
-  const tokens = compileSearchCriteria(criteria);
+  const tokens = tokenize(criteria);
+
+  const LIMIT = 100;
 
   if (!tokens.length) {
     return {
@@ -279,37 +281,72 @@ export async function searchLocalDb(
 
   const activeDbs = await getActiveDatabaseIds();
 
-  const songs = await locdb.songs
-    .where("words")
-    .startsWith(_.maxBy(tokens, (x) => x.length)!)
-    .filter(
-      (song) =>
-        activeDbs.includes(song.databaseId) &&
-        tokens.every((token) =>
-          song.words.find((word) => word.startsWith(token))
-        )
-    )
-    .distinct()
-    .limit(100)
-    .toArray();
-
   const artists = await locdb.artists
-    .where("words")
+    .where("nameWords")
     .startsWith(_.maxBy(tokens, (x) => x.length)!)
     .filter(
       (artist) =>
         activeDbs.includes(artist.databaseId) &&
         tokens.every((token) =>
-          artist.words.find((word) => word.startsWith(token))
+          artist.nameWords.find((word) => word.startsWith(token))
         )
     )
     .distinct()
-    .limit(100)
+    .limit(LIMIT)
+    .toArray();
+
+  if (artists.length >= LIMIT) {
+    return {
+      searchDone: true,
+      songs: [],
+      artists,
+    };
+  }
+
+  const songsByTitle = await locdb.songs
+    .where("titleWords")
+    .startsWith(_.maxBy(tokens, (x) => x.length)!)
+    .filter(
+      (song) =>
+        activeDbs.includes(song.databaseId) &&
+        tokens.every((token) =>
+          song.titleWords.find((word) => word.startsWith(token))
+        )
+    )
+    .distinct()
+    .limit(LIMIT - artists.length)
+    .toArray();
+
+  if (artists.length + songsByTitle.length >= LIMIT) {
+    return {
+      searchDone: true,
+      songs: songsByTitle,
+      artists,
+    };
+  }
+
+  const songsByText = await locdb.songs
+    .where("textWords")
+    .startsWith(_.maxBy(tokens, (x) => x.length)!)
+    .filter(
+      (song) =>
+        activeDbs.includes(song.databaseId) &&
+        tokens.every(
+          (token) =>
+            song.titleWords.find((word) => word.startsWith(token)) ||
+            song.textWords.find((word) => word.startsWith(token))
+        )
+    )
+    .distinct()
+    .limit(LIMIT - artists.length - songsByTitle.length)
     .toArray();
 
   return {
     searchDone: true,
-    songs,
-    artists,
+    songs: [
+      ...localeSortByKey(songsByTitle, "title"),
+      ...localeSortByKey(songsByText, "title"),
+    ],
+    artists: localeSortByKey(artists, "name"),
   };
 }

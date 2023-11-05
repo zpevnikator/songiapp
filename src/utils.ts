@@ -13,15 +13,15 @@ export function removeDiacritics(s: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-export function compileSearchCriteria(criteria: string): string[] {
-  const tokens = _.compact(
-    removeDiacritics(criteria ?? "")
-      .toLowerCase()
-      .split(/\s/)
-      .map((x) => x.trim())
-  );
-  return tokens;
-}
+// export function compileSearchCriteria(criteria: string): string[] {
+//   const tokens = _.compact(
+//     removeDiacritics(criteria ?? "")
+//       .toLowerCase()
+//       .split(/\s/)
+//       .map((x) => x.trim())
+//   );
+//   return tokens;
+// }
 
 export function localeSortByKey(array: any[], field: string) {
   return array.sort((a, b) =>
