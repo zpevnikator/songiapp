@@ -86,7 +86,7 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
             artistId: `${db.id}-${song.artistId}`,
             isActive: 1,
             textWords: tokenize(song.text),
-            titleWords: tokenize(song.text),
+            titleWords: tokenize(song.title),
           })),
           "id"
         )
