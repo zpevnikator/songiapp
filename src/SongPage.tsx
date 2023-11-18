@@ -3,6 +3,9 @@ import PageLayout from "./PageLayout";
 import { addRecentSong, getSong } from "./localdb";
 import {
   Alert,
+  Box,
+  Button,
+  Checkbox,
   CircularProgress,
   Grid,
   Typography,
@@ -56,12 +59,15 @@ export default function SongPage() {
     [query.data?.text]
   );
   const [newBaseTone, setNewBaseTone] = useState(null);
+  const [transpDiff, setTranspDiff] = useState(0);
   const transposedText = useMemo(
     () =>
       newBaseTone != null && baseTone != null
         ? transposeText(query.data?.text ?? "", newBaseTone - baseTone)
+        : transpDiff
+        ? transposeText(query.data?.text ?? "", transpDiff)
         : query.data?.text,
-    [query.data?.text, newBaseTone, baseTone]
+    [query.data?.text, newBaseTone, baseTone, transpDiff]
   );
   const textColumns = useMemo(
     () => divideText(transposedText ?? "", layout.columns),
@@ -96,16 +102,93 @@ export default function SongPage() {
     <PageLayout
       title={query.data?.title ?? "Loading..."}
       showBack
-      menuItems={[
-        {
-          text: "Transpose",
-          onClick: () => setToolPanel("transpose"),
-        },
-        {
-          text: "Layout",
-          onClick: () => setToolPanel("layout"),
-        },
-      ]}
+      rightDrawerContent={
+        <>
+          <Typography variant="h5" sx={{ m: 2 }}>
+            Tranpose
+          </Typography>
+          <Box>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              onClick={() => setTranspDiff(0)}
+            >
+              Reset
+            </Button>
+          </Box>
+          <Box>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              onClick={() => setTranspDiff((x) => x - 1)}
+            >
+              -1
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              onClick={() => setTranspDiff((x) => x + 1)}
+            >
+              +1
+            </Button>
+          </Box>
+          <Box>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              onClick={() => setTranspDiff((x) => x - 2)}
+            >
+              -2
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              onClick={() => setTranspDiff((x) => x + 2)}
+            >
+              +2
+            </Button>
+          </Box>
+          <Typography variant="h5" sx={{ m: 2 }}>
+            Layout
+          </Typography>
+          <div>
+            <Checkbox
+              checked={layout.columns == 1}
+              onChange={(e) => setLayout({ ...layout, columns: 1 })}
+            />
+            1 column
+          </div>
+          <div>
+            <Checkbox
+              checked={layout.columns == 2}
+              onChange={(e) => setLayout({ ...layout, columns: 2 })}
+            />
+            2 columns
+          </div>
+          <div>
+            <Checkbox
+              checked={layout.columns == 3}
+              onChange={(e) => setLayout({ ...layout, columns: 3 })}
+            />
+            3 columns
+          </div>
+        </>
+      }
+      // menuItems={[
+      //   {
+      //     text: "Transpose",
+      //     onClick: () => setToolPanel("transpose"),
+      //   },
+      //   {
+      //     text: "Layout",
+      //     onClick: () => setToolPanel("layout"),
+      //   },
+      // ]}
     >
       {query.isPending ? (
         <CircularProgress />

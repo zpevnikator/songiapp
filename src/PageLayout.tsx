@@ -41,6 +41,7 @@ interface PageLayoutProps {
   searchText?: string;
   onChangeSearchText?: (value: string) => void;
   menuItems?: MenuItemDefinition[];
+  rightDrawerContent?: any;
 }
 
 interface MenuItemDefinition {
@@ -56,6 +57,7 @@ function PageLayout(props: PageLayoutProps) {
     menuItems = null,
     showSearchLink = false,
     searchText = "",
+    rightDrawerContent = null,
     onChangeSearchText,
   } = props;
 
@@ -63,7 +65,8 @@ function PageLayout(props: PageLayoutProps) {
     null
   );
 
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [leftDrawerOpen, setLeftDrawerOpen] = useState(false);
+  const [rightDrawerOpen, setRightDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const bottomNavigationUrls = ["/", "/databases", "/search", "/settings"];
@@ -78,7 +81,7 @@ function PageLayout(props: PageLayoutProps) {
             color="inherit"
             aria-label="menu"
             sx={{ mr: 2 }}
-            onClick={() => (showBack ? navigate(-1) : setDrawerOpen(true))}
+            onClick={() => (showBack ? navigate(-1) : setLeftDrawerOpen(true))}
           >
             {showBack ? <ArrowBackIcon /> : <MenuIcon />}
           </IconButton>
@@ -114,6 +117,18 @@ function PageLayout(props: PageLayoutProps) {
               onClick={(e) => setMenuAnchorEl(e?.currentTarget)}
             >
               <MoreVertIcon />
+            </IconButton>
+          )}
+
+          {rightDrawerContent && (
+            <IconButton
+              size="large"
+              aria-label="display more actions"
+              edge="end"
+              color="inherit"
+              onClick={() => setRightDrawerOpen(true)}
+            >
+              <SettingsIcon />
             </IconButton>
           )}
 
@@ -157,14 +172,14 @@ function PageLayout(props: PageLayoutProps) {
 
       <Drawer
         anchor="left"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
+        open={leftDrawerOpen}
+        onClose={() => setLeftDrawerOpen(false)}
       >
         <Box
           sx={{ width: 250 }}
           role="presentation"
-          onClick={() => setDrawerOpen(false)}
-          onKeyDown={() => setDrawerOpen(false)}
+          onClick={() => setLeftDrawerOpen(false)}
+          onKeyDown={() => setLeftDrawerOpen(false)}
         >
           <List>
             <ListItem disablePadding>
@@ -230,6 +245,22 @@ function PageLayout(props: PageLayoutProps) {
           </List> */}
         </Box>
       </Drawer>
+      {rightDrawerContent && (
+        <Drawer
+          anchor="right"
+          open={rightDrawerOpen}
+          onClose={() => setRightDrawerOpen(false)}
+        >
+          <Box
+            sx={{ width: 250 }}
+            role="presentation"
+            // onClick={() => setRightDrawerOpen(false)}
+            // onKeyDown={() => setRightDrawerOpen(false)}
+          >
+            {rightDrawerContent}
+          </Box>
+        </Drawer>
+      )}
       <Box sx={{ pb: 7, pt: 8 }}>{children}</Box>
 
       <Paper

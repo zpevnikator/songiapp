@@ -30,6 +30,9 @@ export function localeSortByKey(array: any[], field: string) {
 }
 
 export function getFirstLetter(s: string) {
+  if (!s) {
+    return '*';
+  }
   const letter = removeDiacritics(s).trim()[0].toUpperCase();
   if (!letter.match(/[A-Z]/)) {
     return "*";
