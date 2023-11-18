@@ -20,6 +20,7 @@ import _ from "lodash";
 
 export interface LayoutOptions {
   columns: 1 | 2 | 3;
+  fontSize: number;
 }
 
 function divideText(text: string, columns: number): string[] {
@@ -45,7 +46,10 @@ export default function SongPage() {
 
   const wakeLockRef = useRef<any>(null);
 
-  const [layout, setLayout] = useState<LayoutOptions>({ columns: 1 });
+  const [layout, setLayout] = useState<LayoutOptions>({
+    columns: 1,
+    fontSize: 16,
+  });
 
   const query = useQuery<LocalSong | undefined>({
     queryKey: ["song", songid],
@@ -169,6 +173,31 @@ export default function SongPage() {
             />
             3 columns
           </div>
+          <Typography variant="h5" sx={{ m: 2 }}>
+            Font size
+          </Typography>
+          <Box>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              onClick={(e) =>
+                setLayout({ ...layout, fontSize: layout.fontSize - 1 })
+              }
+            >
+              -1
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              onClick={(e) =>
+                setLayout({ ...layout, fontSize: layout.fontSize + 1 })
+              }
+            >
+              +1
+            </Button>
+          </Box>
         </>
       }
     >
@@ -180,7 +209,7 @@ export default function SongPage() {
         <Grid container>
           {textColumns.map((textColumn, index) => (
             <Grid item xs={12 / layout.columns} key={index}>
-              <Typography sx={{ m: 1 }}>
+              <Typography sx={{ m: 1, fontSize: layout.fontSize }}>
                 {new SongFormatter(
                   textColumn,
                   theme.palette.primary.main
