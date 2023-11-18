@@ -26,7 +26,7 @@ class LocalDb extends Dexie {
   public letters!: Table<LocalLetter, string>;
 
   public constructor() {
-    super("LocalDb");
+    super("songiapp");
 
     this.version(2).stores({
       songs: "id,artistId,databaseId,*titleWords,*textWords",

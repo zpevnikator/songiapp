@@ -31,7 +31,11 @@ export function localeSortByKey(array: any[], field: string) {
 
 export function getFirstLetter(s: string) {
   const letter = removeDiacritics(s).trim()[0].toUpperCase();
-  return letter || "-";
+  if (!letter.match(/[A-Z]/)) {
+    return "*";
+  }
+
+  return letter;
 }
 
 export function removeHtmlTags(text: string) {
