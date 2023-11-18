@@ -15,10 +15,12 @@ import { LocalSong } from "./types";
 import { useParams } from "react-router-dom";
 import SongFormatter from "./SongFormatter";
 import { useEffect, useMemo, useRef, useState } from "react";
-import TransposePanel from "./TransposePanel";
 import { getBaseTone, transposeText } from "./chordTools";
-import LayoutPanel, { LayoutOptions } from "./LayoutPanel";
 import _ from "lodash";
+
+export interface LayoutOptions {
+  columns: 1 | 2 | 3;
+}
 
 function divideText(text: string, columns: number): string[] {
   if (columns == 1) {
@@ -51,23 +53,13 @@ export default function SongPage() {
     networkMode: "always",
   });
 
-  const [toolPanel, setToolPanel] = useState<"transpose" | "layout" | null>(
-    null
-  );
-  const baseTone = useMemo(
-    () => getBaseTone(query.data?.text),
-    [query.data?.text]
-  );
-  const [newBaseTone, setNewBaseTone] = useState(null);
   const [transpDiff, setTranspDiff] = useState(0);
   const transposedText = useMemo(
     () =>
-      newBaseTone != null && baseTone != null
-        ? transposeText(query.data?.text ?? "", newBaseTone - baseTone)
-        : transpDiff
+      transpDiff
         ? transposeText(query.data?.text ?? "", transpDiff)
         : query.data?.text,
-    [query.data?.text, newBaseTone, baseTone, transpDiff]
+    [query.data?.text, transpDiff]
   );
   const textColumns = useMemo(
     () => divideText(transposedText ?? "", layout.columns),
@@ -179,16 +171,6 @@ export default function SongPage() {
           </div>
         </>
       }
-      // menuItems={[
-      //   {
-      //     text: "Transpose",
-      //     onClick: () => setToolPanel("transpose"),
-      //   },
-      //   {
-      //     text: "Layout",
-      //     onClick: () => setToolPanel("layout"),
-      //   },
-      // ]}
     >
       {query.isPending ? (
         <CircularProgress />
@@ -207,20 +189,6 @@ export default function SongPage() {
             </Grid>
           ))}
         </Grid>
-      )}
-      {toolPanel == "transpose" && (
-        <TransposePanel
-          tone={newBaseTone ?? baseTone}
-          onChange={setNewBaseTone}
-          onClose={() => setToolPanel(null)}
-        />
-      )}
-      {toolPanel == "layout" && (
-        <LayoutPanel
-          value={layout}
-          onChange={setLayout}
-          onClose={() => setToolPanel(null)}
-        />
       )}
     </PageLayout>
   );
