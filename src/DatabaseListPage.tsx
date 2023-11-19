@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useEffect, useState } from "react";
 import PageLayout from "./PageLayout";
 import { useQuery } from "@tanstack/react-query";
@@ -18,9 +18,11 @@ import {
 } from "@mui/material";
 import CloudIcon from "@mui/icons-material/Cloud";
 import DownloadIcon from "@mui/icons-material/Download";
-import DeleteIcon from "@mui/icons-material/Delete";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import CheckIcon from "@mui/icons-material/Check";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
+  deleteAllDatabases,
   deleteSongDb,
   findDatabases,
   saveSongDb,
@@ -38,16 +40,22 @@ function DatabaseItem(props: {
   localDatabases: LocalDatabase[];
   deleteDatabase: (x: SongDbListItem) => void;
   downloadDatabase: (x: SongDbListItem) => void;
-  loadingDatabases: string[];
+  cancelWaiting: (x: SongDbListItem) => void;
+  isProcessed: boolean;
+  isWaiting: boolean;
+  isFinished: boolean;
   setActiveDb: (dbid: string, value: boolean) => void;
 }) {
   const {
     db,
     deleteDatabase,
     downloadDatabase,
-    loadingDatabases,
+    isProcessed,
+    isWaiting,
+    isFinished,
     localDatabases,
     setActiveDb,
+    cancelWaiting,
   } = props;
   const intl = useIntl();
 
@@ -62,10 +70,20 @@ function DatabaseItem(props: {
     <ListItem
       key={db.id}
       secondaryAction={
-        loadingDatabases.length > 0 ? (
-          loadingDatabases.includes(db.id) ? (
-            <CircularProgress />
-          ) : null
+        isProcessed ? (
+          <CircularProgress />
+        ) : isFinished ? (
+          <CheckIcon />
+        ) : isWaiting ? (
+          <IconButton
+            size="large"
+            aria-label="cancel"
+            edge="end"
+            color="inherit"
+            onClick={() => cancelWaiting(db)}
+          >
+            <HourglassEmptyIcon />
+          </IconButton>
         ) : localDb ? (
           <IconButton
             size="large"
@@ -170,11 +188,22 @@ function DatabaseItem(props: {
 }
 
 export default function DownloadPage() {
-  const [loadingDatabases, setLoadingDatabases] = useState<string[]>([]);
+  // const [loadingDatabases, setLoadingDatabases] = useState<string[]>([]);
+  const [processedDatabase, setProcessedDatabase] = useState<string | null>(
+    null
+  );
+  const [operationQueue, setOperationQueue] = useState<
+    { op: string; db: SongDbListItem }[]
+  >([]);
+  const [finishedDatabases, setFinishedDatabases] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [localDbToken, setLocalDbToken] = useState(0);
   const [isWorking, setIsWorking] = useState(false);
   const intl = useIntl();
+  const queueRef = useRef(operationQueue);
+  const processedRef = useRef(processedDatabase);
+  queueRef.current = operationQueue;
+  processedRef.current = processedDatabase;
 
   const remoteDbQuery = useQuery<SongDbList>({
     queryKey: ["remoteDatabases"],
@@ -190,28 +219,69 @@ export default function DownloadPage() {
     networkMode: "always",
   });
 
-  async function downloadDatabase(db: SongDbListItem) {
-    setLoadingDatabases((a) => [...a, db.id]);
-    try {
-      const dbData = await fetch(db.url).then((res) => res.json());
-      await saveSongDb(db, dbData);
-    } catch (err) {
-      setError(getErrorMessage(err));
+  async function processQueue() {
+    if (processedRef.current) {
+      return;
     }
-    setLoadingDatabases((a) => a.filter((x) => x != db.id));
-    setLocalDbToken((x) => x + 1);
+
+    const queueItem = queueRef.current[0];
+
+    if (!queueItem) {
+      setFinishedDatabases([]);
+      setLocalDbToken((x) => x + 1);
+      return;
+    }
+
+    setOperationQueue((x) => x.filter((y, i) => i > 0));
+    const { db, op } = queueItem;
+    setProcessedDatabase(db.id);
+    switch (op) {
+      case "download":
+        try {
+          const dbData = await fetch(db.url).then((res) => res.json());
+          await saveSongDb(db, dbData);
+        } catch (err) {
+          setError(getErrorMessage(err));
+        }
+        break;
+      case "delete":
+        try {
+          await deleteSongDb(db);
+        } catch (err) {
+          setError(getErrorMessage(err));
+        }
+        break;
+    }
+    setProcessedDatabase(null);
+    setFinishedDatabases((x) => [...x, db.id]);
+
+    setTimeout(processQueue, 10);
+  }
+
+  async function downloadDatabase(db: SongDbListItem) {
+    setOperationQueue((x) => [...x, { db, op: "download" }]);
+    setTimeout(processQueue, 10);
   }
 
   async function deleteDatabase(db: SongDbListItem) {
-    setLoadingDatabases((a) => [...a, db.id]);
-    await deleteSongDb(db);
-    setLoadingDatabases((a) => a.filter((x) => x != db.id));
-    setLocalDbToken((x) => x + 1);
+    setOperationQueue((x) => [...x, { db, op: "delete" }]);
+    setTimeout(processQueue, 10);
+  }
+
+  async function cancelWaiting(db: SongDbListItem) {
+    setOperationQueue((x) => x.filter((y) => y.db.id != db.id));
   }
 
   async function upgradeAll() {
     setIsWorking(true);
     await upgradeAllDatabases();
+    setLocalDbToken((x) => x + 1);
+    setIsWorking(false);
+  }
+
+  async function deleteAll() {
+    setIsWorking(true);
+    await deleteAllDatabases();
     setLocalDbToken((x) => x + 1);
     setIsWorking(false);
   }
@@ -232,6 +302,13 @@ export default function DownloadPage() {
                   defaultMessage: "Upgrade all",
                 }),
                 onClick: upgradeAll,
+              },
+              {
+                text: intl.formatMessage({
+                  id: "delete-all",
+                  defaultMessage: "Delete all",
+                }),
+                onClick: deleteAll,
               },
             ]
       }
@@ -257,7 +334,10 @@ export default function DownloadPage() {
               localDatabases={localDbQuery.data}
               deleteDatabase={deleteDatabase}
               downloadDatabase={downloadDatabase}
-              loadingDatabases={loadingDatabases}
+              cancelWaiting={cancelWaiting}
+              isProcessed={processedDatabase == db.id}
+              isFinished={finishedDatabases.includes(db.id)}
+              isWaiting={!!operationQueue.find((x) => x.db.id == db.id)}
               setActiveDb={async (dbid, value) => {
                 try {
                   setIsWorking(true);

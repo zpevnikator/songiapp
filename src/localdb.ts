@@ -130,6 +130,22 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
   );
 }
 
+export async function deleteAllDatabases() {
+  await locdb.transaction(
+    "rw",
+    locdb.songs,
+    locdb.artists,
+    locdb.databases,
+    locdb.letters,
+    async () => {
+      await locdb.songs.clear();
+      await locdb.artists.clear();
+      await locdb.databases.clear();
+      await locdb.letters.clear();
+    }
+  );
+}
+
 export async function upgradeAllDatabases() {
   const dbs = await locdb.databases.toArray();
   const data = await Promise.all(
