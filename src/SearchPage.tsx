@@ -8,6 +8,7 @@ import SongListItem from "./SongListItem";
 import _ from "lodash";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LocalRecentObject } from "./types";
+import { FormattedMessage } from "react-intl";
 
 function RecentObjectItem(props: { item: LocalRecentObject }) {
   const { item } = props;
@@ -74,12 +75,22 @@ export default function SearchPage() {
         (recentsQuery.data?.length ?? 0) > 0 ? (
           <RecentObjectList list={recentsQuery.data!} />
         ) : (
-          <Box sx={{ m: 1 }}>Please specify some search criteria. Each searched word must contain at least two letters, single letters and numbers are ignored.</Box>
+          <Box sx={{ m: 1 }}>
+            <FormattedMessage
+              id="specify-search-criteria"
+              defaultMessage="Please specify some search criteria. Each searched word must contain at least two letters, single letters and numbers are ignored."
+            />
+          </Box>
         )
       ) : searchQuery.data.artists.length == 0 &&
         searchQuery.data.songs.length == 0 ? (
         <>
-          <Box sx={{ m: 1 }}>No songs found</Box>
+          <Box sx={{ m: 1 }}>
+            <FormattedMessage
+              id="no-songs-found"
+              defaultMessage="No songs found"
+            />
+          </Box>
         </>
       ) : (
         <List>

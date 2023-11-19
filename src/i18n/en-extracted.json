@@ -1,0 +1,74 @@
+{
+  "app-is-offline": {
+    "defaultMessage": "SongiApp is prepared for offline usage, you can install it as normal app"
+  },
+  "artists": {
+    "defaultMessage": "Artists"
+  },
+  "artists.lower": {
+    "defaultMessage": "artists"
+  },
+  "columns": {
+    "defaultMessage": "Columns"
+  },
+  "databases": {
+    "defaultMessage": "Databases"
+  },
+  "delete-all-data": {
+    "defaultMessage": "Delete all data"
+  },
+  "delete-all-data.question": {
+    "defaultMessage": "Really delete all downloaded songs?"
+  },
+  "font-size": {
+    "defaultMessage": "Font size"
+  },
+  "go-to-database": {
+    "defaultMessage": "Go to Databases"
+  },
+  "go-to-home": {
+    "defaultMessage": "Go to Home"
+  },
+  "no-active-songs": {
+    "defaultMessage": "You have no active songs in your database. Please download some songs in \"Databases\" section. Only songs from checked databases are active."
+  },
+  "no-songs-found": {
+    "defaultMessage": "No songs found"
+  },
+  "page-not-exists": {
+    "defaultMessage": "Oops!! This page doesn't exist"
+  },
+  "really-delete-database.question": {
+    "defaultMessage": "Really delete database {db}?"
+  },
+  "reset": {
+    "defaultMessage": "Reset"
+  },
+  "search": {
+    "defaultMessage": "Vyhledat"
+  },
+  "settings": {
+    "defaultMessage": "Settings"
+  },
+  "show-all-artists": {
+    "defaultMessage": "Show all artists"
+  },
+  "show-all-artists.detail": {
+    "defaultMessage": "Don't show alphabet on Artists page. Can be much slower."
+  },
+  "songs.lower": {
+    "defaultMessage": "songs"
+  },
+  "specify-search-criteria": {
+    "defaultMessage": "Please specify some search criteria. Each searched word must contain at least two letters, single letters and numbers are ignored."
+  },
+  "transpose": {
+    "defaultMessage": "Tranpose"
+  },
+  "upgrade-all": {
+    "defaultMessage": "Upgrade all"
+  },
+  "use-dark-theme": {
+    "defaultMessage": "Use dark theme"
+  }
+}

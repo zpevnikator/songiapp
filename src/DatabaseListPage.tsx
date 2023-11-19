@@ -31,6 +31,7 @@ import type { LocalDatabase, SongDbList, SongDbListItem } from "./types";
 import { getErrorMessage } from "./utils";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
+import { useIntl } from "react-intl";
 
 function DatabaseItem(props: {
   db: SongDbListItem;
@@ -48,6 +49,7 @@ function DatabaseItem(props: {
     localDatabases,
     setActiveDb,
   } = props;
+  const intl = useIntl();
 
   const localDb = localDatabases.find((x) => x.id == db.id);
   const navigate = useNavigate();
@@ -109,8 +111,19 @@ function DatabaseItem(props: {
         primary={db.title}
         secondary={
           localDb
-            ? `${localDb.description} (${localDb.songCount} songs, ${localDb.artistCount} artists)`
-            : `${db.description} (${db.size} songs)`
+            ? `${localDb.description} (${
+                localDb.songCount
+              } ${intl.formatMessage({
+                id: "songs.lower",
+                defaultMessage: "songs",
+              })}, ${localDb.artistCount} ${intl.formatMessage({
+                id: "artists.lower",
+                defaultMessage: "artists",
+              })})`
+            : `${db.description} (${db.size} ${intl.formatMessage({
+                id: "songs.lower",
+                defaultMessage: "songs",
+              })})`
         }
       />
 
@@ -125,7 +138,17 @@ function DatabaseItem(props: {
       >
         <MenuItem
           onClick={() => {
-            if (window.confirm(`Really delete database ${db.title}?`)) {
+            if (
+              window.confirm(
+                intl.formatMessage(
+                  {
+                    id: "really-delete-database.question",
+                    defaultMessage: "Really delete database {db}?",
+                  },
+                  { db: db.title }
+                )
+              )
+            ) {
               deleteDatabase(db);
             }
             setMenuAnchorEl(null);
@@ -151,6 +174,7 @@ export default function DownloadPage() {
   const [error, setError] = useState<string | null>(null);
   const [localDbToken, setLocalDbToken] = useState(0);
   const [isWorking, setIsWorking] = useState(false);
+  const intl = useIntl();
 
   const remoteDbQuery = useQuery<SongDbList>({
     queryKey: ["remoteDatabases"],
@@ -194,13 +218,19 @@ export default function DownloadPage() {
 
   return (
     <PageLayout
-      title="Databases"
+      title={intl.formatMessage({
+        id: "databases",
+        defaultMessage: "Databases",
+      })}
       menuItems={
         isWorking
           ? []
           : [
               {
-                text: "Upgrade all",
+                text: intl.formatMessage({
+                  id: "upgrade-all",
+                  defaultMessage: "Upgrade all",
+                }),
                 onClick: upgradeAll,
               },
             ]

@@ -17,9 +17,10 @@ import SongFormatter from "./SongFormatter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getBaseTone, transposeText } from "./chordTools";
 import _ from "lodash";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export interface LayoutOptions {
-  columns: 1 | 2 | 3;
+  columns: number;
   fontSize: number;
 }
 
@@ -43,6 +44,7 @@ function divideText(text: string, columns: number): string[] {
 
 export default function SongPage() {
   const { songid } = useParams();
+  const intl = useIntl();
 
   const wakeLockRef = useRef<any>(null);
 
@@ -101,7 +103,7 @@ export default function SongPage() {
       rightDrawerContent={
         <>
           <Typography variant="h5" sx={{ m: 2 }}>
-            Tranpose
+            <FormattedMessage id="transpose" defaultMessage="Tranpose" />
           </Typography>
           <Box>
             <Button
@@ -110,7 +112,7 @@ export default function SongPage() {
               sx={{ m: 1 }}
               onClick={() => setTranspDiff(0)}
             >
-              Reset
+              <FormattedMessage id="reset" defaultMessage="Reset" />
             </Button>
           </Box>
           <Box>
@@ -150,31 +152,33 @@ export default function SongPage() {
             </Button>
           </Box>
           <Typography variant="h5" sx={{ m: 2 }}>
-            Layout
+            <FormattedMessage id="columns" defaultMessage="Columns" />
           </Typography>
-          <div>
-            <Checkbox
-              checked={layout.columns == 1}
-              onChange={(e) => setLayout({ ...layout, columns: 1 })}
-            />
-            1 column
-          </div>
-          <div>
-            <Checkbox
-              checked={layout.columns == 2}
-              onChange={(e) => setLayout({ ...layout, columns: 2 })}
-            />
-            2 columns
-          </div>
-          <div>
-            <Checkbox
-              checked={layout.columns == 3}
-              onChange={(e) => setLayout({ ...layout, columns: 3 })}
-            />
-            3 columns
-          </div>
+          <Box>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              disabled={layout.columns <= 1}
+              onClick={(e) =>
+                setLayout({ ...layout, columns: layout.columns - 1 })
+              }
+            >
+              -1
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              onClick={(e) =>
+                setLayout({ ...layout, columns: layout.columns + 1 })
+              }
+            >
+              +1
+            </Button>
+          </Box>
           <Typography variant="h5" sx={{ m: 2 }}>
-            Font size
+            <FormattedMessage id="font-size" defaultMessage="Font size" />
           </Typography>
           <Box>
             <Button

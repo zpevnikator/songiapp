@@ -1,6 +1,7 @@
 import { styled, alpha } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
+import { useIntl } from "react-intl";
 
 const SearchDiv = styled("div")(({ theme }) => ({
   position: "relative",
@@ -52,13 +53,18 @@ interface SearchFieldProps {
 }
 
 export default function SearchField(props: SearchFieldProps) {
+  const intl = useIntl();
+
   return (
     <SearchDiv>
       <SearchIconWrapper>
         <SearchIcon />
       </SearchIconWrapper>
       <StyledInputBase
-        placeholder="Search…"
+        placeholder={intl.formatMessage({
+          id: "search",
+          defaultMessage: "Vyhledat",
+        })}
         inputProps={{ "aria-label": "search" }}
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}

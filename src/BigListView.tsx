@@ -3,7 +3,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useMemo, useRef, useState } from "react";
 import { getFirstLetter } from "./utils";
 import NavigationIcon from "@mui/icons-material/Navigation";
-import SearchIcon from "@mui/icons-material/Search";
 
 export default function BigListView<T>(props: {
   array: T[];

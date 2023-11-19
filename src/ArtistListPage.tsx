@@ -29,6 +29,7 @@ import BigListView from "./BigListView";
 import { useCallback, useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useSettings } from "./SettingsProvider";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const startLetterKey = "artistsStartLetter";
 
@@ -94,6 +95,7 @@ function LetterList(props: {
 
 export default function ArtistListPage() {
   const { dbid } = useParams();
+  const intl = useIntl();
 
   const [letter, setLetter] = useState<string | null>(
     localStorage.getItem(startLetterKey)
@@ -130,8 +132,14 @@ export default function ArtistListPage() {
     <PageLayout
       title={
         dbQuery.data
-          ? `Artists (${dbQuery.data.title?.toLocaleLowerCase()})`
-          : "Artists"
+          ? `${intl.formatMessage({
+              id: "artists",
+              defaultMessage: "Artists",
+            })} (${dbQuery.data.title?.toLocaleLowerCase()})`
+          : intl.formatMessage({
+              id: "artists",
+              defaultMessage: "Artists",
+            })
       }
       showSearchLink
     >
@@ -142,12 +150,20 @@ export default function ArtistListPage() {
       ) : query.data[1].length == 0 ? (
         <>
           <Box sx={{ m: 1 }}>
-            You have no active songs in your database. Please download some
+            <FormattedMessage
+              id="no-active-songs"
+              defaultMessage='You have no active songs in your database. Please download some
             songs in "Databases" section. Only songs from checked databases are
-            active.
+            active.'
+            />
           </Box>
           <Box sx={{ m: 1 }}>
-            <Link to="/databases">Go to Databases</Link>
+            <Link to="/databases">
+              <FormattedMessage
+                id="go-to-database"
+                defaultMessage="Go to Databases"
+              />
+            </Link>
           </Box>
         </>
       ) : (

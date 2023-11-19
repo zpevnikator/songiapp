@@ -15,6 +15,8 @@ import SearchPage from "./SearchPage";
 import SettingsPage from "./SettingsPage";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import SettingsProvider, { useSettings } from "./SettingsProvider";
+import { IntlProvider } from "react-intl";
+import TranslationProvider from "./TranslationProvider";
 
 const queryClient = new QueryClient();
 
@@ -78,12 +80,14 @@ const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
   <React.StrictMode>
     <SettingsProvider>
-      <CurrentThemeProvider>
-        <CssBaseline />
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-        </QueryClientProvider>
-      </CurrentThemeProvider>
+      <TranslationProvider>
+        <CurrentThemeProvider>
+          <CssBaseline />
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+          </QueryClientProvider>
+        </CurrentThemeProvider>
+      </TranslationProvider>
     </SettingsProvider>
   </React.StrictMode>
 );

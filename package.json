@@ -5,6 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@formatjs/cli": "^6.2.4",
     "@mui/icons-material": "^5.14.15",
     "@mui/material": "^5.14.15",
     "@tanstack/react-query": "^5.0.5",
@@ -20,6 +21,7 @@
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-intl": "^6.5.5",
     "react-router-dom": "^6.17.0",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
@@ -29,7 +31,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "i18n:compile": "formatjs compile \"src/i18n/en-extracted.json\" --out-file src/i18n/en.json",
+    "i18n:extract": "formatjs extract \"src/**/!(*.d).ts*\" --out-file src/i18n/en-extracted.json",
+    "i18n:missing:cs": "node src/i18n/addMissingKeys.mjs src/i18n/en.json src/i18n/cs.json",
+    "i18n": "npm run i18n:extract && npm run i18n:compile && npm run i18n:missing:cs"
   },
   "eslintConfig": {
     "extends": [

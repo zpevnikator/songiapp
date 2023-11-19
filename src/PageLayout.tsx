@@ -32,6 +32,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import InstallAppSnackbar from "./InstallAppSnackbar";
 import _ from "lodash";
 import SearchField from "./SearchField";
+import { useIntl } from "react-intl";
 
 interface PageLayoutProps {
   title?: string;
@@ -70,6 +71,7 @@ function PageLayout(props: PageLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const bottomNavigationUrls = ["/", "/databases", "/search", "/settings"];
+  const intl = useIntl();
 
   return (
     <div>
@@ -187,7 +189,12 @@ function PageLayout(props: PageLayoutProps) {
                 <ListItemIcon>
                   <CloudIcon />
                 </ListItemIcon>
-                <ListItemText primary="Databases" />
+                <ListItemText
+                  primary={intl.formatMessage({
+                    id: "databases",
+                    defaultMessage: "Databases",
+                  })}
+                />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -195,7 +202,12 @@ function PageLayout(props: PageLayoutProps) {
                 <ListItemIcon>
                   <PeopleIcon />
                 </ListItemIcon>
-                <ListItemText primary="Artists" />
+                <ListItemText
+                  primary={intl.formatMessage({
+                    id: "artists",
+                    defaultMessage: "Artists",
+                  })}
+                />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -203,7 +215,12 @@ function PageLayout(props: PageLayoutProps) {
                 <ListItemIcon>
                   <SearchIcon />
                 </ListItemIcon>
-                <ListItemText primary="Search" />
+                <ListItemText
+                  primary={intl.formatMessage({
+                    id: "search",
+                    defaultMessage: "Search",
+                  })}
+                />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -211,13 +228,25 @@ function PageLayout(props: PageLayoutProps) {
                 <ListItemIcon>
                   <SettingsIcon />
                 </ListItemIcon>
-                <ListItemText primary="Settings" />
+                <ListItemText
+                  primary={intl.formatMessage({
+                    id: "settings",
+                    defaultMessage: "Settings",
+                  })}
+                />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
               <ListItemButton
                 onClick={() => {
-                  if (window.confirm("Really delete all downloaded songs?")) {
+                  if (
+                    window.confirm(
+                      intl.formatMessage({
+                        id: "delete-all-data.question",
+                        defaultMessage: "Really delete all downloaded songs?",
+                      })
+                    )
+                  ) {
                     localStorage.setItem("deleteLocalDatabase", "songiapp");
                     document.location.reload();
                   }
@@ -226,7 +255,12 @@ function PageLayout(props: PageLayoutProps) {
                 <ListItemIcon>
                   <DeleteForeverIcon />
                 </ListItemIcon>
-                <ListItemText primary="Delete all data" />
+                <ListItemText
+                  primary={intl.formatMessage({
+                    id: "delete-all-data",
+                    defaultMessage: "Delete all data",
+                  })}
+                />
               </ListItemButton>
             </ListItem>
           </List>
@@ -277,10 +311,34 @@ function PageLayout(props: PageLayoutProps) {
             navigate(bottomNavigationUrls[newValue]);
           }}
         >
-          <BottomNavigationAction label="Artists" icon={<PeopleIcon />} />
-          <BottomNavigationAction label="Databases" icon={<CloudIcon />} />
-          <BottomNavigationAction label="Search" icon={<SearchIcon />} />
-          <BottomNavigationAction label="Settings" icon={<SettingsIcon />} />
+          <BottomNavigationAction
+            label={intl.formatMessage({
+              id: "artists",
+              defaultMessage: "Artists",
+            })}
+            icon={<PeopleIcon />}
+          />
+          <BottomNavigationAction
+            label={intl.formatMessage({
+              id: "databases",
+              defaultMessage: "Databases",
+            })}
+            icon={<CloudIcon />}
+          />
+          <BottomNavigationAction
+            label={intl.formatMessage({
+              id: "search",
+              defaultMessage: "Search",
+            })}
+            icon={<SearchIcon />}
+          />
+          <BottomNavigationAction
+            label={intl.formatMessage({
+              id: "settings",
+              defaultMessage: "Settings",
+            })}
+            icon={<SettingsIcon />}
+          />
         </BottomNavigation>
       </Paper>
 

@@ -8,13 +8,17 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useSetSettings, useSettings } from "./SettingsProvider";
+import { useIntl } from "react-intl";
 
 export default function SettingsPage() {
   const settings = useSettings();
   const setSettings = useSetSettings();
+  const intl = useIntl();
 
   return (
-    <PageLayout title="Settings">
+    <PageLayout
+      title={intl.formatMessage({ id: "settings", defaultMessage: "Settings" })}
+    >
       <List>
         <ListItem>
           <ListItemIcon>
@@ -32,8 +36,15 @@ export default function SettingsPage() {
             />
           </ListItemIcon>
           <ListItemText
-            primary="Show all artists"
-            secondary="Don't show alphabet on Artists page. Can be much slower."
+            primary={intl.formatMessage({
+              id: "show-all-artists",
+              defaultMessage: "Show all artists",
+            })}
+            secondary={intl.formatMessage({
+              id: "show-all-artists.detail",
+              defaultMessage:
+                "Don't show alphabet on Artists page. Can be much slower.",
+            })}
           />
         </ListItem>
         <ListItem>
@@ -52,7 +63,10 @@ export default function SettingsPage() {
             />
           </ListItemIcon>
           <ListItemText
-            primary="Use dark theme"
+            primary={intl.formatMessage({
+              id: "use-dark-theme",
+              defaultMessage: "Use dark theme",
+            })}
           />
         </ListItem>
       </List>

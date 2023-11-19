@@ -1,10 +1,12 @@
 import { Button, IconButton, Snackbar } from "@mui/material";
 import { useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import { useIntl } from "react-intl";
 
 export default function InstallAppSnackbar() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [installClicked, setInstallClicked] = useState(false);
+  const intl = useIntl();
 
   useEffect(() => {
     if (
@@ -25,7 +27,11 @@ export default function InstallAppSnackbar() {
     <Snackbar
       open={!!deferredPrompt && !installClicked}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      message="SongiApp is prepared for offline usage, you can install it as normal app"
+      message={intl.formatMessage({
+        id: "app-is-offline",
+        defaultMessage:
+          "SongiApp is prepared for offline usage, you can install it as normal app",
+      })}
       onClose={() => setDeferredPrompt(null)}
       action={
         <>
