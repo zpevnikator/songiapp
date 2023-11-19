@@ -1,4 +1,7 @@
 {
+  "about": {
+    "defaultMessage": "About"
+  },
   "app-is-offline": {
     "defaultMessage": "SongiApp is prepared for offline usage, you can install it as normal app"
   },
@@ -13,6 +16,9 @@
   },
   "databases": {
     "defaultMessage": "Databases"
+  },
+  "delete-all": {
+    "defaultMessage": "Delete all"
   },
   "delete-all-data": {
     "defaultMessage": "Delete all data"

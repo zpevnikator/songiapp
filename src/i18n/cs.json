@@ -1,9 +1,11 @@
 {
+  "about": "O aplikace",
   "app-is-offline": "SongiApp je připravena pro použití offline, můžete ji nainstalovat jako normální aplikaci",
   "artists": "Interpreti",
   "artists.lower": "interpreti",
   "columns": "Sloupce",
   "databases": "Databáze",
+  "delete-all": "Vymazat vše",
   "delete-all-data": "Vymazat všechna data",
   "delete-all-data.question": "Opravdu vymazat všechny stažené písně?",
   "font-size": "Velikost fontu",

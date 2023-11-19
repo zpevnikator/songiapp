@@ -1,9 +1,11 @@
 {
+  "about": "About",
   "app-is-offline": "SongiApp is prepared for offline usage, you can install it as normal app",
   "artists": "Artists",
   "artists.lower": "artists",
   "columns": "Columns",
   "databases": "Databases",
+  "delete-all": "Delete all",
   "delete-all-data": "Delete all data",
   "delete-all-data.question": "Really delete all downloaded songs?",
   "font-size": "Font size",

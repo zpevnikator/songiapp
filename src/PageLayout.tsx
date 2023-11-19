@@ -27,6 +27,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CancelIcon from "@mui/icons-material/Cancel";
+import InfoIcon from "@mui/icons-material/Info";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import InstallAppSnackbar from "./InstallAppSnackbar";
@@ -264,6 +265,24 @@ function PageLayout(props: PageLayoutProps) {
               </ListItemButton>
             </ListItem>
           </List>
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() =>
+                window.open("https://github.com/songiapp/songiapp", "_blank")
+              }
+            >
+              <ListItemIcon>
+                <InfoIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={intl.formatMessage({
+                  id: "about",
+                  defaultMessage: "About",
+                })}
+              />
+            </ListItemButton>
+          </ListItem>
+
           {/* <Divider />
           <List>
             {["All mail", "Trash", "Spam"].map((text, index) => (
