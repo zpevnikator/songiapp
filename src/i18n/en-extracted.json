@@ -29,6 +29,9 @@
   "go-to-home": {
     "defaultMessage": "Go to Home"
   },
+  "language": {
+    "defaultMessage": "Language:"
+  },
   "no-active-songs": {
     "defaultMessage": "You have no active songs in your database. Please download some songs in \"Databases\" section. Only songs from checked databases are active."
   },

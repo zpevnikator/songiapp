@@ -1,24 +1,40 @@
 import PageLayout from "./PageLayout";
 import {
+  Box,
   Checkbox,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
+  MenuItem,
+  Select,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { useSetSettings, useSettings } from "./SettingsProvider";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
+import { useLocaleState } from "./TranslationProvider";
 
 export default function SettingsPage() {
   const settings = useSettings();
   const setSettings = useSetSettings();
   const intl = useIntl();
+  const [locale, setLocale] = useLocaleState();
 
   return (
     <PageLayout
       title={intl.formatMessage({ id: "settings", defaultMessage: "Settings" })}
     >
+      <Box sx={{ mx: 2, mt: 2, display: "flex", alignItems: "center" }}>
+        <Typography sx={{ mr: 2 }}>
+          <FormattedMessage id="language" defaultMessage="Language:" />
+        </Typography>
+        <Select value={locale} onChange={(e) => setLocale(e.target.value)}>
+          <MenuItem value="en">English</MenuItem>
+          <MenuItem value="cs">Česky</MenuItem>
+        </Select>
+      </Box>
+
       <List>
         <ListItem>
           <ListItemIcon>

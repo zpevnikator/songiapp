@@ -9,6 +9,7 @@
   "font-size": "Font size",
   "go-to-database": "Go to Databases",
   "go-to-home": "Go to Home",
+  "language": "Language:",
   "no-active-songs": "You have no active songs in your database. Please download some songs in \"Databases\" section. Only songs from checked databases are active.",
   "no-songs-found": "No songs found",
   "page-not-exists": "Oops!! This page doesn't exist",
