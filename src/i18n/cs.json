@@ -1,5 +1,5 @@
 {
-  "about": "O aplikace",
+  "about": "O aplikaci",
   "app-is-offline": "SongiApp je připravena pro použití offline, můžete ji nainstalovat jako normální aplikaci",
   "artists": "Interpreti",
   "artists.lower": "interpreti",
@@ -12,7 +12,7 @@
   "go-to-database": "Přejít na Databáze",
   "go-to-home": "Přejít na úvodní stránku",
   "language": "Jazyk:",
-  "no-active-songs": "Nemáte v databázi žádné aktivní písně. Prosím, stáhněte si nějaké písně v sekci \"Databáze\". Aktivní jsou pPouze písně ze zaškrtnutých databází.",
+  "no-active-songs": "Nemáte v databázi žádné aktivní písně. Prosím, stáhněte si nějaké písně v sekci \"Databáze\". Aktivní jsou pouze písně ze zaškrtnutých databází.",
   "no-songs-found": "Nebyly nalezeny žádné písně",
   "page-not-exists": "Oops!! Stránka nenalezena",
   "really-delete-database.question": "Opravdu smazat databázi {db}?",
