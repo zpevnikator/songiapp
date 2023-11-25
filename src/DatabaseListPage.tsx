@@ -47,6 +47,7 @@ import { useNavigate } from "react-router-dom";
 import { FormattedMessage, useIntl } from "react-intl";
 import { parseSongDatabase } from "./songpro";
 import InputTextDialog from "./InputTextDialog";
+import NewDatabaseDialog from "./NewDatabaseDialog";
 
 function DatabaseItem(props: {
   db: SongDbListItem;
@@ -183,27 +184,31 @@ function DatabaseItem(props: {
           "aria-labelledby": "basic-button",
         }}
       >
-        <MenuItem
-          onClick={() => {
-            if (
-              window.confirm(
-                intl.formatMessage(
-                  {
-                    id: "really-delete-database.question",
-                    defaultMessage: "Really delete database {db}?",
-                  },
-                  { db: db.title }
+        {((!localFileDb && localDb) || (localFileDb && !localDb)) && (
+          <MenuItem
+            onClick={async () => {
+              if (
+                window.confirm(
+                  intl.formatMessage(
+                    {
+                      id: "really-delete-database.question",
+                      defaultMessage: "Really delete database {db}?",
+                    },
+                    { db: db.title }
+                  )
                 )
-              )
-            ) {
-              if (localDb) deleteDatabase(db);
-              if (localFileDb) deleteFileDatabase(localFileDb.id!);
-            }
-            setMenuAnchorEl(null);
-          }}
-        >
-          <FormattedMessage id="delete" defaultMessage="Delete" />
-        </MenuItem>
+              ) {
+                if (localFileDb) {
+                  await deleteFileDatabase(localFileDb.id!);
+                }
+                if (localDb) deleteDatabase(db);
+              }
+              setMenuAnchorEl(null);
+            }}
+          >
+            <FormattedMessage id="delete" defaultMessage="Delete" />
+          </MenuItem>
+        )}
         {localDb && (
           <MenuItem
             onClick={() => {
@@ -418,11 +423,6 @@ export default function DownloadPage() {
     setIsWorking(false);
   }
 
-  async function createOwn(name) {
-    const newid = await addLocalSongsDb(name);
-    navigate(`/local/edit/${newid}`);
-  }
-
   return (
     <PageLayout
       title={intl.formatMessage({
@@ -511,18 +511,7 @@ export default function DownloadPage() {
         </Alert>
       </Snackbar>
 
-      {newDbOpen && (
-        <InputTextDialog
-          onClose={(value) => {
-            if (value) createOwn(value);
-            setNewDbOpen(false);
-          }}
-          text={intl.formatMessage({
-            id: "choose-database-name",
-            defaultMessage: "Please choose database name",
-          })}
-        />
-      )}
+      {newDbOpen && <NewDatabaseDialog onClose={() => setNewDbOpen(false)} />}
     </PageLayout>
   );
 }

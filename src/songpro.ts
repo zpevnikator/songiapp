@@ -98,7 +98,7 @@ export function parseSongDatabase(data: string): SongDatabase {
 export function parseSongParts(source: string) {
   const song = {};
   let text = "";
-  for (const line of source.split("\n")) {
+  for (const line of source?.split("\n") ?? []) {
     if (line.match(/^\s*----*\s*$/)) {
       return {
         ...song,

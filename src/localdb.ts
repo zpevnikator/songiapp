@@ -328,9 +328,9 @@ export async function addRecentArtist(artist: LocalArtist) {
 export async function addLocalSongsDb(title: string) {
   const newid = await localSongs.databases.put({
     title,
-    songCount: 0,
-    artistCount: 0,
-    data: "",
+    songCount: 2,
+    artistCount: 1,
+    data: "@title=song1\n@artist=Some artist\n\n#1.\nText[Ami] to be [Fmaj]continued\n\n---\n\n@title=song2\n@artist=Some artist\n\n#1.\nText[Ami] to be [Fmaj]continued",
   });
   return newid;
 }

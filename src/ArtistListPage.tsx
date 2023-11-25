@@ -30,6 +30,8 @@ import { useCallback, useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useSettings } from "./SettingsProvider";
 import { FormattedMessage, useIntl } from "react-intl";
+import MaterialLink from "@mui/material/Link";
+import NewDatabaseDialog from "./NewDatabaseDialog";
 
 const startLetterKey = "artistsStartLetter";
 
@@ -100,6 +102,7 @@ export default function ArtistListPage() {
   const [letter, setLetter] = useState<string | null>(
     localStorage.getItem(startLetterKey)
   );
+  const [newDbOpen, setNewDbOpen] = useState(false);
 
   const { showAllArtists } = useSettings();
 
@@ -165,6 +168,30 @@ export default function ArtistListPage() {
               />
             </Link>
           </Box>
+          <Box sx={{ m: 1 }}>
+            <FormattedMessage
+              id="could-add-songpro"
+              defaultMessage="You could also add songs in songpro format. Songpro is text file format allowing to store songs with chords and other metadata."
+            />
+          </Box>
+          <Box sx={{ m: 1 }}>
+            <MaterialLink
+              component="button"
+              onClick={() => {
+                setNewDbOpen(true);
+              }}
+            >
+              <FormattedMessage
+                id="add-new-database"
+                defaultMessage="Add new database"
+              />
+            </MaterialLink>
+          </Box>
+          <Box sx={{ m: 1 }}>
+            <MaterialLink href="https://songpro.org" target="_blank">
+              SongPro format
+            </MaterialLink>
+          </Box>
         </>
       ) : (
         <div>
@@ -209,6 +236,7 @@ export default function ArtistListPage() {
           />
         </div>
       )}
+      {newDbOpen && <NewDatabaseDialog onClose={() => setNewDbOpen(false)} />}
     </PageLayout>
   );
 }
