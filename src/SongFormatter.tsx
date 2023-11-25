@@ -174,7 +174,7 @@ export default class SongFormatter {
     let showLabel = false;
 
     for (const line of this.text?.split("\n") || "") {
-      if (line.startsWith(".")) {
+      if (line.startsWith("#")) {
         if (label && showLabel) {
           res.push(
             <div key={res.length}>
@@ -182,7 +182,7 @@ export default class SongFormatter {
             </div>
           );
         }
-        label = line.substring(1);
+        label = line.substring(1).trim();
         showLabel = true;
       } else {
         res.push(
