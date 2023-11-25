@@ -491,7 +491,7 @@ export default function DownloadPage() {
               setActiveDb={async (dbid, value) => {
                 try {
                   setIsWorking(true);
-                  await setLocalDbActive(db.id, value);
+                  await setLocalDbActive(String(dbid), value);
                 } finally {
                   setIsWorking(false);
                   setLocalDbToken((x) => x + 1);
