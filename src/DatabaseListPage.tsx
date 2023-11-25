@@ -24,6 +24,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import StorageIcon from "@mui/icons-material/Storage";
 import {
   addLocalSongsDb,
+  convertDbFromFileToCloud,
   deleteAllDatabases,
   deleteFileDb,
   deleteSongDb,
@@ -385,22 +386,7 @@ export default function DownloadPage() {
 
   async function activateFileDatabase(db: LocalFileDatabase) {
     setIsWorking(true);
-    await deleteSongDb(String(db.id));
-    const parsed = parseSongDatabase(db.data);
-    await saveSongDb(
-      {
-        title: db.title,
-        id: String(db.id),
-        description: "",
-        url: "",
-        size: "",
-        // @ts-ignore
-        songCount: parsed.songs.length,
-        artistCount: parsed.artists.length,
-      },
-      parsed
-    );
-    // await deleteFileDb(id);
+    await convertDbFromFileToCloud(db);
     setLocalDbToken((x) => x + 1);
     setIsWorking(false);
   }

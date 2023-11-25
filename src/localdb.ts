@@ -337,6 +337,13 @@ export async function addLocalSongsDb(title: string) {
 
 export async function saveLocalSongsDb(db: LocalFileDatabase) {
   await localSongs.databases.put(db);
+
+  if (db.id) {
+    const activated = await getDatabase(String(db.id));
+    if (activated) {
+      convertDbFromFileToCloud(db);
+    }
+  }
 }
 
 export async function deleteFileDb(id: number) {
@@ -440,4 +447,24 @@ export async function searchLocalDb(
     ],
     artists: localeSortByKey(artists, "name"),
   };
+}
+
+export async function convertDbFromFileToCloud(db: LocalFileDatabase) {
+  const parsed = parseSongDatabase(db?.data!);
+
+  await deleteSongDb(String(db.id));
+
+  await saveSongDb(
+    {
+      title: db.title,
+      id: String(db.id),
+      description: "",
+      url: "",
+      size: "",
+      // @ts-ignore
+      songCount: parsed.songs.length,
+      artistCount: parsed.artists.length,
+    },
+    parsed
+  );
 }

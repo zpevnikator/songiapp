@@ -49,23 +49,6 @@ export default function EditLocalDatabasePage() {
       songCount: parsed.songs.length,
       data,
     });
-    const activated = await getDatabase(String(dbid));
-    if (activated) {
-      await deleteSongDb(String(dbid));
-      await saveSongDb(
-        {
-          title: query.data!.title,
-          id: String(query.data!.id),
-          description: "",
-          url: "",
-          size: "",
-          // @ts-ignore
-          songCount: parsed.songs.length,
-          artistCount: parsed.artists.length,
-        },
-        parsed
-      );
-    }
     setSavedInfo(
       intl.formatMessage(
         {
