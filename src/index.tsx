@@ -17,6 +17,7 @@ import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import SettingsProvider, { useSettings } from "./SettingsProvider";
 import { IntlProvider } from "react-intl";
 import TranslationProvider from "./TranslationProvider";
+import EditLocalDatabasePage from "./EditLocalDatabasePage";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,14 @@ const router = createHashRouter([
   {
     path: "/databases/:dbid",
     element: <ArtistListPage />,
+  },
+  // {
+  //   path: "/local/:dbid",
+  //   element: <ArtistListPage isLocalFile />,
+  // },
+  {
+    path: "/local/edit/:dbid",
+    element: <EditLocalDatabasePage />,
   },
   {
     path: "*",

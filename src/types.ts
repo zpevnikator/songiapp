@@ -13,7 +13,7 @@ export interface LocalDatabase extends SongDbListItem {
 }
 
 export interface LocalFileDatabase {
-  id: string;
+  id?: number;
   title: string;
   isActive?: number;
   songCount: number;

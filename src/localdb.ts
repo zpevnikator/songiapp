@@ -39,13 +39,13 @@ class CloudSongsDb extends Dexie {
 }
 
 class LocalSongsDb extends Dexie {
-  public databases!: Table<LocalFileDatabase, string>;
+  public databases!: Table<LocalFileDatabase, number>;
 
   public constructor() {
     super("localsongs");
 
     this.version(1).stores({
-      databases: "id,isActive",
+      databases: "++id,isActive",
     });
   }
 }
@@ -64,6 +64,7 @@ class PreferencesDb extends Dexie {
 
 const cloudSongs = new CloudSongsDb();
 const preferences = new PreferencesDb();
+const localSongs = new LocalSongsDb();
 
 if (localStorage.getItem("deleteLocalDatabase") == "cloudsongs") {
   window.indexedDB.deleteDatabase("cloudsongs");
@@ -183,7 +184,7 @@ export async function upgradeAllDatabases() {
   );
 }
 
-export async function deleteSongDb(db: SongDbListItem) {
+export async function deleteSongDb(dbid: string) {
   await cloudSongs.transaction(
     "rw",
     cloudSongs.songs,
@@ -191,10 +192,10 @@ export async function deleteSongDb(db: SongDbListItem) {
     cloudSongs.databases,
     cloudSongs.letters,
     () => {
-      cloudSongs.songs.where({ databaseId: db.id }).delete();
-      cloudSongs.artists.where({ databaseId: db.id }).delete();
-      cloudSongs.databases.where({ id: db.id }).delete();
-      cloudSongs.letters.where({ databaseId: db.id }).delete();
+      cloudSongs.songs.where({ databaseId: dbid }).delete();
+      cloudSongs.artists.where({ databaseId: dbid }).delete();
+      cloudSongs.databases.where({ id: dbid }).delete();
+      cloudSongs.letters.where({ databaseId: dbid }).delete();
     }
   );
 }
@@ -249,6 +250,10 @@ export async function findDatabases(): Promise<LocalDatabase[]> {
   return localeSortByKey(await cloudSongs.databases.toArray(), "title");
 }
 
+export async function findFileDatabases(): Promise<LocalFileDatabase[]> {
+  return localeSortByKey(await localSongs.databases.toArray(), "title");
+}
+
 export async function getActiveDatabaseIds(): Promise<string[]> {
   return (await cloudSongs.databases.where({ isActive: 1 }).toArray()).map(
     (x) => x.id
@@ -266,6 +271,12 @@ export async function findSongsByArtist(
 
 export async function getSong(songid: string): Promise<LocalSong | undefined> {
   return cloudSongs.songs.get(songid);
+}
+
+export async function getLocalFileDatabase(
+  id: number
+): Promise<LocalFileDatabase | undefined> {
+  return localSongs.databases.get(id);
 }
 
 export async function getArtist(
@@ -312,6 +323,25 @@ export async function addRecentArtist(artist: LocalArtist) {
     artist,
   });
   await deleteOldRecents();
+}
+
+export async function addLocalSongsDb(title: string) {
+  const newid = await localSongs.databases.put({
+    title,
+    isActive: 1,
+    songCount: 0,
+    artistCount: 0,
+    data: "",
+  });
+  return newid;
+}
+
+export async function saveLocalSongsDb(db: LocalFileDatabase) {
+  await localSongs.databases.put(db);
+}
+
+export async function deleteFileDb(id: number) {
+  await localSongs.databases.delete(id);
 }
 
 export async function findAllRecents(): Promise<LocalRecentObject[]> {

@@ -21,46 +21,63 @@ import DownloadIcon from "@mui/icons-material/Download";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import CheckIcon from "@mui/icons-material/Check";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import StorageIcon from "@mui/icons-material/Storage";
 import {
+  addLocalSongsDb,
   deleteAllDatabases,
+  deleteFileDb,
   deleteSongDb,
   findDatabases,
+  findFileDatabases,
   saveSongDb,
   setLocalDbActive,
   upgradeAllDatabases,
 } from "./localdb";
-import type { LocalDatabase, SongDbList, SongDbListItem } from "./types";
+import type {
+  LocalDatabase,
+  LocalFileDatabase,
+  SongDbList,
+  SongDbListItem,
+} from "./types";
 import { getErrorMessage } from "./utils";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { parseSongDatabase } from "./songpro";
+import InputTextDialog from "./InputTextDialog";
 
 function DatabaseItem(props: {
   db: SongDbListItem;
-  localDatabases: LocalDatabase[];
   deleteDatabase: (x: SongDbListItem) => void;
   downloadDatabase: (x: SongDbListItem) => void;
   cancelWaiting: (x: SongDbListItem) => void;
+  deleteFileDatabase: (id: number) => void;
+  activateFileDatabase: (db: LocalFileDatabase) => void;
+  deactivateFileDatabase: (db: LocalFileDatabase) => void;
   isProcessed: boolean;
   isWaiting: boolean;
   isFinished: boolean;
+  localFileDb?: LocalFileDatabase;
+  localDb: LocalDatabase | undefined;
   setActiveDb: (dbid: string, value: boolean) => void;
 }) {
   const {
     db,
     deleteDatabase,
     downloadDatabase,
+    deleteFileDatabase,
+    activateFileDatabase,
+    deactivateFileDatabase,
     isProcessed,
     isWaiting,
     isFinished,
-    localDatabases,
     setActiveDb,
     cancelWaiting,
+    localDb,
+    localFileDb,
   } = props;
   const intl = useIntl();
 
-  const localDb = localDatabases.find((x) => x.id == db.id);
   const navigate = useNavigate();
 
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
@@ -85,7 +102,7 @@ function DatabaseItem(props: {
           >
             <HourglassEmptyIcon />
           </IconButton>
-        ) : localDb ? (
+        ) : localDb || localFileDb ? (
           <IconButton
             size="large"
             aria-label="display more actions"
@@ -122,6 +139,8 @@ function DatabaseItem(props: {
             disableRipple
             onChange={(e) => setActiveDb(db.id, e.target.checked)}
           />
+        ) : localFileDb ? (
+          <StorageIcon />
         ) : (
           <CloudIcon />
         )}
@@ -138,6 +157,11 @@ function DatabaseItem(props: {
               })}, ${localDb.artistCount} ${intl.formatMessage({
                 id: "artists.lower",
                 defaultMessage: "artists",
+              })})`
+            : localFileDb
+            ? `(${localFileDb.songCount} ${intl.formatMessage({
+                id: "songs.lower",
+                defaultMessage: "songs",
               })})`
             : `${db.description} (${db.size} ${intl.formatMessage({
                 id: "songs.lower",
@@ -168,21 +192,60 @@ function DatabaseItem(props: {
                 )
               )
             ) {
-              deleteDatabase(db);
+              if (localDb) deleteDatabase(db);
+              if (localFileDb) deleteFileDatabase(localFileDb.id!);
             }
             setMenuAnchorEl(null);
           }}
         >
-          Delete
+          <FormattedMessage id="delete" defaultMessage="Delete" />
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setMenuAnchorEl(null);
-            navigate(`/databases/${encodeURIComponent(db.id)}`);
-          }}
-        >
-          Show artists
-        </MenuItem>
+        {localDb && (
+          <MenuItem
+            onClick={() => {
+              setMenuAnchorEl(null);
+              navigate(`/databases/${encodeURIComponent(db.id)}`);
+            }}
+          >
+            <FormattedMessage id="show-artists" defaultMessage="Show artists" />
+          </MenuItem>
+        )}
+        {localFileDb && (
+          <MenuItem
+            onClick={() => {
+              setMenuAnchorEl(null);
+              navigate(`/local/edit/${db.id}`);
+            }}
+          >
+            <FormattedMessage id="edit-data" defaultMessage="Edit data" />
+          </MenuItem>
+        )}
+        {localFileDb && !localDb && (
+          <MenuItem
+            onClick={() => {
+              setMenuAnchorEl(null);
+              activateFileDatabase(localFileDb);
+            }}
+          >
+            <FormattedMessage
+              id="activate-database"
+              defaultMessage="Activate database"
+            />
+          </MenuItem>
+        )}
+        {localFileDb && localDb && (
+          <MenuItem
+            onClick={() => {
+              setMenuAnchorEl(null);
+              deactivateFileDatabase(localFileDb);
+            }}
+          >
+            <FormattedMessage
+              id="deactivate-database"
+              defaultMessage="Deectivate database"
+            />
+          </MenuItem>
+        )}
       </Menu>
     </ListItem>
   );
@@ -200,9 +263,11 @@ export default function DownloadPage() {
   const [error, setError] = useState<string | null>(null);
   const [localDbToken, setLocalDbToken] = useState(0);
   const [isWorking, setIsWorking] = useState(false);
+  const [newDbOpen, setNewDbOpen] = useState(false);
   const intl = useIntl();
   const queueRef = useRef(operationQueue);
   const processedRef = useRef(processedDatabase);
+  const navigate = useNavigate();
   queueRef.current = operationQueue;
   processedRef.current = processedDatabase;
 
@@ -217,6 +282,12 @@ export default function DownloadPage() {
   const localDbQuery = useQuery<LocalDatabase[]>({
     queryKey: ["localDatabases", localDbToken],
     queryFn: findDatabases,
+    networkMode: "always",
+  });
+
+  const localDbFileQuery = useQuery<LocalFileDatabase[]>({
+    queryKey: ["localFileDatabases", localDbToken],
+    queryFn: findFileDatabases,
     networkMode: "always",
   });
 
@@ -249,7 +320,7 @@ export default function DownloadPage() {
         break;
       case "delete":
         try {
-          await deleteSongDb(db);
+          await deleteSongDb(db.id);
         } catch (err) {
           setError(getErrorMessage(err));
         }
@@ -289,6 +360,47 @@ export default function DownloadPage() {
     setIsWorking(false);
   }
 
+  async function deleteFileDatabase(id: number) {
+    setIsWorking(true);
+    await deleteFileDb(id);
+    setLocalDbToken((x) => x + 1);
+    setIsWorking(false);
+  }
+
+  async function activateFileDatabase(db: LocalFileDatabase) {
+    setIsWorking(true);
+    await deleteSongDb(String(db.id));
+    const parsed = parseSongDatabase(db.data);
+    await saveSongDb(
+      {
+        title: db.title,
+        id: String(db.id),
+        description: "",
+        url: "",
+        size: "",
+        // @ts-ignore
+        songCount: parsed.songs.length,
+        artistCount: parsed.artists.length,
+      },
+      parsed
+    );
+    // await deleteFileDb(id);
+    setLocalDbToken((x) => x + 1);
+    setIsWorking(false);
+  }
+
+  async function deactivateFileDatabase(db: LocalFileDatabase) {
+    setIsWorking(true);
+    await deleteSongDb(String(db.id));
+    setLocalDbToken((x) => x + 1);
+    setIsWorking(false);
+  }
+
+  async function createOwn(name) {
+    const newid = await addLocalSongsDb(name);
+    navigate(`/local/edit/${newid}`);
+  }
+
   return (
     <PageLayout
       title={intl.formatMessage({
@@ -313,10 +425,17 @@ export default function DownloadPage() {
                 }),
                 onClick: deleteAll,
               },
+              {
+                text: intl.formatMessage({
+                  id: "create-own-database",
+                  defaultMessage: "Create own database",
+                }),
+                onClick: () => setNewDbOpen(true),
+              },
             ]
       }
     >
-      {isWorking || localDbQuery.isPending ? (
+      {isWorking || localDbQuery.isPending || localDbFileQuery.isPending ? (
         <CircularProgress />
       ) : remoteDbQuery.error ? (
         <Alert severity="error">{remoteDbQuery.error.message}</Alert>
@@ -326,21 +445,26 @@ export default function DownloadPage() {
         <List>
           {_.uniqBy(
             [
+              ...(localDbFileQuery.data as any),
               ...localDbQuery.data,
               ...(remoteDbQuery.data ? remoteDbQuery.data.databases : []),
             ],
-            (x) => x.id
+            (x) => String(x.id)
           ).map((db) => (
             <DatabaseItem
               key={db.id}
               db={db}
-              localDatabases={localDbQuery.data}
+              localDb={localDbQuery.data.find((x) => x.id == db.id)}
+              localFileDb={localDbFileQuery.data!.find((x) => x.id == db.id)}
               deleteDatabase={deleteDatabase}
+              deleteFileDatabase={deleteFileDatabase}
               downloadDatabase={downloadDatabase}
               cancelWaiting={cancelWaiting}
               isProcessed={processedDatabase == db.id}
               isFinished={finishedDatabases.includes(db.id)}
               isWaiting={!!operationQueue.find((x) => x.db.id == db.id)}
+              activateFileDatabase={activateFileDatabase}
+              deactivateFileDatabase={deactivateFileDatabase}
               setActiveDb={async (dbid, value) => {
                 try {
                   setIsWorking(true);
@@ -363,6 +487,19 @@ export default function DownloadPage() {
           {error}
         </Alert>
       </Snackbar>
+
+      {newDbOpen && (
+        <InputTextDialog
+          onClose={(value) => {
+            if (value) createOwn(value);
+            setNewDbOpen(false);
+          }}
+          text={intl.formatMessage({
+            id: "choose-database-name",
+            defaultMessage: "Please choose database name",
+          })}
+        />
+      )}
     </PageLayout>
   );
 }
