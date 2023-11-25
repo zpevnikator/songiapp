@@ -45,7 +45,7 @@ class LocalSongsDb extends Dexie {
     super("localsongs");
 
     this.version(1).stores({
-      databases: "++id,isActive",
+      databases: "++id",
     });
   }
 }
@@ -328,7 +328,6 @@ export async function addRecentArtist(artist: LocalArtist) {
 export async function addLocalSongsDb(title: string) {
   const newid = await localSongs.databases.put({
     title,
-    isActive: 1,
     songCount: 0,
     artistCount: 0,
     data: "",
