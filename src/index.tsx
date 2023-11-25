@@ -38,11 +38,11 @@ const router = createHashRouter([
     element: <SettingsPage />,
   },
   {
-    path: "/by-artist/:artistid",
+    path: "/by-artist/:dbid/:artistid",
     element: <ByArtistListPage />,
   },
   {
-    path: "/songs/:songid",
+    path: "/songs/:dbid/:artistid/:songid",
     element: <SongPage />,
   },
   {

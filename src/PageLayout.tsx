@@ -248,7 +248,7 @@ function PageLayout(props: PageLayoutProps) {
                       })
                     )
                   ) {
-                    localStorage.setItem("deleteLocalDatabase", "songiapp");
+                    localStorage.setItem("deleteLocalDatabase", "cloudsongs");
                     document.location.reload();
                   }
                 }}

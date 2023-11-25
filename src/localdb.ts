@@ -17,31 +17,43 @@ import {
   removeHtmlTags,
 } from "./utils";
 import { removeChords } from "./chordTools";
+import { parseSongDatabase } from "./songpro";
 
-class LocalDb extends Dexie {
+class CloudSongsDb extends Dexie {
   public songs!: Table<LocalSong, string>;
   public databases!: Table<LocalDatabase, string>;
   public artists!: Table<LocalArtist, string>;
-  public recents!: Table<LocalRecentObject, string>;
   public letters!: Table<LocalLetter, string>;
 
   public constructor() {
-    super("songiapp");
+    super("cloudsongs");
 
-    this.version(2).stores({
+    this.version(1).stores({
       songs: "id,artistId,databaseId,*titleWords,*textWords",
       databases: "id,isActive",
       artists: "id,artistId,databaseId,letterId,*nameWords",
-      recents: "id",
       letters: "id,letter,databaseId",
     });
   }
 }
 
-const locdb = new LocalDb();
+class PreferencesDb extends Dexie {
+  public recents!: Table<LocalRecentObject, string>;
 
-if (localStorage.getItem("deleteLocalDatabase") == "songiapp") {
-  window.indexedDB.deleteDatabase("songiapp");
+  public constructor() {
+    super("preferences");
+
+    this.version(1).stores({
+      recents: "id",
+    });
+  }
+}
+
+const cloudSongs = new CloudSongsDb();
+const preferences = new PreferencesDb();
+
+if (localStorage.getItem("deleteLocalDatabase") == "cloudsongs") {
+  window.indexedDB.deleteDatabase("cloudsongs");
   localStorage.removeItem("deleteLocalDatabase");
   document.location.reload();
 }
@@ -66,24 +78,44 @@ function tokenize(...texts: string[]): string[] {
 }
 
 export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
-  await locdb.transaction(
+  await cloudSongs.transaction(
     "rw",
-    locdb.songs,
-    locdb.artists,
-    locdb.databases,
-    locdb.letters,
+    cloudSongs.songs,
+    cloudSongs.artists,
+    cloudSongs.databases,
+    cloudSongs.letters,
     () => {
-      const artistMap = _.keyBy(data.artists, (x) => x.id);
+      const allArtists = data.songs.map((x) => ({
+        id: _.kebabCase(x.artist) || "no-artist",
+        name: x.artist,
+      }));
+      const dbArtists = _.uniqBy(allArtists, (x) => x.id);
+      const artistByName = _.keyBy(allArtists, (x) => x.name);
 
-      locdb.songs.bulkAdd(
+      const songIds: string[] = [];
+      for (let i = 0; i < data.songs.length; i += 1) {
+        const song = data.songs[i];
+        let id = `${artistByName[song.artist].id}/${
+          _.kebabCase(song.title) || "no-title"
+        }`;
+        let suffix = "";
+        let suffixIndex = 1;
+        while (songIds.includes(id + suffix)) {
+          suffixIndex += 1;
+          suffix = `-${suffixIndex}`;
+        }
+        songIds.push(id + suffix);
+      }
+
+      cloudSongs.songs.bulkAdd(
         _.uniqBy(
-          data.songs.map((song) => ({
+          data.songs.map((song, index) => ({
             ...song,
-            artistName: artistMap[song.artistId]?.name ?? song.artistId,
+            artistName: song.artist,
             databaseId: db.id,
             databaseTitle: db.title,
-            id: `${db.id}-${song.id}`,
-            artistId: `${db.id}-${song.artistId}`,
+            id: `${db.id}/${songIds[index]}`,
+            artistId: `${db.id}/${artistByName[song.artist].id}`,
             isActive: 1,
             textWords: tokenize(song.text),
             titleWords: tokenize(song.title),
@@ -93,34 +125,36 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
       );
 
       const artists = _.uniqBy(
-        data.artists.map((artist) => ({
+        dbArtists.map((artist) => ({
           ...artist,
-          id: `${db.id}-${artist.id}`,
+          id: `${db.id}/${artist.id}`,
           databaseId: db.id,
           databaseTitle: db.title,
-          songCount: data.songs.filter((x) => x.artistId == artist.id).length,
+          songCount: data.songs.filter(
+            (x) => artistByName[x.artist].id == artist.id
+          ).length,
           isActive: 1,
           letter: getFirstLetter(artist.name),
-          letterId: `${db.id}-${getFirstLetter(artist.name)}`,
+          letterId: `${db.id}/${getFirstLetter(artist.name)}`,
           nameWords: tokenize(artist.name),
         })),
         "id"
       );
 
-      locdb.artists.bulkAdd(artists);
+      cloudSongs.artists.bulkAdd(artists);
 
-      locdb.databases.add({
+      cloudSongs.databases.add({
         ...db,
         isActive: 1,
         songCount: data.songs.length,
-        artistCount: data.artists.length,
+        artistCount: dbArtists.length,
       });
 
       const artistsByLetters = _.groupBy(artists, (x) => x.letter);
 
-      locdb.letters.bulkAdd(
+      cloudSongs.letters.bulkAdd(
         _.keys(artistsByLetters).map((letter) => ({
-          id: `${db.id}-${letter}`,
+          id: `${db.id}/${letter}`,
           databaseId: db.id,
           letter,
           artistCount: artistsByLetters[letter].length,
@@ -131,40 +165,42 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
 }
 
 export async function deleteAllDatabases() {
-  await locdb.transaction(
+  await cloudSongs.transaction(
     "rw",
-    locdb.songs,
-    locdb.artists,
-    locdb.databases,
-    locdb.letters,
+    cloudSongs.songs,
+    cloudSongs.artists,
+    cloudSongs.databases,
+    cloudSongs.letters,
     async () => {
-      await locdb.songs.clear();
-      await locdb.artists.clear();
-      await locdb.databases.clear();
-      await locdb.letters.clear();
+      await cloudSongs.songs.clear();
+      await cloudSongs.artists.clear();
+      await cloudSongs.databases.clear();
+      await cloudSongs.letters.clear();
     }
   );
 }
 
 export async function upgradeAllDatabases() {
-  const dbs = await locdb.databases.toArray();
+  const dbs = await cloudSongs.databases.toArray();
   const data = await Promise.all(
     dbs.map((db) =>
-      fetch(db.url).then((res) => res.json() as Promise<SongDatabase>)
+      fetch(db.url)
+        .then((res) => res.text())
+        .then((res) => parseSongDatabase(res))
     )
   );
 
-  await locdb.transaction(
+  await cloudSongs.transaction(
     "rw",
-    locdb.songs,
-    locdb.artists,
-    locdb.databases,
-    locdb.letters,
+    cloudSongs.songs,
+    cloudSongs.artists,
+    cloudSongs.databases,
+    cloudSongs.letters,
     async () => {
-      await locdb.songs.clear();
-      await locdb.artists.clear();
-      await locdb.databases.clear();
-      await locdb.letters.clear();
+      await cloudSongs.songs.clear();
+      await cloudSongs.artists.clear();
+      await cloudSongs.databases.clear();
+      await cloudSongs.letters.clear();
 
       for (const item of _.zip(dbs, data)) {
         await saveSongDb(item[0]!, item[1]!);
@@ -174,17 +210,17 @@ export async function upgradeAllDatabases() {
 }
 
 export async function deleteSongDb(db: SongDbListItem) {
-  await locdb.transaction(
+  await cloudSongs.transaction(
     "rw",
-    locdb.songs,
-    locdb.artists,
-    locdb.databases,
-    locdb.letters,
+    cloudSongs.songs,
+    cloudSongs.artists,
+    cloudSongs.databases,
+    cloudSongs.letters,
     () => {
-      locdb.songs.where({ databaseId: db.id }).delete();
-      locdb.artists.where({ databaseId: db.id }).delete();
-      locdb.databases.where({ id: db.id }).delete();
-      locdb.letters.where({ databaseId: db.id }).delete();
+      cloudSongs.songs.where({ databaseId: db.id }).delete();
+      cloudSongs.artists.where({ databaseId: db.id }).delete();
+      cloudSongs.databases.where({ id: db.id }).delete();
+      cloudSongs.letters.where({ databaseId: db.id }).delete();
     }
   );
 }
@@ -193,7 +229,7 @@ export async function findArtists(dbid?: string): Promise<LocalArtist[]> {
   const activeDbs = dbid ? [dbid] : await getActiveDatabaseIds();
 
   return localeSortByKey(
-    await locdb.artists.where("databaseId").anyOf(activeDbs).toArray(),
+    await cloudSongs.artists.where("databaseId").anyOf(activeDbs).toArray(),
     "name"
   );
 }
@@ -203,7 +239,7 @@ export async function findActiveLetters(
 ): Promise<GroupedLetter[]> {
   const activeDbs = dbid ? [dbid] : await getActiveDatabaseIds();
 
-  const allLetters = await locdb.letters
+  const allLetters = await cloudSongs.letters
     .where("databaseId")
     .anyOf(activeDbs)
     .toArray();
@@ -227,20 +263,20 @@ export async function findArtistsByLetter(
   const activeDbs = dbid ? [dbid] : await getActiveDatabaseIds();
 
   return localeSortByKey(
-    await locdb.artists
+    await cloudSongs.artists
       .where("letterId")
-      .anyOf(activeDbs.map((db) => `${db}-${letter}`))
+      .anyOf(activeDbs.map((db) => `${db}/${letter}`))
       .toArray(),
     "name"
   );
 }
 
 export async function findDatabases(): Promise<LocalDatabase[]> {
-  return localeSortByKey(await locdb.databases.toArray(), "title");
+  return localeSortByKey(await cloudSongs.databases.toArray(), "title");
 }
 
 export async function getActiveDatabaseIds(): Promise<string[]> {
-  return (await locdb.databases.where({ isActive: 1 }).toArray()).map(
+  return (await cloudSongs.databases.where({ isActive: 1 }).toArray()).map(
     (x) => x.id
   );
 }
@@ -249,43 +285,43 @@ export async function findSongsByArtist(
   artistId: string
 ): Promise<LocalSong[]> {
   return localeSortByKey(
-    await locdb.songs.where({ artistId }).toArray(),
+    await cloudSongs.songs.where({ artistId }).toArray(),
     "title"
   );
 }
 
 export async function getSong(songid: string): Promise<LocalSong | undefined> {
-  return locdb.songs.get(songid);
+  return cloudSongs.songs.get(songid);
 }
 
 export async function getArtist(
   artistid: string
 ): Promise<LocalArtist | undefined> {
-  return locdb.artists.get(artistid);
+  return cloudSongs.artists.get(artistid);
 }
 
 export async function getDatabase(
   dbid: string
 ): Promise<LocalDatabase | undefined> {
-  return locdb.databases.get(dbid);
+  return cloudSongs.databases.get(dbid);
 }
 
 export async function setLocalDbActive(dbid: string, isActive: boolean) {
-  await locdb.databases
+  await cloudSongs.databases
     .where({ id: dbid })
     .modify({ isActive: isActive ? 1 : 0 });
 }
 
 async function deleteOldRecents() {
-  const count = await locdb.recents.count();
+  const count = await preferences.recents.count();
   if (count > 100) {
-    const all = _.sortBy(await locdb.recents.toArray(), (x) => x.date);
-    await locdb.recents.bulkDelete(all.slice(0, -100).map((x) => x.id));
+    const all = _.sortBy(await preferences.recents.toArray(), (x) => x.date);
+    await preferences.recents.bulkDelete(all.slice(0, -100).map((x) => x.id));
   }
 }
 
 export async function addRecentSong(song: LocalSong) {
-  await locdb.recents.put({
+  await preferences.recents.put({
     type: "song",
     date: new Date(),
     id: `song:${song.id}`,
@@ -295,7 +331,7 @@ export async function addRecentSong(song: LocalSong) {
 }
 
 export async function addRecentArtist(artist: LocalArtist) {
-  await locdb.recents.put({
+  await preferences.recents.put({
     type: "artist",
     date: new Date(),
     id: `artist:${artist.name}`,
@@ -305,7 +341,7 @@ export async function addRecentArtist(artist: LocalArtist) {
 }
 
 export async function findAllRecents(): Promise<LocalRecentObject[]> {
-  const res = await locdb.recents.toArray();
+  const res = await preferences.recents.toArray();
   const sorted = _.sortBy(res, (x) => x.date);
   sorted.reverse();
   return sorted;
@@ -333,7 +369,7 @@ export async function searchLocalDb(
 
   const activeDbs = await getActiveDatabaseIds();
 
-  const artists = await locdb.artists
+  const artists = await cloudSongs.artists
     .where("nameWords")
     .startsWith(_.maxBy(tokens, (x) => x.length)!)
     .filter(
@@ -355,7 +391,7 @@ export async function searchLocalDb(
     };
   }
 
-  const songsByTitle = await locdb.songs
+  const songsByTitle = await cloudSongs.songs
     .where("titleWords")
     .startsWith(_.maxBy(tokens, (x) => x.length)!)
     .filter(
@@ -377,7 +413,7 @@ export async function searchLocalDb(
     };
   }
 
-  const songsByText = await locdb.songs
+  const songsByText = await cloudSongs.songs
     .where("textWords")
     .startsWith(_.maxBy(tokens, (x) => x.length)!)
     .filter(

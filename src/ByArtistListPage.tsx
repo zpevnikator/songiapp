@@ -10,17 +10,19 @@ import { useEffect } from "react";
 import _ from "lodash";
 
 export default function ByArtistListPage() {
-  const { artistid } = useParams();
+  const { dbid, artistid } = useParams();
+
+  const artistFullId = `${dbid}/${artistid}`;
 
   const querySong = useQuery<LocalSong[]>({
-    queryKey: ["songs-by-artist", artistid],
-    queryFn: () => findSongsByArtist(artistid!),
+    queryKey: ["songs-by-artist", artistFullId],
+    queryFn: () => findSongsByArtist(artistFullId!),
     networkMode: "always",
   });
 
   const queryArtist = useQuery<LocalArtist | undefined>({
-    queryKey: ["artist-by-id", artistid],
-    queryFn: () => getArtist(artistid!),
+    queryKey: ["artist-by-id", artistFullId],
+    queryFn: () => getArtist(artistFullId!),
     networkMode: "always",
   });
 
@@ -34,8 +36,10 @@ export default function ByArtistListPage() {
     <PageLayout
       title={
         queryArtist.data
-          ? `${queryArtist.data?.name} (${queryArtist.data.databaseTitle?.toLocaleLowerCase()})`
-          : _.startCase(artistid?.replace(/^[^\-]*\-/, ""))
+          ? `${
+              queryArtist.data?.name
+            } (${queryArtist.data.databaseTitle?.toLocaleLowerCase()})`
+          : _.startCase(artistid)
       }
       showBack
     >

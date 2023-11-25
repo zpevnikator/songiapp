@@ -16,7 +16,7 @@ export default function SongListItem(props: {
 
   return (
     <ListItemButton
-      onClick={() => navigate(`/songs/${encodeURIComponent(song.id)}`)}
+      onClick={() => navigate(`/songs/${song.id}`)}
     >
       {showIcon && (
         <ListItemIcon>

@@ -13,7 +13,7 @@ export default function ArtistListItem(props: {
   const { artist, showIcon = true } = props;
   return (
     <ListItemButton
-      onClick={() => navigate(`/by-artist/${encodeURIComponent(artist.id)}`)}
+      onClick={() => navigate(`/by-artist/${artist.id}`)}
     >
       {showIcon && (
         <ListItemIcon>

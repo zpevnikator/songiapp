@@ -17,14 +17,9 @@ export interface SongDbList {
 }
 
 export interface SongDatabase {
-  artists: {
-    id: string;
-    name: string;
-  }[];
   songs: {
-    id: string;
     title: string;
-    artistId: string;
+    artist: string;
     lang: string;
     text: string;
   }[];

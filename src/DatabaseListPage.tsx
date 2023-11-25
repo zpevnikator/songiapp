@@ -34,6 +34,7 @@ import { getErrorMessage } from "./utils";
 import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 import { useIntl } from "react-intl";
+import { parseSongDatabase } from "./songpro";
 
 function DatabaseItem(props: {
   db: SongDbListItem;
@@ -238,9 +239,11 @@ export default function DownloadPage() {
     switch (op) {
       case "download":
         try {
-          const dbData = await fetch(db.url).then((res) => res.json());
+          const dbText = await fetch(db.url).then((res) => res.text());
+          const dbData = parseSongDatabase(dbText);
           await saveSongDb(db, dbData);
         } catch (err) {
+          console.error(err);
           setError(getErrorMessage(err));
         }
         break;

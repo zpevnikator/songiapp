@@ -43,8 +43,10 @@ function divideText(text: string, columns: number): string[] {
 }
 
 export default function SongPage() {
-  const { songid } = useParams();
+  const { dbid, artistid, songid } = useParams();
   const intl = useIntl();
+
+  const songFullId = `${dbid}/${artistid}/${songid}`;
 
   const wakeLockRef = useRef<any>(null);
 
@@ -54,8 +56,8 @@ export default function SongPage() {
   });
 
   const query = useQuery<LocalSong | undefined>({
-    queryKey: ["song", songid],
-    queryFn: () => getSong(songid!),
+    queryKey: ["song", songFullId],
+    queryFn: () => getSong(songFullId!),
     networkMode: "always",
   });
 
