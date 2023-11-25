@@ -12,16 +12,37 @@ export interface LocalDatabase extends SongDbListItem {
   artistCount: number;
 }
 
+export interface LocalFileDatabase {
+  id: string;
+  title: string;
+  isActive?: number;
+  songCount: number;
+  artistCount: number;
+  data: string;
+}
+
 export interface SongDbList {
   databases: SongDbListItem[];
 }
 
 export interface SongDatabase {
+  artists: {
+    id: string;
+    name: string;
+    letter: string;
+    songCount: number;
+  }[];
   songs: {
+    id: string;
     title: string;
     artist: string;
+    artistId: string;
     lang: string;
     text: string;
+  }[];
+  letters: {
+    letter: string;
+    artistCount: number;
   }[];
 }
 
@@ -29,7 +50,7 @@ export interface LocalSong {
   id: string;
   title: string;
   artistId: string;
-  artistName: string;
+  artist: string;
   lang: string;
   text: string;
   databaseId: string;

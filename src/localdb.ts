@@ -3,6 +3,7 @@ import type {
   GroupedLetter,
   LocalArtist,
   LocalDatabase,
+  LocalFileDatabase,
   LocalLetter,
   LocalRecentObject,
   LocalSong,
@@ -33,6 +34,18 @@ class CloudSongsDb extends Dexie {
       databases: "id,isActive",
       artists: "id,artistId,databaseId,letterId,*nameWords",
       letters: "id,letter,databaseId",
+    });
+  }
+}
+
+class LocalSongsDb extends Dexie {
+  public databases!: Table<LocalFileDatabase, string>;
+
+  public constructor() {
+    super("localsongs");
+
+    this.version(1).stores({
+      databases: "id,isActive",
     });
   }
 }
@@ -85,81 +98,42 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
     cloudSongs.databases,
     cloudSongs.letters,
     () => {
-      const allArtists = data.songs.map((x) => ({
-        id: _.kebabCase(x.artist) || "no-artist",
-        name: x.artist,
+      const songs = data.songs.map((song) => ({
+        ...song,
+        databaseId: db.id,
+        databaseTitle: db.title,
+        id: `${db.id}/${song.id}`,
+        artistId: `${db.id}/${song.artistId}`,
+        isActive: 1,
+        textWords: tokenize(song.text),
+        titleWords: tokenize(song.title),
       }));
-      const dbArtists = _.uniqBy(allArtists, (x) => x.id);
-      const artistByName = _.keyBy(allArtists, (x) => x.name);
+      cloudSongs.songs.bulkAdd(_.uniqBy(songs, "id"));
 
-      const songIds: string[] = [];
-      for (let i = 0; i < data.songs.length; i += 1) {
-        const song = data.songs[i];
-        let id = `${artistByName[song.artist].id}/${
-          _.kebabCase(song.title) || "no-title"
-        }`;
-        let suffix = "";
-        let suffixIndex = 1;
-        while (songIds.includes(id + suffix)) {
-          suffixIndex += 1;
-          suffix = `-${suffixIndex}`;
-        }
-        songIds.push(id + suffix);
-      }
-
-      cloudSongs.songs.bulkAdd(
-        _.uniqBy(
-          data.songs.map((song, index) => ({
-            ...song,
-            artistName: song.artist,
-            databaseId: db.id,
-            databaseTitle: db.title,
-            id: `${db.id}/${songIds[index]}`,
-            artistId: `${db.id}/${artistByName[song.artist].id}`,
-            isActive: 1,
-            textWords: tokenize(song.text),
-            titleWords: tokenize(song.title),
-          })),
-          "id"
-        )
-      );
-
-      const artists = _.uniqBy(
-        dbArtists.map((artist) => ({
-          ...artist,
-          id: `${db.id}/${artist.id}`,
-          databaseId: db.id,
-          databaseTitle: db.title,
-          songCount: data.songs.filter(
-            (x) => artistByName[x.artist].id == artist.id
-          ).length,
-          isActive: 1,
-          letter: getFirstLetter(artist.name),
-          letterId: `${db.id}/${getFirstLetter(artist.name)}`,
-          nameWords: tokenize(artist.name),
-        })),
-        "id"
-      );
-
-      cloudSongs.artists.bulkAdd(artists);
+      const artists = data.artists.map((artist) => ({
+        ...artist,
+        id: `${db.id}/${artist.id}`,
+        databaseId: db.id,
+        databaseTitle: db.title,
+        isActive: 1,
+        letterId: `${db.id}/${artist.letter}`,
+        nameWords: tokenize(artist.name),
+      }));
+      cloudSongs.artists.bulkAdd(_.uniqBy(artists, "id"));
 
       cloudSongs.databases.add({
         ...db,
         isActive: 1,
         songCount: data.songs.length,
-        artistCount: dbArtists.length,
+        artistCount: data.artists.length,
       });
 
-      const artistsByLetters = _.groupBy(artists, (x) => x.letter);
-
-      cloudSongs.letters.bulkAdd(
-        _.keys(artistsByLetters).map((letter) => ({
-          id: `${db.id}/${letter}`,
-          databaseId: db.id,
-          letter,
-          artistCount: artistsByLetters[letter].length,
-        }))
-      );
+      const letters = data.letters.map((letter) => ({
+        ...letter,
+        id: `${db.id}/${letter.letter}`,
+        databaseId: db.id,
+      }));
+      cloudSongs.letters.bulkAdd(_.uniqBy(letters, "id"));
     }
   );
 }

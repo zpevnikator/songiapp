@@ -29,7 +29,7 @@ export default function SongListItem(props: {
           whiteSpace: "nowrap",
           textOverflow: "ellipsis",
         }}
-        primary={showArtist ? `${song.title} (${song.artistName})` : song.title}
+        primary={showArtist ? `${song.title} (${song.artist})` : song.title}
         secondary={
           showDatabase
             ? `${song?.databaseTitle?.toLocaleLowerCase()}: ${textPart}`

@@ -1,4 +1,6 @@
+import _ from "lodash";
 import { SongDatabase } from "./types";
+import { getFirstLetter } from "./utils";
 
 export function parseSongDatabase(data: string): SongDatabase {
   let currentSong: any = null;
@@ -46,5 +48,45 @@ export function parseSongDatabase(data: string): SongDatabase {
 
   flushSong();
 
-  return { songs };
+  const allArtists: SongDatabase["artists"] = songs.map((x) => ({
+    id: _.kebabCase(x.artist) || "no-artist",
+    name: x.artist,
+    letter: getFirstLetter(x.artist),
+    songCount: 0,
+  }));
+  const artists = _.uniqBy(allArtists, (x) => x.id);
+  const artistByName = _.keyBy(allArtists, (x) => x.name);
+
+  const songIds = new Set<string>();
+  for (const song of songs) {
+    let id = `${artistByName[song.artist].id}/${
+      _.kebabCase(song.title) || "no-title"
+    }`;
+    let suffix = "";
+    let suffixIndex = 1;
+    while (songIds.has(id + suffix)) {
+      suffixIndex += 1;
+      suffix = `-${suffixIndex}`;
+    }
+    songIds.add(id + suffix);
+
+    song.id = id + suffix;
+    song.artistId = artistByName[song.artist].id;
+  }
+
+  const artistsByLetters = _.groupBy(artists, (x) => x.letter);
+  const letters = _.keys(artistsByLetters).map((letter) => ({
+    letter,
+    artistCount: artistsByLetters[letter].length,
+  }));
+
+  for (const artist of artists) {
+    artist.songCount = songs.filter((x) => x.artistId == artist.id).length;
+  }
+
+  return {
+    songs,
+    artists,
+    letters,
+  };
 }
