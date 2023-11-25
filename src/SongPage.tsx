@@ -18,10 +18,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getBaseTone, transposeText } from "./chordTools";
 import _ from "lodash";
 import { FormattedMessage, useIntl } from "react-intl";
+import { parseSongParts } from "./songpro";
 
 export interface LayoutOptions {
   columns: number;
   fontSize: number;
+  view: "normal" | "source";
 }
 
 function divideText(text: string, columns: number): string[] {
@@ -53,6 +55,7 @@ export default function SongPage() {
   const [layout, setLayout] = useState<LayoutOptions>({
     columns: 1,
     fontSize: 16,
+    view: "normal",
   });
 
   const query = useQuery<LocalSong | undefined>({
@@ -61,13 +64,15 @@ export default function SongPage() {
     networkMode: "always",
   });
 
+  const { text } = useMemo(
+    () => parseSongParts(query?.data?.source ?? ""),
+    [query?.data]
+  );
+
   const [transpDiff, setTranspDiff] = useState(0);
   const transposedText = useMemo(
-    () =>
-      transpDiff
-        ? transposeText(query.data?.text ?? "", transpDiff)
-        : query.data?.text,
-    [query.data?.text, transpDiff]
+    () => (transpDiff ? transposeText(text ?? "", transpDiff) : text),
+    [text, transpDiff]
   );
   const textColumns = useMemo(
     () => divideText(transposedText ?? "", layout.columns),
@@ -204,6 +209,27 @@ export default function SongPage() {
               +1
             </Button>
           </Box>
+          <Typography variant="h5" sx={{ m: 2 }}>
+            <FormattedMessage id="view" defaultMessage="View" />
+          </Typography>
+          <Box>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              onClick={(e) => setLayout({ ...layout, view: "normal" })}
+            >
+              <FormattedMessage id="normal" defaultMessage="Normal" />
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              onClick={(e) => setLayout({ ...layout, view: "source" })}
+            >
+              <FormattedMessage id="source" defaultMessage="Source" />
+            </Button>
+          </Box>
         </>
       }
     >
@@ -211,7 +237,7 @@ export default function SongPage() {
         <CircularProgress />
       ) : query.error ? (
         <Alert severity="error">{query.error.message}</Alert>
-      ) : (
+      ) : layout.view == "normal" ? (
         <Grid container>
           {textColumns.map((textColumn, index) => (
             <Grid item xs={12 / layout.columns} key={index}>
@@ -224,6 +250,10 @@ export default function SongPage() {
             </Grid>
           ))}
         </Grid>
+      ) : (
+        <Typography sx={{ m: 1, fontSize: layout.fontSize }}>
+          <pre>{query?.data?.source}</pre>
+        </Typography>
       )}
     </PageLayout>
   );

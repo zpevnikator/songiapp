@@ -5,6 +5,7 @@ import { getFirstLetter } from "./utils";
 export function parseSongDatabase(data: string): SongDatabase {
   let currentSong: any = null;
   let currentText = "";
+  let currentSource = "";
 
   const songs: SongDatabase["songs"] = [];
 
@@ -18,10 +19,12 @@ export function parseSongDatabase(data: string): SongDatabase {
       songs.push({
         ...currentSong,
         text: currentText.trim(),
+        source: currentSource.trim(),
       });
     }
     currentSong = null;
     currentText = "";
+    currentSource = "";
   }
 
   for (const line of data.split("\n")) {
@@ -29,6 +32,8 @@ export function parseSongDatabase(data: string): SongDatabase {
       flushSong();
       continue;
     }
+
+    currentSource += line + "\n";
 
     if (!currentText) {
       const attrMatch = line.match(/[@!]([^=]+)=(.*)/);
@@ -45,7 +50,6 @@ export function parseSongDatabase(data: string): SongDatabase {
       currentText += line + "\n";
     }
   }
-
   flushSong();
 
   const allArtists: SongDatabase["artists"] = songs.map((x) => ({
@@ -88,5 +92,35 @@ export function parseSongDatabase(data: string): SongDatabase {
     songs,
     artists,
     letters,
+  };
+}
+
+export function parseSongParts(source: string) {
+  const song = {};
+  let text = "";
+  for (const line of source.split("\n")) {
+    if (line.match(/^\s*----*\s*$/)) {
+      return {
+        ...song,
+        text,
+      };
+    }
+
+    if (!text) {
+      const attrMatch = line.match(/[@!]([^=]+)=(.*)/);
+      if (attrMatch) {
+        song[attrMatch[1]] = attrMatch[2].trim();
+        continue;
+      }
+    }
+
+    if (line.trim() || text) {
+      text += line + "\n";
+    }
+  }
+
+  return {
+    ...song,
+    text,
   };
 }

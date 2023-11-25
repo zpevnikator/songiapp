@@ -2,6 +2,7 @@ import { ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { LocalSong } from "./types";
 import LyricsIcon from "@mui/icons-material/Lyrics";
 import { useNavigate } from "react-router-dom";
+import { parseSongParts } from "./songpro";
 
 export default function SongListItem(props: {
   song: LocalSong;
@@ -12,12 +13,11 @@ export default function SongListItem(props: {
   const { song, showArtist, showIcon = true, showDatabase } = props;
   const navigate = useNavigate();
 
-  const textPart = song?.text?.replace(/^\..*$/m, "")?.substring(0, 200);
+  const { text } = parseSongParts(song.source);
+  const textPart = text?.replace(/^\..*$/m, "")?.substring(0, 200);
 
   return (
-    <ListItemButton
-      onClick={() => navigate(`/songs/${song.id}`)}
-    >
+    <ListItemButton onClick={() => navigate(`/songs/${song.id}`)}>
       {showIcon && (
         <ListItemIcon>
           <LyricsIcon />

@@ -37,7 +37,8 @@ export interface SongDatabase {
     artist: string;
     artistId: string;
     lang: string;
-    text: string;
+    source: string;
+    text?: string;
   }[];
   letters: {
     letter: string;
@@ -51,7 +52,7 @@ export interface LocalSong {
   artistId: string;
   artist: string;
   lang: string;
-  text: string;
+  source: string;
   databaseId: string;
   databaseTitle: string;
   titleWords: string[];

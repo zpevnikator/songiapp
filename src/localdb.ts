@@ -100,13 +100,13 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
     cloudSongs.letters,
     () => {
       const songs = data.songs.map((song) => ({
-        ...song,
+        ..._.omit(song, ["text"]),
         databaseId: db.id,
         databaseTitle: db.title,
         id: `${db.id}/${song.id}`,
         artistId: `${db.id}/${song.artistId}`,
         isActive: 1,
-        textWords: tokenize(song.text),
+        textWords: tokenize(song.text!),
         titleWords: tokenize(song.title),
       }));
       cloudSongs.songs.bulkAdd(_.uniqBy(songs, "id"));
