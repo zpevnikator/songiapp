@@ -48,6 +48,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { parseSongDatabase } from "./songpro";
 import InputTextDialog from "./InputTextDialog";
 import NewDatabaseDialog from "./NewDatabaseDialog";
+import FreeSpaceProgressBar from "./FreeSpaceProgressBar";
 
 function DatabaseItem(props: {
   db: SongDbListItem;
@@ -457,6 +458,8 @@ export default function DownloadPage() {
             ]
       }
     >
+      <FreeSpaceProgressBar live={isWorking || !!processedDatabase} />
+
       {isWorking || localDbQuery.isPending || localDbFileQuery.isPending ? (
         <CircularProgress />
       ) : remoteDbQuery.error ? (
