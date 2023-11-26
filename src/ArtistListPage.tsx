@@ -161,12 +161,12 @@ export default function ArtistListPage() {
             />
           </Box>
           <Box sx={{ m: 1 }}>
-            <Link to="/databases">
+            <MaterialLink component={Link} to="/databases">
               <FormattedMessage
                 id="go-to-database"
                 defaultMessage="Go to Databases"
               />
-            </Link>
+            </MaterialLink>
           </Box>
           <Box sx={{ m: 1 }}>
             <FormattedMessage

@@ -251,7 +251,9 @@ export default function SongPage() {
           ))}
         </Grid>
       ) : (
-        <Typography sx={{ m: 1, fontSize: layout.fontSize }}>
+        <Typography
+          sx={{ m: 1, fontSize: layout.fontSize, overflowX: "scroll" }}
+        >
           <pre>{query?.data?.source}</pre>
         </Typography>
       )}
