@@ -73,7 +73,7 @@ if (localStorage.getItem("deleteLocalDatabase") == "cloudsongs") {
 }
 
 function tokenize(...texts: string[]): string[] {
-  const res = new Set<string>();
+  const res: string[] = [];
 
   for (const text of texts) {
     for (const word of removeDiacritics(
@@ -83,12 +83,12 @@ function tokenize(...texts: string[]): string[] {
       .split(/[\s\-\(\)\.\,\;\!\?\"\'\/\+\*\&]/)) {
       const trimmed = word.replace(/[^a-z]/g, "").trim();
       if (trimmed.length >= 2) {
-        res.add(trimmed);
+        res.push(trimmed);
       }
     }
   }
 
-  return [...res];
+  return res;
 }
 
 export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
@@ -106,8 +106,8 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
         id: `${db.id}/${song.id}`,
         artistId: `${db.id}/${song.artistId}`,
         isActive: 1,
-        textWords: tokenize(song.text!),
-        titleWords: tokenize(song.title),
+        textWords: _.uniq(tokenize(song.text!).slice(0, 20)),
+        titleWords: _.uniq(tokenize(song.title)),
       }));
       cloudSongs.songs.bulkAdd(_.uniqBy(songs, "id"));
 
@@ -118,7 +118,7 @@ export async function saveSongDb(db: SongDbListItem, data: SongDatabase) {
         databaseTitle: db.title,
         isActive: 1,
         letterId: `${db.id}/${artist.letter}`,
-        nameWords: tokenize(artist.name),
+        nameWords: _.uniq(tokenize(artist.name)),
       }));
       cloudSongs.artists.bulkAdd(_.uniqBy(artists, "id"));
 
