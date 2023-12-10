@@ -14,12 +14,16 @@ import { useState } from "react";
 import { useSetSettings, useSettings } from "./SettingsProvider";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useLocaleState } from "./TranslationProvider";
+import GitHubLogin from "react-github-login";
 
 export default function SettingsPage() {
   const settings = useSettings();
   const setSettings = useSetSettings();
   const intl = useIntl();
   const [locale, setLocale] = useLocaleState();
+
+  const handleLoginSuccess = (response) => console.log(response);
+  const handleLoginFailure = (response) => console.error(response);
 
   return (
     <PageLayout
@@ -34,7 +38,6 @@ export default function SettingsPage() {
           <MenuItem value="cs">Česky</MenuItem>
         </Select>
       </Box>
-
       <List>
         <ListItem>
           <ListItemIcon>
@@ -86,6 +89,13 @@ export default function SettingsPage() {
           />
         </ListItem>
       </List>
+      <Box sx={{ m: 2 }}>
+        <GitHubLogin
+          clientId="e10f5b994e58c6b3914a"
+          onSuccess={handleLoginSuccess}
+          onFailure={handleLoginFailure}
+        />
+      </Box>
     </PageLayout>
   );
 }
