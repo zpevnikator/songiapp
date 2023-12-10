@@ -2,8 +2,20 @@
   "about": {
     "defaultMessage": "About"
   },
+  "activate-database": {
+    "defaultMessage": "Activate database"
+  },
+  "activate-database.check": {
+    "defaultMessage": "Activate database after creating"
+  },
+  "add-new-database": {
+    "defaultMessage": "Add new database"
+  },
   "app-is-offline": {
     "defaultMessage": "SongiApp is prepared for offline usage, you can install it as normal app"
+  },
+  "artist": {
+    "defaultMessage": "Artist"
   },
   "artists": {
     "defaultMessage": "Artists"
@@ -11,11 +23,35 @@
   "artists.lower": {
     "defaultMessage": "artists"
   },
+  "cancel": {
+    "defaultMessage": "Cancel"
+  },
   "columns": {
     "defaultMessage": "Columns"
   },
+  "could-add-songpro": {
+    "defaultMessage": "You could also add songs in songpro format. Songpro is text file format allowing to store songs with chords and other metadata."
+  },
+  "create-editable-version": {
+    "defaultMessage": "Create editable version"
+  },
+  "create-own-database": {
+    "defaultMessage": "Create own database"
+  },
+  "database": {
+    "defaultMessage": "Database"
+  },
+  "database-name": {
+    "defaultMessage": "Database name"
+  },
   "databases": {
     "defaultMessage": "Databases"
+  },
+  "deactivate-database": {
+    "defaultMessage": "Deectivate database"
+  },
+  "delete": {
+    "defaultMessage": "Delete"
   },
   "delete-all": {
     "defaultMessage": "Delete all"
@@ -25,6 +61,9 @@
   },
   "delete-all-data.question": {
     "defaultMessage": "Really delete all downloaded songs?"
+  },
+  "edit-data": {
+    "defaultMessage": "Edit data"
   },
   "font-size": {
     "defaultMessage": "Font size"
@@ -38,14 +77,29 @@
   "language": {
     "defaultMessage": "Language:"
   },
+  "new-database": {
+    "defaultMessage": "New database"
+  },
+  "new-db-name": {
+    "defaultMessage": "Please enter new database name"
+  },
   "no-active-songs": {
     "defaultMessage": "You have no active songs in your database. Please download some songs in \"Databases\" section. Only songs from checked databases are active."
   },
   "no-songs-found": {
     "defaultMessage": "No songs found"
   },
+  "normal": {
+    "defaultMessage": "Normal"
+  },
+  "ok": {
+    "defaultMessage": "OK"
+  },
   "page-not-exists": {
     "defaultMessage": "Oops!! This page doesn't exist"
+  },
+  "question": {
+    "defaultMessage": "Question"
   },
   "really-delete-database.question": {
     "defaultMessage": "Really delete database {db}?"
@@ -65,11 +119,20 @@
   "show-all-artists.detail": {
     "defaultMessage": "Don't show alphabet on Artists page. Can be much slower."
   },
+  "show-artists": {
+    "defaultMessage": "Show artists"
+  },
   "songs.lower": {
     "defaultMessage": "songs"
   },
+  "source": {
+    "defaultMessage": "Source"
+  },
   "specify-search-criteria": {
     "defaultMessage": "Please specify some search criteria. Each searched word must contain at least two letters, single letters and numbers are ignored."
+  },
+  "succesfully-saved-db": {
+    "defaultMessage": "Saved database, detected {songs} songs and {artists} artists"
   },
   "transpose": {
     "defaultMessage": "Tranpose"
@@ -79,5 +142,8 @@
   },
   "use-dark-theme": {
     "defaultMessage": "Use dark theme"
+  },
+  "view": {
+    "defaultMessage": "View"
   }
 }
