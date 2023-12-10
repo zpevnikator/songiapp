@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
-import { addRecentSong, getSong } from "./localdb";
+import { addRecentSong, getDatabase, getSong } from "./localdb";
 import {
   Alert,
   Box,
@@ -11,14 +11,15 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { LocalSong } from "./types";
-import { useParams } from "react-router-dom";
+import { LocalDatabase, LocalSong } from "./types";
+import { Link, useParams } from "react-router-dom";
 import SongFormatter from "./SongFormatter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getBaseTone, transposeText } from "./chordTools";
 import _ from "lodash";
 import { FormattedMessage, useIntl } from "react-intl";
 import { parseSongParts } from "./songpro";
+import MaterialLink from "@mui/material/Link";
 
 export interface LayoutOptions {
   columns: number;
@@ -78,6 +79,12 @@ export default function SongPage() {
     () => divideText(transposedText ?? "", layout.columns),
     [transposedText, layout.columns]
   );
+
+  const dbQuery = useQuery<LocalDatabase | undefined>({
+    queryKey: ["selected-database", dbid],
+    queryFn: () => getDatabase(dbid ?? ""),
+    networkMode: "always",
+  });
 
   useEffect(() => {
     if (query.data) {
@@ -238,18 +245,44 @@ export default function SongPage() {
       ) : query.error ? (
         <Alert severity="error">{query.error.message}</Alert>
       ) : layout.view == "normal" ? (
-        <Grid container>
-          {textColumns.map((textColumn, index) => (
-            <Grid item xs={12 / layout.columns} key={index}>
-              <Typography sx={{ m: 1, fontSize: layout.fontSize }}>
-                {new SongFormatter(
-                  textColumn,
-                  theme.palette.primary.main
-                ).format()}
-              </Typography>
-            </Grid>
-          ))}
-        </Grid>
+        <>
+          <Typography sx={{ m: 1 }}>
+            <Typography sx={{ fontWeight: "bold" }} component="span">
+              <FormattedMessage id="artist" defaultMessage="Artist" />:
+            </Typography>
+            <MaterialLink
+              sx={{ ml: 1 }}
+              component={Link}
+              to={`/by-artist/${dbid}/${artistid}`}
+            >
+              {query?.data?.artist}
+            </MaterialLink>
+          </Typography>
+          <Typography sx={{ m: 1 }}>
+            <Typography sx={{ fontWeight: "bold" }} component="span">
+              <FormattedMessage id="database" defaultMessage="Database" />:
+            </Typography>
+            <MaterialLink
+              sx={{ ml: 1 }}
+              component={Link}
+              to={`/databases/${dbid}`}
+            >
+              {dbQuery?.data?.title ?? dbid}
+            </MaterialLink>
+          </Typography>
+          <Grid container>
+            {textColumns.map((textColumn, index) => (
+              <Grid item xs={12 / layout.columns} key={index}>
+                <Typography sx={{ m: 1, fontSize: layout.fontSize }}>
+                  {new SongFormatter(
+                    textColumn,
+                    theme.palette.primary.main
+                  ).format()}
+                </Typography>
+              </Grid>
+            ))}
+          </Grid>
+        </>
       ) : (
         <Typography
           sx={{ m: 1, fontSize: layout.fontSize, overflowX: "scroll" }}
