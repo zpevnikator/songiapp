@@ -89,14 +89,14 @@ export default function SettingsPage() {
           />
         </ListItem>
       </List>
-      <Box sx={{ m: 2 }}>
+      {/* <Box sx={{ m: 2 }}>
         <GitHubLogin
           clientId="e10f5b994e58c6b3914a"
           onSuccess={handleLoginSuccess}
           onFailure={handleLoginFailure}
           redirectUri='https://songi.app/'
         />
-      </Box>
+      </Box> */}
     </PageLayout>
   );
 }
