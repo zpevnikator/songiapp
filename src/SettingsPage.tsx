@@ -94,6 +94,7 @@ export default function SettingsPage() {
           clientId="e10f5b994e58c6b3914a"
           onSuccess={handleLoginSuccess}
           onFailure={handleLoginFailure}
+          redirectUri='https://songi.app/'
         />
       </Box>
     </PageLayout>
