@@ -32,9 +32,6 @@
   "could-add-songpro": {
     "defaultMessage": "You could also add songs in songpro format. Songpro is text file format allowing to store songs with chords and other metadata."
   },
-  "create-editable-version": {
-    "defaultMessage": "Create editable version"
-  },
   "create-own-database": {
     "defaultMessage": "Create own database"
   },

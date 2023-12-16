@@ -12,6 +12,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ListSubheader,
   Menu,
   MenuItem,
   Snackbar,
@@ -58,7 +59,6 @@ function DatabaseItem(props: {
   deleteFileDatabase: (id: number) => void;
   activateFileDatabase: (db: LocalFileDatabase) => void;
   deactivateFileDatabase: (db: LocalFileDatabase) => void;
-  getEditableVersion: (db: LocalDatabase) => void;
   isProcessed: boolean;
   isWaiting: boolean;
   isFinished: boolean;
@@ -73,7 +73,6 @@ function DatabaseItem(props: {
     deleteFileDatabase,
     activateFileDatabase,
     deactivateFileDatabase,
-    getEditableVersion,
     isProcessed,
     isWaiting,
     isFinished,
@@ -228,19 +227,6 @@ function DatabaseItem(props: {
             }}
           >
             <FormattedMessage id="edit-data" defaultMessage="Edit data" />
-          </MenuItem>
-        )}
-        {localDb && !localFileDb && (
-          <MenuItem
-            onClick={() => {
-              setMenuAnchorEl(null);
-              getEditableVersion(localDb);
-            }}
-          >
-            <FormattedMessage
-              id="create-editable-version"
-              defaultMessage="Create editable version"
-            />
           </MenuItem>
         )}
         {localFileDb && !localDb && (
@@ -416,26 +402,6 @@ export default function DownloadPage() {
     setIsWorking(false);
   }
 
-  async function getEditableVersion(db: LocalDatabase) {
-    setIsWorking(true);
-    try {
-      const dbText = await fetch(db.url).then((res) => res.text());
-      const parsed = parseSongDatabase(dbText);
-      await saveLocalSongsDb({
-        title: db.title,
-        songCount: parsed.songs.length,
-        artistCount: parsed.artists.length,
-        data: dbText,
-      });
-    } catch (err) {
-      console.error(err);
-      setError(getErrorMessage(err));
-    }
-
-    setLocalDbToken((x) => x + 1);
-    setIsWorking(false);
-  }
-
   return (
     <PageLayout
       title={intl.formatMessage({
@@ -502,7 +468,6 @@ export default function DownloadPage() {
               isWaiting={!!operationQueue.find((x) => x.db.id == db.id)}
               activateFileDatabase={activateFileDatabase}
               deactivateFileDatabase={deactivateFileDatabase}
-              getEditableVersion={getEditableVersion}
               setActiveDb={async (dbid, value) => {
                 try {
                   setIsWorking(true);
