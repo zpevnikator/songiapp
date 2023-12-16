@@ -251,7 +251,20 @@ function DatabaseItem(props: {
           >
             <FormattedMessage
               id="deactivate-database"
-              defaultMessage="Deectivate database"
+              defaultMessage="Deactivate database"
+            />
+          </MenuItem>
+        )}
+        {db.url != null && (
+          <MenuItem
+            onClick={() => {
+              setMenuAnchorEl(null);
+              window.open(db.url, "_blank");
+            }}
+          >
+            <FormattedMessage
+              id="open-database-source"
+              defaultMessage="Open database source"
             />
           </MenuItem>
         )}
