@@ -37,3 +37,7 @@ code {
 .song-chords-group {
   display: flex;
 }
+
+.song-section-delimiter {
+  height: 1em;
+}

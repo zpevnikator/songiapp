@@ -14,7 +14,8 @@ export default function SongListItem(props: {
   const navigate = useNavigate();
 
   const { text } = parseSongParts(song.source);
-  const textPart = text?.replace(/^\..*$/m, "")?.substring(0, 200);
+  // const textPart = text?.replace(/^#\s*.*$/m, "")?.substring(0, 200);
+  const textPart = text?.substring(0, 200);
 
   return (
     <ListItemButton onClick={() => navigate(`/songs/${song.id}`)}>

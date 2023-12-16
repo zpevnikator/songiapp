@@ -294,6 +294,18 @@ export default function DownloadPage() {
   queueRef.current = operationQueue;
   processedRef.current = processedDatabase;
 
+  // async function loadHubs() {
+  //   const resp = await fetch(
+  //     "https://api.github.com/search/repositories?q=topic:songihub"
+  //   );
+  //   const json = await resp.json();
+  //   console.log("HUBS", json);
+  // }
+
+  // useEffect(() => {
+  //   loadHubs();
+  // }, []);
+
   const remoteDbQuery = useQuery<SongDbList>({
     queryKey: ["remoteDatabases"],
     queryFn: () =>

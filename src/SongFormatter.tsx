@@ -184,6 +184,11 @@ export default class SongFormatter {
         }
         label = line.substring(1).trim();
         showLabel = true;
+      }
+      if (line.trim() == "") {
+        label = "";
+        showLabel = false;
+        res.push(<div className="song-section-delimiter"></div>);
       } else {
         res.push(
           new ChordLineFormatter(line).format(
