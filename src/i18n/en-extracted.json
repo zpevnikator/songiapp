@@ -8,8 +8,14 @@
   "activate-database.check": {
     "defaultMessage": "Activate database after creating"
   },
+  "add": {
+    "defaultMessage": "Add"
+  },
   "add-new-database": {
     "defaultMessage": "Add new database"
+  },
+  "all": {
+    "defaultMessage": "All"
   },
   "app-is-offline": {
     "defaultMessage": "SongiApp is prepared for offline usage, you can install it as normal app"
@@ -45,7 +51,7 @@
     "defaultMessage": "Databases"
   },
   "deactivate-database": {
-    "defaultMessage": "Deectivate database"
+    "defaultMessage": "Deactivate database"
   },
   "delete": {
     "defaultMessage": "Delete"
@@ -59,8 +65,14 @@
   "delete-all-data.question": {
     "defaultMessage": "Really delete all downloaded songs?"
   },
+  "edit": {
+    "defaultMessage": "Edit"
+  },
   "edit-data": {
     "defaultMessage": "Edit data"
+  },
+  "edit-songs": {
+    "defaultMessage": "Edit songs"
   },
   "font-size": {
     "defaultMessage": "Font size"
@@ -73,6 +85,9 @@
   },
   "language": {
     "defaultMessage": "Language:"
+  },
+  "loading": {
+    "defaultMessage": "Loading"
   },
   "new-database": {
     "defaultMessage": "New database"
@@ -92,6 +107,9 @@
   "ok": {
     "defaultMessage": "OK"
   },
+  "open-database-source": {
+    "defaultMessage": "Open database source"
+  },
   "page-not-exists": {
     "defaultMessage": "Oops!! This page doesn't exist"
   },
@@ -101,14 +119,23 @@
   "really-delete-database.question": {
     "defaultMessage": "Really delete database {db}?"
   },
+  "really-delete-songs": {
+    "defaultMessage": "Really delete {songs} songs?"
+  },
   "reset": {
     "defaultMessage": "Reset"
+  },
+  "save": {
+    "defaultMessage": "Save"
   },
   "search": {
     "defaultMessage": "Vyhledat"
   },
   "settings": {
     "defaultMessage": "Settings"
+  },
+  "show": {
+    "defaultMessage": "Show"
   },
   "show-all-artists": {
     "defaultMessage": "Show all artists"
