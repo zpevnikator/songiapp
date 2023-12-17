@@ -8,7 +8,7 @@ You could also create your own database. It could be public or hidden.
 
 ## Creating own database
 * Create your [github](https://github.com/) account
-* [Create repository](https://github.com/new} under your account
+* [Create repository](https://github.com/new) under your account
   * Repository must be public
   * Check "Add README file"
 * Create text file "index.songpro" with songs exported from your local database in songiapp
