@@ -1,11 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
 import {
-  addRecentArtist,
   deleteSongsFromLocalDb,
-  findSongsByArtist,
   findSongsByDatabase,
-  getArtist,
   getLocalFileDatabase,
 } from "./localdb";
 import {
@@ -13,21 +10,16 @@ import {
   Button,
   Checkbox,
   CircularProgress,
-  Grid,
   List,
-  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import { LocalArtist, LocalSong } from "./types";
+import { LocalFileDatabase, LocalSong } from "./types";
 import { useNavigate, useParams } from "react-router-dom";
-import SongListItem from "./SongListItem";
-import BigListView from "./BigListView";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import _ from "lodash";
 import { FormattedMessage, useIntl } from "react-intl";
-import { parseSongParts } from "./songpro";
 
 function SongItem(props: {
   song: LocalSong;
@@ -80,6 +72,12 @@ export default function SongsAdminPage() {
     networkMode: "always",
   });
 
+  const queryDb = useQuery<LocalFileDatabase | undefined>({
+    queryKey: ["local-db-by-id", dbid],
+    queryFn: () => getLocalFileDatabase(parseInt(dbid!)),
+    networkMode: "always",
+  });
+
   const handleDelete = async () => {
     if (
       window.confirm(
@@ -103,7 +101,10 @@ export default function SongsAdminPage() {
 
   return (
     <PageLayout
-      title={intl.formatMessage({ id: "songs", defaultMessage: "Songs" })}
+      title={
+        queryDb?.data?.title ??
+        intl.formatMessage({ id: "loading", defaultMessage: "Loading" })
+      }
       showBack
       headerButtons={
         <>
@@ -139,6 +140,12 @@ export default function SongsAdminPage() {
             onClick={handleDelete}
           >
             <FormattedMessage id="delete" defaultMessage="Delete" />
+          </Button>
+          <Button
+            color="inherit"
+            onClick={() => navigate(`/local/edit/${dbid}`)}
+          >
+            <FormattedMessage id="all" defaultMessage="All" />
           </Button>
         </>
       }

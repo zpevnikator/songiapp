@@ -101,7 +101,10 @@ export default function EditLocalDatabasePage(props: {
 
   return (
     <PageLayout
-      title={dbQuery?.data?.title ?? "Loading..."}
+      title={
+        dbQuery?.data?.title ??
+        intl.formatMessage({ id: "loading", defaultMessage: "Loading" })
+      }
       headerButtons={
         dbQuery.data && (
           <Button color="inherit" onClick={handleSave}>
