@@ -74,7 +74,9 @@ export default function EditLocalDatabasePage(props: {
     ) {
       switch (mode) {
         case "addsongs":
-          setData("");
+          setData(
+            "@title=song1\n@artist=Some artist\n\n#1.\nText[Ami] to be [Fmaj]continued"
+          );
           break;
         case "editdb":
           setData(dbContentQuery.data?.data ?? "");
