@@ -237,6 +237,9 @@ export default function SongPage() {
               <FormattedMessage id="source" defaultMessage="Source" />
             </Button>
           </Box>
+          <Typography variant="h5" sx={{ m: 2 }}>
+            <FormattedMessage id="add-to-database" defaultMessage="Add to database" />
+          </Typography>
         </>
       }
     >

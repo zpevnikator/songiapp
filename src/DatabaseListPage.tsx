@@ -229,7 +229,7 @@ function DatabaseItem(props: {
             <FormattedMessage id="edit-data" defaultMessage="Edit data" />
           </MenuItem>
         )}
-        {localFileDb && (
+        {localFileDb && localDb && (
           <MenuItem
             onClick={() => {
               setMenuAnchorEl(null);
