@@ -63,7 +63,7 @@ export default function SearchField(props: SearchFieldProps) {
       <StyledInputBase
         placeholder={intl.formatMessage({
           id: "search",
-          defaultMessage: "Vyhledat",
+          defaultMessage: "Search",
         })}
         inputProps={{ "aria-label": "search" }}
         value={props.value}

@@ -14,6 +14,9 @@
   "add-new-database": {
     "defaultMessage": "Add new database"
   },
+  "add-to-database": {
+    "defaultMessage": "Add to database"
+  },
   "all": {
     "defaultMessage": "All"
   },
@@ -129,7 +132,7 @@
     "defaultMessage": "Save"
   },
   "search": {
-    "defaultMessage": "Vyhledat"
+    "defaultMessage": "Search"
   },
   "settings": {
     "defaultMessage": "Settings"
@@ -145,6 +148,9 @@
   },
   "show-artists": {
     "defaultMessage": "Show artists"
+  },
+  "song-added-to-db": {
+    "defaultMessage": "Song was added to local database"
   },
   "songs.lower": {
     "defaultMessage": "songs"
