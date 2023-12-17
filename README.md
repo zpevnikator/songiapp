@@ -15,3 +15,4 @@ You could also create your own database. It could be public or hidden.
 * Open settings dialog for repository and change topics:
   * set "songidb-public" for public databases visible for all users
   * set "songidb-yourkey" for hidden databases. Users can download this database, if he types "yourkey" in database search field
+* You could see at [this sample repository](https://github.com/songiapp/miserables)
