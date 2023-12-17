@@ -95,7 +95,7 @@ export function parseSongDatabase(data: string): SongDatabase {
   };
 }
 
-export function parseSongParts(source: string) {
+export function parseSongParts(source: string): Record<string, string> {
   const song = {};
   let text = "";
   for (const line of source?.split("\n") ?? []) {

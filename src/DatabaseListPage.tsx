@@ -229,6 +229,16 @@ function DatabaseItem(props: {
             <FormattedMessage id="edit-data" defaultMessage="Edit data" />
           </MenuItem>
         )}
+        {localFileDb && (
+          <MenuItem
+            onClick={() => {
+              setMenuAnchorEl(null);
+              navigate(`/local/songs/${db.id}`);
+            }}
+          >
+            <FormattedMessage id="edit-songs" defaultMessage="Edit songs" />
+          </MenuItem>
+        )}
         {localFileDb && !localDb && (
           <MenuItem
             onClick={() => {

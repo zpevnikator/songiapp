@@ -1,54 +1,91 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
+  Button,
   CircularProgress,
   Fab,
   Paper,
   TextField,
 } from "@mui/material";
 import PageLayout from "./PageLayout";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useQuery } from "@tanstack/react-query";
-import { LocalFileDatabase } from "./types";
+import { LocalFileDatabase, LocalSong } from "./types";
 import {
+  addNewSongsToLocalDb,
   deleteSongDb,
   getDatabase,
   getLocalFileDatabase,
+  getSongs,
   saveLocalSongsDb,
   saveSongDb,
+  updateSongsInLocalDb,
 } from "./localdb";
 import SaveIcon from "@mui/icons-material/Save";
 import { parseSongDatabase } from "./songpro";
 
-export default function EditLocalDatabasePage() {
-  const { dbid } = useParams();
+export default function EditLocalDatabasePage(props: {
+  mode: "editsongs" | "addsongs" | "editdb";
+}) {
+  const { mode } = props;
+  const { dbid, songids } = useParams();
   const intl = useIntl();
 
-  const query = useQuery<LocalFileDatabase | undefined>({
+  const songIdList = useMemo(() => (songids ?? "").split(","), [songids]);
+
+  const dbQuery = useQuery<LocalFileDatabase | undefined>({
     queryKey: ["localfiledb", dbid],
     queryFn: () => getLocalFileDatabase(parseInt(dbid!)),
     networkMode: "always",
     gcTime: 0,
   });
+  const songsQuery = useQuery<LocalSong[]>({
+    queryKey: ["localsongs", dbid, songids],
+    queryFn: () => getSongs(songIdList),
+    networkMode: "always",
+    gcTime: 0,
+  });
   const [data, setData] = useState("");
   const [savedInfo, setSavedInfo] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!query.isPending) {
-      setData(query.data?.data ?? "");
+    console.log("songsQuery", songsQuery.data);
+    if (!dbQuery.isPending && !songsQuery.isPending) {
+      switch (mode) {
+        case "addsongs":
+          setData("");
+          break;
+        case "editdb":
+          setData(dbQuery.data?.data ?? "");
+          break;
+        case "editsongs":
+          setData(songsQuery.data?.map((x) => x.source).join("\n---\n") ?? "");
+          break;
+      }
     }
-  }, [query.isPending]);
+  }, [dbQuery.isPending, songsQuery.isPending]);
 
   async function handleSave() {
     const parsed = parseSongDatabase(data);
-    await saveLocalSongsDb({
-      ...query.data!,
-      artistCount: parsed.artists.length,
-      songCount: parsed.songs.length,
-      data,
-    });
+    switch (mode) {
+      case "editdb":
+        await saveLocalSongsDb({
+          ...dbQuery.data!,
+          artistCount: parsed.artists.length,
+          songCount: parsed.songs.length,
+          data,
+        });
+        break;
+      case "editsongs":
+        await updateSongsInLocalDb(dbQuery.data!, songIdList, data);
+        break;
+      case "addsongs":
+        await addNewSongsToLocalDb(dbQuery.data!, data);
+        break;
+    }
     setSavedInfo(
       intl.formatMessage(
         {
@@ -59,14 +96,24 @@ export default function EditLocalDatabasePage() {
         { songs: parsed.songs.length, artists: parsed.artists.length }
       )
     );
+    navigate(`/local/songs/${dbid}`);
   }
 
   return (
-    <PageLayout title={query?.data?.title ?? "Loading..."}>
-      {query.isPending ? (
+    <PageLayout
+      title={dbQuery?.data?.title ?? "Loading..."}
+      headerButtons={
+        dbQuery.data && (
+          <Button color="inherit" onClick={handleSave}>
+            <FormattedMessage id="save" defaultMessage="Save" />
+          </Button>
+        )
+      }
+    >
+      {dbQuery.isPending ? (
         <CircularProgress />
-      ) : query.error ? (
-        <Alert severity="error">{query.error.message}</Alert>
+      ) : dbQuery.error ? (
+        <Alert severity="error">{dbQuery.error.message}</Alert>
       ) : (
         <Box
           sx={{
@@ -88,15 +135,6 @@ export default function EditLocalDatabasePage() {
         </Box>
       )}
 
-      {query.data && (
-        <Fab
-          color="primary"
-          style={{ position: "fixed", bottom: 40, right: 20 }}
-          onClick={handleSave}
-        >
-          <SaveIcon sx={{ mr: 1 }} />
-        </Fab>
-      )}
       {savedInfo && (
         <Alert
           severity="info"

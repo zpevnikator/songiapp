@@ -269,8 +269,22 @@ export async function findSongsByArtist(
   );
 }
 
+export async function findSongsByDatabase(
+  databaseId: string
+): Promise<LocalSong[]> {
+  return localeSortByKey(
+    await cloudSongs.songs.where({ databaseId }).toArray(),
+    "title"
+  );
+}
+
 export async function getSong(songid: string): Promise<LocalSong | undefined> {
   return cloudSongs.songs.get(songid);
+}
+
+export async function getSongs(songids: string[]): Promise<LocalSong[]> {
+  return _.compact(await Promise.all(songids.map((songid) => getSong(songid))));
+  // return cloudSongs.songs.where({ id: songids }).toArray();
 }
 
 export async function getLocalFileDatabase(
@@ -341,9 +355,88 @@ export async function saveLocalSongsDb(db: LocalFileDatabase) {
   if (db.id) {
     const activated = await getDatabase(String(db.id));
     if (activated) {
-      convertDbFromFileToCloud(db);
+      await convertDbFromFileToCloud(db);
     }
   }
+}
+
+export async function addNewSongsToLocalDb(
+  db: LocalFileDatabase,
+  addedSongsSource: string
+) {
+  const activated = await getDatabase(String(db.id));
+  if (!activated) {
+    return;
+  }
+
+  const newSource = db.data + "\n---\n" + addedSongsSource;
+  const parsed = parseSongDatabase(newSource);
+
+  const newDb = {
+    ...db,
+    data: newSource,
+    songCount: parsed.songs.length,
+    artistCount: parsed.artists.length,
+  }
+
+  await localSongs.databases.put(newDb);
+
+  await convertDbFromFileToCloud(newDb);
+}
+
+export async function updateSongsInLocalDb(
+  db: LocalFileDatabase,
+  updatedSongsIds: string[],
+  updatedSongsSource: string
+) {
+  const activated = await getDatabase(String(db.id));
+  if (!activated) {
+    return;
+  }
+
+  const songs = await findSongsByDatabase(String(db.id));
+  const newSource = [
+    ...songs
+      .filter((x) => !updatedSongsIds.includes(x.id))
+      .map((x) => x.source),
+    updatedSongsSource,
+  ].join("\n---\n");
+  const parsed = parseSongDatabase(newSource);
+
+  const newDb = {
+    ...db,
+    data: newSource,
+    songCount: parsed.songs.length,
+    artistCount: parsed.artists.length,
+  }
+  await localSongs.databases.put(newDb);
+  await convertDbFromFileToCloud(newDb);
+}
+
+export async function deleteSongsFromLocalDb(
+  db: LocalFileDatabase,
+  deletedSongsIds: string[]
+) {
+  const activated = await getDatabase(String(db.id));
+  if (!activated) {
+    return;
+  }
+
+  const songs = await findSongsByDatabase(String(db.id));
+  const newSource = songs
+    .filter((x) => !deletedSongsIds.includes(x.id))
+    .map((x) => x.source)
+    .join("\n---\n");
+  const parsed = parseSongDatabase(newSource);
+
+  const newDb = {
+    ...db,
+    data: newSource,
+    songCount: parsed.songs.length,
+    artistCount: parsed.artists.length,
+  }
+  await localSongs.databases.put(newDb);
+  await convertDbFromFileToCloud(newDb);
 }
 
 export async function deleteFileDb(id: number) {

@@ -44,6 +44,7 @@ interface PageLayoutProps {
   onChangeSearchText?: (value: string) => void;
   menuItems?: MenuItemDefinition[];
   rightDrawerContent?: any;
+  headerButtons?: any;
 }
 
 interface MenuItemDefinition {
@@ -60,6 +61,7 @@ function PageLayout(props: PageLayoutProps) {
     showSearchLink = false,
     searchText = "",
     rightDrawerContent = null,
+    headerButtons = null,
     onChangeSearchText,
   } = props;
 
@@ -93,6 +95,8 @@ function PageLayout(props: PageLayoutProps) {
               {title}
             </Typography>
           )}
+
+          {headerButtons}
 
           {onChangeSearchText && (
             <>

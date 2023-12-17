@@ -18,6 +18,7 @@ import SettingsProvider, { useSettings } from "./SettingsProvider";
 import { IntlProvider } from "react-intl";
 import TranslationProvider from "./TranslationProvider";
 import EditLocalDatabasePage from "./EditLocalDatabasePage";
+import SongsAdminPage from "./SongsAdminPage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,18 @@ const router = createHashRouter([
     element: <SongPage />,
   },
   {
+    path: "/local/songs/:dbid",
+    element: <SongsAdminPage />,
+  },
+  {
+    path: "/local/songs/edit/:dbid/:songids",
+    element: <EditLocalDatabasePage mode="editsongs" />,
+  },
+  {
+    path: "/local/songs/add/:dbid",
+    element: <EditLocalDatabasePage mode="addsongs" />,
+  },
+  {
     path: "/databases/:dbid",
     element: <ArtistListPage />,
   },
@@ -56,7 +69,7 @@ const router = createHashRouter([
   // },
   {
     path: "/local/edit/:dbid",
-    element: <EditLocalDatabasePage />,
+    element: <EditLocalDatabasePage mode="editdb" />,
   },
   {
     path: "*",
