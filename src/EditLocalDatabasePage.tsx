@@ -67,7 +67,11 @@ export default function EditLocalDatabasePage(props: {
 
   useEffect(() => {
     console.log("songsQuery", songsQuery.data);
-    if (!dbQuery.isPending && !songsQuery.isPending) {
+    if (
+      !dbQuery.isPending &&
+      !songsQuery.isPending &&
+      !dbContentQuery.isPending
+    ) {
       switch (mode) {
         case "addsongs":
           setData("");
@@ -80,7 +84,7 @@ export default function EditLocalDatabasePage(props: {
           break;
       }
     }
-  }, [dbQuery.isPending, songsQuery.isPending]);
+  }, [dbQuery.isPending, songsQuery.isPending, dbContentQuery.isPending]);
 
   async function handleSave() {
     const parsed = parseSongDatabase(data);
@@ -105,7 +109,10 @@ export default function EditLocalDatabasePage(props: {
         { songs: parsed.songs.length, artists: parsed.artists.length }
       )
     );
-    navigate(`/local/songs/${dbid}`);
+    const activated = await getDatabase(dbid!);
+    if (activated) {
+      navigate(`/local/songs/${dbid}`);
+    }
   }
 
   return (

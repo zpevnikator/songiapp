@@ -447,6 +447,7 @@ export async function deleteSongsFromLocalDb(
 
 export async function deleteFileDb(id: number) {
   await localSongs.databases.delete(id);
+  await localSongs.dbcontent.where({ databaseId: id }).delete();
 }
 
 export async function findAllRecents(): Promise<LocalRecentObject[]> {
