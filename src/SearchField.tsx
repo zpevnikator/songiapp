@@ -50,6 +50,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 interface SearchFieldProps {
   value: string;
   onChange: (value: string) => void;
+  placeholder?: string;
 }
 
 export default function SearchField(props: SearchFieldProps) {
@@ -61,10 +62,13 @@ export default function SearchField(props: SearchFieldProps) {
         <SearchIcon />
       </SearchIconWrapper>
       <StyledInputBase
-        placeholder={intl.formatMessage({
-          id: "search",
-          defaultMessage: "Search",
-        })}
+        placeholder={
+          props.placeholder ??
+          intl.formatMessage({
+            id: "search",
+            defaultMessage: "Search",
+          })
+        }
         inputProps={{ "aria-label": "search" }}
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}

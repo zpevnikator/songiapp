@@ -23,6 +23,25 @@ export function removeDiacritics(s: string) {
 //   return tokens;
 // }
 
+export function matchSearchCriteria(text: string, criteria: string) {
+  if (!criteria) {
+    return true;
+  }
+  const tokens = _.compact(
+    removeDiacritics(criteria ?? "")
+      .toLowerCase()
+      .split(/\s/)
+      .map((x) => x.trim())
+  );
+  const tested = removeDiacritics(text ?? "").toLowerCase();
+  for (const token of tokens) {
+    if (!tested.includes(token)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export function localeSortByKey(array: any[], field: string) {
   return array.sort((a, b) =>
     String(_.get(a, field)).localeCompare(String(_.get(b, field)))
@@ -31,7 +50,7 @@ export function localeSortByKey(array: any[], field: string) {
 
 export function getFirstLetter(s: string) {
   if (!s) {
-    return '*';
+    return "*";
   }
   const letter = removeDiacritics(s).trim()[0].toUpperCase();
   if (!letter.match(/[A-Z]/)) {

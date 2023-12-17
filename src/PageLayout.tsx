@@ -45,6 +45,7 @@ interface PageLayoutProps {
   menuItems?: MenuItemDefinition[];
   rightDrawerContent?: any;
   headerButtons?: any;
+  searchPlaceholder?: string;
 }
 
 interface MenuItemDefinition {
@@ -63,6 +64,7 @@ function PageLayout(props: PageLayoutProps) {
     rightDrawerContent = null,
     headerButtons = null,
     onChangeSearchText,
+    searchPlaceholder,
   } = props;
 
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
@@ -100,7 +102,11 @@ function PageLayout(props: PageLayoutProps) {
 
           {onChangeSearchText && (
             <>
-              <SearchField value={searchText} onChange={onChangeSearchText} />
+              <SearchField
+                value={searchText}
+                onChange={onChangeSearchText}
+                placeholder={searchPlaceholder}
+              />
               {searchText && (
                 <IconButton
                   size="large"

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useEffect, useState } from "react";
 import PageLayout from "./PageLayout";
 import { useQuery } from "@tanstack/react-query";
@@ -41,14 +41,15 @@ import type {
   SongDbList,
   SongDbListItem,
 } from "./types";
-import { getErrorMessage } from "./utils";
+import { getErrorMessage, matchSearchCriteria } from "./utils";
 import _ from "lodash";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FormattedMessage, useIntl } from "react-intl";
 import { parseSongDatabase } from "./songpro";
 import InputTextDialog from "./InputTextDialog";
 import NewDatabaseDialog from "./NewDatabaseDialog";
 import FreeSpaceProgressBar from "./FreeSpaceProgressBar";
+import { findDefaultRemoteDatabases, findGithubDatabases } from "./remotedb";
 
 function DatabaseItem(props: {
   db: SongDbListItem;
@@ -167,10 +168,12 @@ function DatabaseItem(props: {
                 id: "songs.lower",
                 defaultMessage: "songs",
               })})`
-            : `${db.description} (${db.size} ${intl.formatMessage({
+            : db.size != null
+            ? `${db.description} (${db.size} ${intl.formatMessage({
                 id: "songs.lower",
                 defaultMessage: "songs",
               })})`
+            : db.description
         }
       />
 
@@ -301,6 +304,23 @@ export default function DownloadPage() {
   const navigate = useNavigate();
   queueRef.current = operationQueue;
   processedRef.current = processedDatabase;
+  const location = useLocation();
+
+  const [searchText, setSearchText] = useState(location.state?.search ?? "");
+  const [filter, setFilter] = useState(location.state?.search ?? "");
+
+  const sendRequest = useCallback((value: string) => {
+    setFilter(value);
+  }, []);
+
+  const debouncedSendRequest = useMemo(() => {
+    return _.debounce(sendRequest, 500);
+  }, [sendRequest]);
+
+  useEffect(() => {
+    navigate(".", { replace: true, state: { search: searchText } });
+    debouncedSendRequest(searchText);
+  }, [searchText, debouncedSendRequest]);
 
   // async function loadHubs() {
   //   const resp = await fetch(
@@ -316,10 +336,7 @@ export default function DownloadPage() {
 
   const remoteDbQuery = useQuery<SongDbList>({
     queryKey: ["remoteDatabases"],
-    queryFn: () =>
-      fetch(
-        `https://raw.githubusercontent.com/songiapp/songidb/main/index.json?x=${new Date().getTime()}`
-      ).then((res) => res.json()),
+    queryFn: findDefaultRemoteDatabases,
   });
 
   const localDbQuery = useQuery<LocalDatabase[]>({
@@ -332,6 +349,11 @@ export default function DownloadPage() {
     queryKey: ["localFileDatabases", localDbToken],
     queryFn: findFileDatabases,
     networkMode: "always",
+  });
+
+  const githubDbQuery = useQuery<SongDbList>({
+    queryKey: ["githubDatabases", filter],
+    queryFn: () => findGithubDatabases(filter),
   });
 
   async function processQueue() {
@@ -426,7 +448,9 @@ export default function DownloadPage() {
 
   return (
     <PageLayout
-      title={intl.formatMessage({
+      onChangeSearchText={setSearchText}
+      searchText={searchText}
+      searchPlaceholder={intl.formatMessage({
         id: "databases",
         defaultMessage: "Databases",
       })}
@@ -464,6 +488,8 @@ export default function DownloadPage() {
         <CircularProgress />
       ) : remoteDbQuery.error ? (
         <Alert severity="error">{remoteDbQuery.error.message}</Alert>
+      ) : githubDbQuery.error ? (
+        <Alert severity="error">{githubDbQuery.error.message}</Alert>
       ) : localDbQuery.error ? (
         <Alert severity="error">{localDbQuery.error.message}</Alert>
       ) : (
@@ -473,34 +499,39 @@ export default function DownloadPage() {
               ...(localDbFileQuery.data as any),
               ...localDbQuery.data,
               ...(remoteDbQuery.data ? remoteDbQuery.data.databases : []),
+              ...(githubDbQuery.data ? githubDbQuery.data.databases : []),
             ],
             (x) => String(x.id)
-          ).map((db) => (
-            <DatabaseItem
-              key={db.id}
-              db={db}
-              localDb={localDbQuery.data.find((x) => x.id == db.id)}
-              localFileDb={localDbFileQuery.data!.find((x) => x.id == db.id)}
-              deleteDatabase={deleteDatabase}
-              deleteFileDatabase={deleteFileDatabase}
-              downloadDatabase={downloadDatabase}
-              cancelWaiting={cancelWaiting}
-              isProcessed={processedDatabase == db.id}
-              isFinished={finishedDatabases.includes(db.id)}
-              isWaiting={!!operationQueue.find((x) => x.db.id == db.id)}
-              activateFileDatabase={activateFileDatabase}
-              deactivateFileDatabase={deactivateFileDatabase}
-              setActiveDb={async (dbid, value) => {
-                try {
-                  setIsWorking(true);
-                  await setLocalDbActive(String(dbid), value);
-                } finally {
-                  setIsWorking(false);
-                  setLocalDbToken((x) => x + 1);
-                }
-              }}
-            />
-          ))}
+          )
+            .filter((db) =>
+              matchSearchCriteria(`${db.title} ${db.description}`, filter)
+            )
+            .map((db) => (
+              <DatabaseItem
+                key={db.id}
+                db={db}
+                localDb={localDbQuery.data.find((x) => x.id == db.id)}
+                localFileDb={localDbFileQuery.data!.find((x) => x.id == db.id)}
+                deleteDatabase={deleteDatabase}
+                deleteFileDatabase={deleteFileDatabase}
+                downloadDatabase={downloadDatabase}
+                cancelWaiting={cancelWaiting}
+                isProcessed={processedDatabase == db.id}
+                isFinished={finishedDatabases.includes(db.id)}
+                isWaiting={!!operationQueue.find((x) => x.db.id == db.id)}
+                activateFileDatabase={activateFileDatabase}
+                deactivateFileDatabase={deactivateFileDatabase}
+                setActiveDb={async (dbid, value) => {
+                  try {
+                    setIsWorking(true);
+                    await setLocalDbActive(String(dbid), value);
+                  } finally {
+                    setIsWorking(false);
+                    setLocalDbToken((x) => x + 1);
+                  }
+                }}
+              />
+            ))}
         </List>
       )}
       <Snackbar
