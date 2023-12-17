@@ -65,6 +65,38 @@ export default function EditLocalDatabasePage(props: {
   const [savedInfo, setSavedInfo] = useState("");
   const navigate = useNavigate();
 
+  // TODO
+  //   const handlePaste = (e) => {
+  //   var types, pastedData, savedContent;
+
+  //   // Browsers that support the 'text/html' type in the Clipboard API (Chrome, Firefox 22+)
+  //   if (
+  //     e &&
+  //     e.clipboardData &&
+  //     e.clipboardData.types &&
+  //     e.clipboardData.getData
+  //   ) {
+  //     // Check for 'text/html' in types list. See abligh's answer below for deatils on
+  //     // why the DOMStringList bit is needed. We cannot fall back to 'text/plain' as
+  //     // Safari/Edge don't advertise HTML data even if it is available
+  //     types = e.clipboardData.types;
+  //     if (
+  //       (types instanceof DOMStringList && types.contains("text/html")) ||
+  //       (types.indexOf && types.indexOf("text/html") !== -1)
+  //     ) {
+  //       // Extract data and pass it to callback
+  //       pastedData = e.clipboardData.getData("text/html");
+
+  //       // TODO - process HTML
+
+  //       // Stop the data from actually being pasted
+  //       e.stopPropagation();
+  //       e.preventDefault();
+  //       return false;
+  //     }
+  //   }
+  // };
+
   useEffect(() => {
     console.log("songsQuery", songsQuery.data);
     if (
@@ -152,6 +184,7 @@ export default function EditLocalDatabasePage(props: {
             value={data}
             onChange={(e) => setData(e.target.value)}
             style={{ flex: 1 }}
+            // onPaste={handlePaste}
           />
         </Box>
       )}
