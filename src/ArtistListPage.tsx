@@ -104,17 +104,31 @@ export default function ArtistListPage() {
   );
   const [newDbOpen, setNewDbOpen] = useState(false);
 
-  const { showAllArtists } = useSettings();
-
-  const query = useQuery<[GroupedLetter[], LocalArtist[]]>({
-    queryKey: ["artist-data", letter || "__no_selected__", dbid],
-    queryFn: () => loadArtistsData(letter, showAllArtists, dbid),
-    networkMode: "always",
-  });
+  const settings = useSettings();
 
   const dbQuery = useQuery<LocalDatabase | undefined>({
     queryKey: ["selected-database", dbid],
     queryFn: () => getDatabase(dbid ?? ""),
+    networkMode: "always",
+  });
+
+  const showAllArtists =
+    dbQuery?.data?.artistCount && dbQuery?.data?.artistCount < 100
+      ? true
+      : settings.showAllArtists;
+
+  const query = useQuery<[GroupedLetter[], LocalArtist[]]>({
+    queryKey: [
+      "artist-data",
+      letter || "__no_selected__",
+      dbid,
+      showAllArtists,
+      dbQuery.isPending,
+    ],
+    queryFn: () =>
+      dbQuery.isPending
+        ? Promise.resolve([[], []])
+        : loadArtistsData(letter, showAllArtists, dbid),
     networkMode: "always",
   });
 

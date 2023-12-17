@@ -4,6 +4,8 @@ import PageLayout from "./PageLayout";
 import { useQuery } from "@tanstack/react-query";
 import {
   Alert,
+  Box,
+  Button,
   Checkbox,
   CircularProgress,
   IconButton,
@@ -90,198 +92,222 @@ function DatabaseItem(props: {
   );
 
   return (
-    <ListItem
-      key={db.id}
-      secondaryAction={
-        isProcessed ? (
-          <CircularProgress />
-        ) : isFinished ? (
-          <CheckIcon />
-        ) : isWaiting ? (
-          <IconButton
-            size="large"
-            aria-label="cancel"
-            edge="end"
-            color="inherit"
-            onClick={() => cancelWaiting(db)}
-          >
-            <HourglassEmptyIcon />
-          </IconButton>
-        ) : localDb || localFileDb ? (
-          <IconButton
-            size="large"
-            aria-label="display more actions"
-            edge="end"
-            color="inherit"
-            onClick={(e) => setMenuAnchorEl(e?.currentTarget)}
-          >
-            <MoreVertIcon />
-          </IconButton>
-        ) : (
-          // <IconButton
-          //   edge="end"
-          //   aria-label="download"
-          //   onClick={() => deleteDatabase(db)}
-          // >
-          //   <DeleteIcon />
-          // </IconButton>
-          <IconButton
-            edge="end"
-            aria-label="download"
-            onClick={() => downloadDatabase(db)}
-          >
-            <DownloadIcon />
-          </IconButton>
-        )
-      }
-    >
-      <ListItemIcon>
-        {localDb ? (
-          <Checkbox
-            edge="start"
-            checked={!!localDb.isActive}
-            tabIndex={-1}
-            disableRipple
-            onChange={(e) => setActiveDb(db.id, e.target.checked)}
-          />
-        ) : localFileDb ? (
-          <StorageIcon />
-        ) : (
-          <CloudIcon />
-        )}
-      </ListItemIcon>
-      <ListItemText
-        primary={db.title}
-        secondary={
-          localDb
-            ? `${localDb.description} (${
-                localDb.songCount
-              } ${intl.formatMessage({
-                id: "songs.lower",
-                defaultMessage: "songs",
-              })}, ${localDb.artistCount} ${intl.formatMessage({
-                id: "artists.lower",
-                defaultMessage: "artists",
-              })})`
-            : localFileDb
-            ? `(${localFileDb.songCount} ${intl.formatMessage({
-                id: "songs.lower",
-                defaultMessage: "songs",
-              })})`
-            : db.size != null
-            ? `${db.description} (${db.size} ${intl.formatMessage({
-                id: "songs.lower",
-                defaultMessage: "songs",
-              })})`
-            : db.description
+    <>
+      <ListItem
+        key={db.id}
+        secondaryAction={
+          isProcessed ? (
+            <CircularProgress />
+          ) : isFinished ? (
+            <CheckIcon />
+          ) : isWaiting ? (
+            <IconButton
+              size="large"
+              aria-label="cancel"
+              edge="end"
+              color="inherit"
+              onClick={() => cancelWaiting(db)}
+            >
+              <HourglassEmptyIcon />
+            </IconButton>
+          ) : localDb || localFileDb ? (
+            <IconButton
+              size="large"
+              aria-label="display more actions"
+              edge="end"
+              color="inherit"
+              onClick={(e) => setMenuAnchorEl(e?.currentTarget)}
+            >
+              <MoreVertIcon />
+            </IconButton>
+          ) : (
+            // <IconButton
+            //   edge="end"
+            //   aria-label="download"
+            //   onClick={() => deleteDatabase(db)}
+            // >
+            //   <DeleteIcon />
+            // </IconButton>
+            <IconButton
+              edge="end"
+              aria-label="download"
+              onClick={() => downloadDatabase(db)}
+            >
+              <DownloadIcon />
+            </IconButton>
+          )
         }
-      />
-
-      <Menu
-        id="basic-menu"
-        anchorEl={menuAnchorEl}
-        open={!!menuAnchorEl}
-        onClose={() => setMenuAnchorEl(null)}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-        }}
       >
-        {((!localFileDb && localDb) || (localFileDb && !localDb)) && (
-          <MenuItem
-            onClick={async () => {
-              if (
-                window.confirm(
-                  intl.formatMessage(
-                    {
-                      id: "really-delete-database.question",
-                      defaultMessage: "Really delete database {db}?",
-                    },
-                    { db: db.title }
+        <ListItemIcon>
+          {localDb ? (
+            <Checkbox
+              edge="start"
+              checked={!!localDb.isActive}
+              tabIndex={-1}
+              disableRipple
+              onChange={(e) => setActiveDb(db.id, e.target.checked)}
+            />
+          ) : localFileDb ? (
+            <StorageIcon />
+          ) : (
+            <CloudIcon />
+          )}
+        </ListItemIcon>
+        <ListItemText
+          primary={db.title}
+          secondary={
+            localDb
+              ? `${localDb.description} (${
+                  localDb.songCount
+                } ${intl.formatMessage({
+                  id: "songs.lower",
+                  defaultMessage: "songs",
+                })}, ${localDb.artistCount} ${intl.formatMessage({
+                  id: "artists.lower",
+                  defaultMessage: "artists",
+                })})`
+              : localFileDb
+              ? `(${localFileDb.songCount} ${intl.formatMessage({
+                  id: "songs.lower",
+                  defaultMessage: "songs",
+                })})`
+              : db.size != null
+              ? `${db.description} (${db.size} ${intl.formatMessage({
+                  id: "songs.lower",
+                  defaultMessage: "songs",
+                })})`
+              : db.description
+          }
+        />
+
+        <Menu
+          id="basic-menu"
+          anchorEl={menuAnchorEl}
+          open={!!menuAnchorEl}
+          onClose={() => setMenuAnchorEl(null)}
+          MenuListProps={{
+            "aria-labelledby": "basic-button",
+          }}
+        >
+          {((!localFileDb && localDb) || (localFileDb && !localDb)) && (
+            <MenuItem
+              onClick={async () => {
+                if (
+                  window.confirm(
+                    intl.formatMessage(
+                      {
+                        id: "really-delete-database.question",
+                        defaultMessage: "Really delete database {db}?",
+                      },
+                      { db: db.title }
+                    )
                   )
-                )
-              ) {
-                if (localFileDb) {
-                  await deleteFileDatabase(localFileDb.id!);
+                ) {
+                  if (localFileDb) {
+                    await deleteFileDatabase(localFileDb.id!);
+                  }
+                  if (localDb) deleteDatabase(db);
                 }
-                if (localDb) deleteDatabase(db);
+                setMenuAnchorEl(null);
+              }}
+            >
+              <FormattedMessage id="delete" defaultMessage="Delete" />
+            </MenuItem>
+          )}
+          {localDb && (
+            <MenuItem
+              onClick={() => {
+                setMenuAnchorEl(null);
+                navigate(`/databases/${encodeURIComponent(db.id)}`);
+              }}
+            >
+              <FormattedMessage
+                id="show-artists"
+                defaultMessage="Show artists"
+              />
+            </MenuItem>
+          )}
+          {localFileDb && (
+            <MenuItem
+              onClick={() => {
+                setMenuAnchorEl(null);
+                navigate(`/local/edit/${db.id}`);
+              }}
+            >
+              <FormattedMessage id="edit-data" defaultMessage="Edit data" />
+            </MenuItem>
+          )}
+          {localFileDb && localDb && (
+            <MenuItem
+              onClick={() => {
+                setMenuAnchorEl(null);
+                navigate(`/local/songs/${db.id}`);
+              }}
+            >
+              <FormattedMessage id="edit-songs" defaultMessage="Edit songs" />
+            </MenuItem>
+          )}
+          {localFileDb && !localDb && (
+            <MenuItem
+              onClick={() => {
+                setMenuAnchorEl(null);
+                activateFileDatabase(localFileDb);
+              }}
+            >
+              <FormattedMessage
+                id="activate-database"
+                defaultMessage="Activate database"
+              />
+            </MenuItem>
+          )}
+          {localFileDb && localDb && (
+            <MenuItem
+              onClick={() => {
+                setMenuAnchorEl(null);
+                deactivateFileDatabase(localFileDb);
+              }}
+            >
+              <FormattedMessage
+                id="deactivate-database"
+                defaultMessage="Deactivate database"
+              />
+            </MenuItem>
+          )}
+          {db.url != null && (
+            <MenuItem
+              onClick={() => {
+                setMenuAnchorEl(null);
+                window.open(db.url, "_blank");
+              }}
+            >
+              <FormattedMessage
+                id="open-database-source"
+                defaultMessage="Open database source"
+              />
+            </MenuItem>
+          )}
+        </Menu>
+      </ListItem>
+      {localDb && (
+        <Box sx={{ ml: 8 }}>
+          <Button
+            onClick={() => navigate(`/databases/${encodeURIComponent(db.id)}`)}
+          >
+            <FormattedMessage id="artists" defaultMessage="Artists" />
+          </Button>
+
+          {localFileDb && (
+            <Button
+              onClick={() =>
+                navigate(`/local/songs/${db.id}`)
               }
-              setMenuAnchorEl(null);
-            }}
-          >
-            <FormattedMessage id="delete" defaultMessage="Delete" />
-          </MenuItem>
-        )}
-        {localDb && (
-          <MenuItem
-            onClick={() => {
-              setMenuAnchorEl(null);
-              navigate(`/databases/${encodeURIComponent(db.id)}`);
-            }}
-          >
-            <FormattedMessage id="show-artists" defaultMessage="Show artists" />
-          </MenuItem>
-        )}
-        {localFileDb && (
-          <MenuItem
-            onClick={() => {
-              setMenuAnchorEl(null);
-              navigate(`/local/edit/${db.id}`);
-            }}
-          >
-            <FormattedMessage id="edit-data" defaultMessage="Edit data" />
-          </MenuItem>
-        )}
-        {localFileDb && localDb && (
-          <MenuItem
-            onClick={() => {
-              setMenuAnchorEl(null);
-              navigate(`/local/songs/${db.id}`);
-            }}
-          >
-            <FormattedMessage id="edit-songs" defaultMessage="Edit songs" />
-          </MenuItem>
-        )}
-        {localFileDb && !localDb && (
-          <MenuItem
-            onClick={() => {
-              setMenuAnchorEl(null);
-              activateFileDatabase(localFileDb);
-            }}
-          >
-            <FormattedMessage
-              id="activate-database"
-              defaultMessage="Activate database"
-            />
-          </MenuItem>
-        )}
-        {localFileDb && localDb && (
-          <MenuItem
-            onClick={() => {
-              setMenuAnchorEl(null);
-              deactivateFileDatabase(localFileDb);
-            }}
-          >
-            <FormattedMessage
-              id="deactivate-database"
-              defaultMessage="Deactivate database"
-            />
-          </MenuItem>
-        )}
-        {db.url != null && (
-          <MenuItem
-            onClick={() => {
-              setMenuAnchorEl(null);
-              window.open(db.url, "_blank");
-            }}
-          >
-            <FormattedMessage
-              id="open-database-source"
-              defaultMessage="Open database source"
-            />
-          </MenuItem>
-        )}
-      </Menu>
-    </ListItem>
+            >
+              <FormattedMessage id="songs" defaultMessage="Songs" />
+            </Button>
+          )}
+        </Box>
+      )}
+    </>
   );
 }
 
