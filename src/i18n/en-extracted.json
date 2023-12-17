@@ -149,8 +149,14 @@
   "show-artists": {
     "defaultMessage": "Show artists"
   },
+  "show-songs": {
+    "defaultMessage": "Show songs"
+  },
   "song-added-to-db": {
     "defaultMessage": "Song was added to local database"
+  },
+  "songs": {
+    "defaultMessage": "Songs"
   },
   "songs.lower": {
     "defaultMessage": "songs"
