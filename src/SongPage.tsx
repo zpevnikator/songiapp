@@ -1,6 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "./PageLayout";
-import { addRecentSong, getDatabase, getSong } from "./localdb";
+import {
+  addNewSongsToLocalDb,
+  addRecentSong,
+  findFileDatabases,
+  getDatabase,
+  getSong,
+} from "./localdb";
 import {
   Alert,
   Box,
@@ -8,10 +14,12 @@ import {
   Checkbox,
   CircularProgress,
   Grid,
+  MenuItem,
+  Select,
   Typography,
   useTheme,
 } from "@mui/material";
-import { LocalDatabase, LocalSong } from "./types";
+import { LocalDatabase, LocalFileDatabase, LocalSong } from "./types";
 import { Link, useParams } from "react-router-dom";
 import SongFormatter from "./SongFormatter";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -48,6 +56,10 @@ function divideText(text: string, columns: number): string[] {
 export default function SongPage() {
   const { dbid, artistid, songid } = useParams();
   const intl = useIntl();
+  const [selectedFileDb, setSelectedFileDb] = useState(
+    parseInt(localStorage.getItem("lastUsedLocalFileDb")!) || 0
+  );
+  const [showSavedInfo, setShowSavedInfo] = useState(false);
 
   const songFullId = `${dbid}/${artistid}/${songid}`;
 
@@ -86,11 +98,26 @@ export default function SongPage() {
     networkMode: "always",
   });
 
+  const localDbFileQuery = useQuery<LocalFileDatabase[]>({
+    queryKey: ["localFileDatabases"],
+    queryFn: findFileDatabases,
+    networkMode: "always",
+  });
+
   useEffect(() => {
     if (query.data) {
       addRecentSong(query.data);
     }
   }, [query.data]);
+
+  useEffect(() => {
+    if (
+      localDbFileQuery.data?.[0] &&
+      !localDbFileQuery.data?.find((x) => x.id == selectedFileDb)
+    ) {
+      setSelectedFileDb(localDbFileQuery.data?.[0].id!);
+    }
+  }, [localDbFileQuery.data]);
 
   useEffect(() => {
     if ("wakeLock" in navigator) {
@@ -109,6 +136,12 @@ export default function SongPage() {
   }, []);
 
   const theme = useTheme();
+
+  const handleAddToDatabase = async () => {
+    localStorage.setItem("lastUsedLocalFileDb", selectedFileDb.toString());
+    await addNewSongsToLocalDb(selectedFileDb, query?.data?.source!);
+    setShowSavedInfo(true);
+  };
 
   return (
     <PageLayout
@@ -238,8 +271,35 @@ export default function SongPage() {
             </Button>
           </Box>
           <Typography variant="h5" sx={{ m: 2 }}>
-            <FormattedMessage id="add-to-database" defaultMessage="Add to database" />
+            <FormattedMessage
+              id="add-to-database"
+              defaultMessage="Add to database"
+            />
           </Typography>
+          {(localDbFileQuery.data?.length ?? 0) > 0 && (
+            <Box>
+              <Select
+                sx={{ m: 1 }}
+                value={selectedFileDb}
+                onChange={(e) =>
+                  setSelectedFileDb(parseInt(e.target.value as string))
+                }
+              >
+                {localDbFileQuery.data?.map((db) => (
+                  <MenuItem value={db.id}>{db.title}</MenuItem>
+                ))}
+              </Select>
+              <Button
+                variant="contained"
+                size="small"
+                sx={{ m: 1 }}
+                onClick={handleAddToDatabase}
+                disabled={!selectedFileDb}
+              >
+                <FormattedMessage id="add" defaultMessage="Add" />
+              </Button>
+            </Box>
+          )}
         </>
       }
     >
@@ -292,6 +352,19 @@ export default function SongPage() {
         >
           <pre>{query?.data?.source}</pre>
         </Typography>
+      )}
+
+      {showSavedInfo && (
+        <Alert
+          severity="info"
+          sx={{ position: "fixed", bottom: 0, left: 0, mb: 7 }}
+          onClose={() => setShowSavedInfo(false)}
+        >
+          <FormattedMessage
+            id="song-added-to-db"
+            defaultMessage="Song was added to local database"
+          />
+        </Alert>
       )}
     </PageLayout>
   );
