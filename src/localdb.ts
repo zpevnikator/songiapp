@@ -4,6 +4,7 @@ import type {
   LocalArtist,
   LocalDatabase,
   LocalFileDatabase,
+  LocalFileDatabaseContent,
   LocalLetter,
   LocalRecentObject,
   LocalSong,
@@ -40,12 +41,14 @@ class CloudSongsDb extends Dexie {
 
 class LocalSongsDb extends Dexie {
   public databases!: Table<LocalFileDatabase, number>;
+  public dbcontent!: Table<LocalFileDatabaseContent, number>;
 
   public constructor() {
     super("localsongs");
 
-    this.version(1).stores({
+    this.version(2).stores({
       databases: "++id",
+      dbcontent: "++id,databaseId,isActive",
     });
   }
 }
@@ -293,6 +296,14 @@ export async function getLocalFileDatabase(
   return localSongs.databases.get(id);
 }
 
+export async function getLocalFileDatabaseContent(
+  id: number
+): Promise<LocalFileDatabaseContent | undefined> {
+  return (
+    await localSongs.dbcontent.where({ databaseId: id, isActive: 1 }).toArray()
+  )[0];
+}
+
 export async function getArtist(
   artistid: string
 ): Promise<LocalArtist | undefined> {
@@ -344,99 +355,94 @@ export async function addLocalSongsDb(title: string) {
     title,
     songCount: 2,
     artistCount: 1,
+  });
+  await localSongs.dbcontent.put({
+    databaseId: newid,
     data: "@title=song1\n@artist=Some artist\n\n#1.\nText[Ami] to be [Fmaj]continued\n\n---\n\n@title=song2\n@artist=Some artist\n\n#1.\nText[Ami] to be [Fmaj]continued",
+    isActive: 1,
+    savedDate: new Date(),
   });
   return newid;
 }
 
-export async function saveLocalSongsDb(db: LocalFileDatabase) {
-  await localSongs.databases.put(db);
+export async function saveLocalSongsDb(dbid: number, source: string) {
+  const oldDb = (await getLocalFileDatabase(dbid))!;
+  const parsed = parseSongDatabase(source);
 
-  if (db.id) {
-    const activated = await getDatabase(String(db.id));
-    if (activated) {
-      await convertDbFromFileToCloud(db);
-    }
+  const newDb = {
+    ...oldDb,
+    data: source,
+    songCount: parsed.songs.length,
+    artistCount: parsed.artists.length,
+  };
+
+  await localSongs.databases.put(newDb);
+  await localSongs.dbcontent.where({ databaseId: dbid }).delete();
+  await localSongs.dbcontent.put({
+    databaseId: dbid,
+    savedDate: new Date(),
+    isActive: 1,
+    data: source,
+  });
+
+  const activated = await getDatabase(String(dbid));
+  if (activated) {
+    await convertDbFromFileToCloud(newDb, parsed);
   }
 }
 
 export async function addNewSongsToLocalDb(
-  db: LocalFileDatabase,
+  dbid: number,
   addedSongsSource: string
 ) {
-  const activated = await getDatabase(String(db.id));
+  const activated = await getDatabase(String(dbid));
   if (!activated) {
     return;
   }
 
-  const newSource = db.data + "\n---\n" + addedSongsSource;
-  const parsed = parseSongDatabase(newSource);
+  const oldContent = await getLocalFileDatabaseContent(dbid);
 
-  const newDb = {
-    ...db,
-    data: newSource,
-    songCount: parsed.songs.length,
-    artistCount: parsed.artists.length,
-  }
-
-  await localSongs.databases.put(newDb);
-
-  await convertDbFromFileToCloud(newDb);
+  const newSource = oldContent?.data
+    ? oldContent?.data + "\n---\n" + addedSongsSource
+    : addedSongsSource;
+  await saveLocalSongsDb(dbid, newSource);
 }
 
 export async function updateSongsInLocalDb(
-  db: LocalFileDatabase,
+  dbid: number,
   updatedSongsIds: string[],
   updatedSongsSource: string
 ) {
-  const activated = await getDatabase(String(db.id));
+  const activated = await getDatabase(String(dbid));
   if (!activated) {
     return;
   }
 
-  const songs = await findSongsByDatabase(String(db.id));
+  const songs = await findSongsByDatabase(String(dbid));
   const newSource = [
     ...songs
       .filter((x) => !updatedSongsIds.includes(x.id))
       .map((x) => x.source),
     updatedSongsSource,
   ].join("\n---\n");
-  const parsed = parseSongDatabase(newSource);
-
-  const newDb = {
-    ...db,
-    data: newSource,
-    songCount: parsed.songs.length,
-    artistCount: parsed.artists.length,
-  }
-  await localSongs.databases.put(newDb);
-  await convertDbFromFileToCloud(newDb);
+  await saveLocalSongsDb(dbid, newSource);
 }
 
 export async function deleteSongsFromLocalDb(
-  db: LocalFileDatabase,
+  dbid: number,
   deletedSongsIds: string[]
 ) {
-  const activated = await getDatabase(String(db.id));
+  const activated = await getDatabase(String(dbid));
   if (!activated) {
     return;
   }
 
-  const songs = await findSongsByDatabase(String(db.id));
+  const songs = await findSongsByDatabase(String(dbid));
   const newSource = songs
     .filter((x) => !deletedSongsIds.includes(x.id))
     .map((x) => x.source)
     .join("\n---\n");
-  const parsed = parseSongDatabase(newSource);
-
-  const newDb = {
-    ...db,
-    data: newSource,
-    songCount: parsed.songs.length,
-    artistCount: parsed.artists.length,
-  }
-  await localSongs.databases.put(newDb);
-  await convertDbFromFileToCloud(newDb);
+  await saveLocalSongsDb(dbid, newSource);
 }
 
 export async function deleteFileDb(id: number) {
@@ -542,8 +548,19 @@ export async function searchLocalDb(
   };
 }
 
-export async function convertDbFromFileToCloud(db: LocalFileDatabase) {
-  const parsed = parseSongDatabase(db?.data!);
+export async function convertDbFromFileToCloud(
+  db: LocalFileDatabase,
+  parsed?: SongDatabase
+) {
+  if (!parsed) {
+    const content = await getLocalFileDatabaseContent(db.id!);
+    if (content) {
+      parsed = parseSongDatabase(content?.data!);
+    }
+  }
+  if (!parsed) {
+    return;
+  }
 
   await deleteSongDb(String(db.id));
 

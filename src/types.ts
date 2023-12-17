@@ -17,7 +17,14 @@ export interface LocalFileDatabase {
   title: string;
   songCount?: number;
   artistCount?: number;
-  data?: string;
+}
+
+export interface LocalFileDatabaseContent {
+  id?: number;
+  databaseId: number;
+  isActive: number;
+  data: string;
+  savedDate: Date;
 }
 
 export interface SongDbList {

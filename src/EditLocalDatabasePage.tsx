@@ -12,12 +12,17 @@ import PageLayout from "./PageLayout";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useQuery } from "@tanstack/react-query";
-import { LocalFileDatabase, LocalSong } from "./types";
+import {
+  LocalFileDatabase,
+  LocalFileDatabaseContent,
+  LocalSong,
+} from "./types";
 import {
   addNewSongsToLocalDb,
   deleteSongDb,
   getDatabase,
   getLocalFileDatabase,
+  getLocalFileDatabaseContent,
   getSongs,
   saveLocalSongsDb,
   saveSongDb,
@@ -41,6 +46,15 @@ export default function EditLocalDatabasePage(props: {
     networkMode: "always",
     gcTime: 0,
   });
+  const dbContentQuery = useQuery<LocalFileDatabaseContent | undefined>({
+    queryKey: ["localfiledbcontent", dbid],
+    queryFn: () =>
+      mode == "editdb"
+        ? getLocalFileDatabaseContent(parseInt(dbid!))
+        : Promise.resolve(undefined),
+    networkMode: "always",
+    gcTime: 0,
+  });
   const songsQuery = useQuery<LocalSong[]>({
     queryKey: ["localsongs", dbid, songids],
     queryFn: () => getSongs(songIdList),
@@ -59,7 +73,7 @@ export default function EditLocalDatabasePage(props: {
           setData("");
           break;
         case "editdb":
-          setData(dbQuery.data?.data ?? "");
+          setData(dbContentQuery.data?.data ?? "");
           break;
         case "editsongs":
           setData(songsQuery.data?.map((x) => x.source).join("\n---\n") ?? "");
@@ -72,18 +86,13 @@ export default function EditLocalDatabasePage(props: {
     const parsed = parseSongDatabase(data);
     switch (mode) {
       case "editdb":
-        await saveLocalSongsDb({
-          ...dbQuery.data!,
-          artistCount: parsed.artists.length,
-          songCount: parsed.songs.length,
-          data,
-        });
+        await saveLocalSongsDb(parseInt(dbid!), data);
         break;
       case "editsongs":
-        await updateSongsInLocalDb(dbQuery.data!, songIdList, data);
+        await updateSongsInLocalDb(parseInt(dbid!), songIdList, data);
         break;
       case "addsongs":
-        await addNewSongsToLocalDb(dbQuery.data!, data);
+        await addNewSongsToLocalDb(parseInt(dbid!), data);
         break;
     }
     setSavedInfo(

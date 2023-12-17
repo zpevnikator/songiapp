@@ -92,7 +92,7 @@ export default function SongsAdminPage() {
     ) {
       const db = await getLocalFileDatabase(parseInt(dbid!));
       await deleteSongsFromLocalDb(
-        db!,
+        db?.id!,
         checkedSongs.map((x) => x.id)
       );
       querySongs.refetch();

@@ -31,7 +31,6 @@ import {
   deleteSongDb,
   findDatabases,
   findFileDatabases,
-  saveLocalSongsDb,
   saveSongDb,
   setLocalDbActive,
   upgradeAllDatabases,
