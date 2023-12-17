@@ -19,6 +19,7 @@ import { IntlProvider } from "react-intl";
 import TranslationProvider from "./TranslationProvider";
 import EditLocalDatabasePage from "./EditLocalDatabasePage";
 import SongsAdminPage from "./SongsAdminPage";
+import SongListPage from "./SongListPage";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,10 @@ const router = createHashRouter([
   {
     path: "/",
     element: <ArtistListPage />,
+  },
+  {
+    path: "/songs",
+    element: <SongListPage />,
   },
   {
     path: "/databases",
@@ -62,6 +67,10 @@ const router = createHashRouter([
   {
     path: "/databases/:dbid",
     element: <ArtistListPage />,
+  },
+  {
+    path: "/songs/:dbid",
+    element: <SongListPage />,
   },
   // {
   //   path: "/local/:dbid",

@@ -28,6 +28,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CancelIcon from "@mui/icons-material/Cancel";
 import InfoIcon from "@mui/icons-material/Info";
+import LyricsIcon from "@mui/icons-material/Lyrics";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import InstallAppSnackbar from "./InstallAppSnackbar";
@@ -75,7 +76,13 @@ function PageLayout(props: PageLayoutProps) {
   const [rightDrawerOpen, setRightDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const bottomNavigationUrls = ["/", "/databases", "/search", "/settings"];
+  const bottomNavigationUrls = [
+    "/",
+    "/songs",
+    "/databases",
+    "/search",
+    "/settings",
+  ];
   const intl = useIntl();
 
   return (
@@ -222,6 +229,19 @@ function PageLayout(props: PageLayoutProps) {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/songs")}>
+                <ListItemIcon>
+                  <LyricsIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={intl.formatMessage({
+                    id: "songs",
+                    defaultMessage: "Songs",
+                  })}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
               <ListItemButton onClick={() => navigate("/search")}>
                 <ListItemIcon>
                   <SearchIcon />
@@ -346,6 +366,13 @@ function PageLayout(props: PageLayoutProps) {
               defaultMessage: "Artists",
             })}
             icon={<PeopleIcon />}
+          />
+          <BottomNavigationAction
+            label={intl.formatMessage({
+              id: "songs",
+              defaultMessage: "Songs",
+            })}
+            icon={<LyricsIcon />}
           />
           <BottomNavigationAction
             label={intl.formatMessage({

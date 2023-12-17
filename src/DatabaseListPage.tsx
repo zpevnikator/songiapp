@@ -227,6 +227,16 @@ function DatabaseItem(props: {
               />
             </MenuItem>
           )}
+          {localDb && (
+            <MenuItem
+              onClick={() => {
+                setMenuAnchorEl(null);
+                navigate(`/songs/${db.id}`);
+              }}
+            >
+              <FormattedMessage id="show-songs" defaultMessage="Show songs" />
+            </MenuItem>
+          )}
           {localFileDb && (
             <MenuItem
               onClick={() => {
@@ -296,12 +306,16 @@ function DatabaseItem(props: {
             <FormattedMessage id="artists" defaultMessage="Artists" />
           </Button>
 
-          {localFileDb && (
+          {!localFileDb && (
             <Button
-              onClick={() =>
-                navigate(`/local/songs/${db.id}`)
-              }
+              onClick={() => navigate(`/songs/${encodeURIComponent(db.id)}`)}
             >
+              <FormattedMessage id="songs" defaultMessage="Songs" />
+            </Button>
+          )}
+
+          {localFileDb && (
+            <Button onClick={() => navigate(`/local/songs/${db.id}`)}>
               <FormattedMessage id="songs" defaultMessage="Songs" />
             </Button>
           )}

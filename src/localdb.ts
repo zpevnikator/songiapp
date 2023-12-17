@@ -263,6 +263,14 @@ export async function getActiveDatabaseIds(): Promise<string[]> {
   );
 }
 
+export async function getActivceSongCount() {
+  return _.sum(
+    (await cloudSongs.databases.where({ isActive: 1 }).toArray()).map(
+      (x) => x.songCount
+    )
+  );
+}
+
 export async function findSongsByArtist(
   artistId: string
 ): Promise<LocalSong[]> {
@@ -277,6 +285,21 @@ export async function findSongsByDatabase(
 ): Promise<LocalSong[]> {
   return localeSortByKey(
     await cloudSongs.songs.where({ databaseId }).toArray(),
+    "title"
+  );
+}
+
+export async function findSongsByRange(
+  offset: number,
+  limit: number,
+  databaseId?: string
+): Promise<LocalSong[]> {
+  const activeIds = await getActiveDatabaseIds();
+  const where = databaseId
+    ? cloudSongs.songs.where({ databaseId })
+    : cloudSongs.songs.where("databaseId").anyOf(activeIds);
+  return localeSortByKey(
+    await where.offset(offset).limit(limit).toArray(),
     "title"
   );
 }

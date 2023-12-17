@@ -9,8 +9,15 @@ export default function SongListItem(props: {
   showArtist?: boolean;
   showIcon?: boolean;
   showDatabase?: boolean;
+  showArtistInDescription?: boolean;
 }) {
-  const { song, showArtist, showIcon = true, showDatabase } = props;
+  const {
+    song,
+    showArtist,
+    showIcon = true,
+    showDatabase,
+    showArtistInDescription,
+  } = props;
   const navigate = useNavigate();
 
   const { text } = parseSongParts(song.source);
@@ -32,7 +39,11 @@ export default function SongListItem(props: {
         }}
         primary={showArtist ? `${song.title} (${song.artist})` : song.title}
         secondary={
-          showDatabase
+          showArtistInDescription
+            ? showDatabase
+              ? `${song.artist} (${song?.databaseTitle?.toLocaleLowerCase()})`
+              : song.artist
+            : showDatabase
             ? `${song?.databaseTitle?.toLocaleLowerCase()}: ${textPart}`
             : textPart
         }
