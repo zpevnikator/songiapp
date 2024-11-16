@@ -24,7 +24,7 @@ export default function HomeEn() {
         . Here's how a{" "}
         <a href="https://github.com/zpevnikator/miserables">simple database</a> looks.
       </p>
-      <h4>Web application functioning offline</h4>
+      <h4>Web application working offline</h4>
       <p>
         Zpevnikator is a web application that runs in your browser; however, it is designed so that all songs are stored locally, meaning it works even without an internet connection. The internet is only needed for the initial download of the song database. There are several databases available, and more may be created; you can download only the ones you prefer to your tablet.
       </p>

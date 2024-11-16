@@ -1,7 +1,4 @@
 {
-  "about": {
-    "defaultMessage": "About"
-  },
   "activate-database": {
     "defaultMessage": "Activate database"
   },
@@ -85,6 +82,9 @@
   },
   "go-to-home": {
     "defaultMessage": "Go to Home"
+  },
+  "home": {
+    "defaultMessage": "Home"
   },
   "language": {
     "defaultMessage": "Language:"
@@ -181,5 +181,8 @@
   },
   "view": {
     "defaultMessage": "View"
+  },
+  "zpevnikator.git": {
+    "defaultMessage": "Zpevnikator.git"
   }
 }

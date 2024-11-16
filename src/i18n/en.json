@@ -1,5 +1,4 @@
 {
-  "about": "About",
   "activate-database": "Activate database",
   "activate-database.check": "Activate database after creating",
   "add": "Add",
@@ -28,6 +27,7 @@
   "font-size": "Font size",
   "go-to-database": "Go to Databases",
   "go-to-home": "Go to Home",
+  "home": "Home",
   "language": "Language:",
   "loading": "Loading",
   "new-database": "New database",
@@ -59,5 +59,6 @@
   "transpose": "Tranpose",
   "upgrade-all": "Upgrade all",
   "use-dark-theme": "Use dark theme",
-  "view": "View"
+  "view": "View",
+  "zpevnikator.git": "Zpevnikator.git"
 }

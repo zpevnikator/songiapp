@@ -28,6 +28,7 @@
   "font-size": "Velikost fontu",
   "go-to-database": "Přejít na Databáze",
   "go-to-home": "Přejít na úvodní stránku",
+  "home": "Domů",
   "language": "Jazyk:",
   "loading": "Načítání",
   "new-database": "Nová databáze",
@@ -59,5 +60,6 @@
   "transpose": "Transpozice",
   "upgrade-all": "Upgradovat vše",
   "use-dark-theme": "Použít tmavé schéma",
-  "view": "Pohled"
+  "view": "Pohled",
+  "zpevnikator.git": "*** Zpevnikator.git"
 }
