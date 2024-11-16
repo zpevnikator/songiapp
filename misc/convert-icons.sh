@@ -3,12 +3,13 @@ magick  \
     -size 1000x1000  xc:transparent \
     -fill '#ddddfa' \
     -draw "circle 500 500 500 1" \
-    -pointsize 400 -font './Mcbungus-Regular.ttf' \
+    -pointsize 400 \
     -gravity center \
     -fill '#0000ff' \
-    -draw 'text 0,-150 "App"' \
+    -draw 'text 0,-150 "♪"' \
+    -font './Mcbungus-Regular.ttf' \
     -fill '#3a3a3a' \
-    -draw 'text 0,150 "Songi"' \
+    -draw 'text 0,150 "git"' \
     icon_circle.png
 
 
@@ -16,12 +17,13 @@ magick  \
     -size 1000x1000  xc:transparent \
     -fill '#ddddfa' \
     -draw "rectangle 0,0 1000,1000" \
-    -pointsize 300 -font './Mcbungus-Regular.ttf' \
+    -pointsize 300 \
     -gravity center \
     -fill '#0000ff' \
-    -draw 'text 0,-120 "App"' \
+    -draw 'text 0,-120 "♪"' \
+    -font './Mcbungus-Regular.ttf' \
     -fill '#3a3a3a' \
-    -draw 'text 0,120 "Songi"' \
+    -draw 'text 0,120 "git"' \
     icon_maskable.png
 
 
