@@ -3,10 +3,11 @@ magick  \
     -size 1000x1000  xc:transparent \
     -fill '#ddddfa' \
     -draw "circle 500 500 500 1" \
-    -pointsize 400 \
+    -pointsize 500 \
     -gravity center \
     -fill '#0000ff' \
-    -draw 'text 0,-150 "♪"' \
+    -draw 'text 0,-200 "♪"' \
+    -pointsize 400 \
     -font './Mcbungus-Regular.ttf' \
     -fill '#3a3a3a' \
     -draw 'text 0,150 "git"' \
@@ -17,10 +18,11 @@ magick  \
     -size 1000x1000  xc:transparent \
     -fill '#ddddfa' \
     -draw "rectangle 0,0 1000,1000" \
-    -pointsize 300 \
+    -pointsize 400 \
     -gravity center \
     -fill '#0000ff' \
-    -draw 'text 0,-120 "♪"' \
+    -draw 'text 0,-150 "♪"' \
+    -pointsize 300 \
     -font './Mcbungus-Regular.ttf' \
     -fill '#3a3a3a' \
     -draw 'text 0,120 "git"' \
