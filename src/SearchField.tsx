@@ -73,6 +73,9 @@ export default function SearchField(props: SearchFieldProps) {
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
         autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck="false"
       />
     </SearchDiv>
   );
