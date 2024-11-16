@@ -69,7 +69,7 @@ export default function SearchField(props: SearchFieldProps) {
             defaultMessage: "Search",
           })
         }
-        type='search'
+        type="search"
         inputMode="search"
         inputProps={{ "aria-label": "search" }}
         value={props.value}
