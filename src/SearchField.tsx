@@ -70,14 +70,16 @@ export default function SearchField(props: SearchFieldProps) {
           })
         }
         type="search"
-        inputMode="search"
-        inputProps={{ "aria-label": "search" }}
+        inputProps={{
+          "aria-label": "search",
+          autocorrect: "off",
+          autocapitalize: "off",
+          spellcheck: "false",
+          inputmode: "search",
+        }}
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
         autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        spellCheck="false"
       />
     </SearchDiv>
   );
