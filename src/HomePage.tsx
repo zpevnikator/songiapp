@@ -15,6 +15,7 @@ export default function ErrorPage() {
         id: "zpevnikator.git",
         defaultMessage: "Zpevnikator.git",
       })}
+      showLanguageSelector
     >
       <Box sx={{ m: 2 }} style={{ maxWidth: 600 }}>
         {intl.locale?.startsWith("cs") ? <HomeCs /> : <HomeEn />}

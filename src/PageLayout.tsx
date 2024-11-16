@@ -17,6 +17,7 @@ import {
   Menu,
   MenuItem,
   Paper,
+  Select,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -36,6 +37,7 @@ import InstallAppSnackbar from "./InstallAppSnackbar";
 import _ from "lodash";
 import SearchField from "./SearchField";
 import { useIntl } from "react-intl";
+import { useLocaleState } from "./TranslationProvider";
 
 interface PageLayoutProps {
   title?: string;
@@ -48,6 +50,7 @@ interface PageLayoutProps {
   rightDrawerContent?: any;
   headerButtons?: any;
   searchPlaceholder?: string;
+  showLanguageSelector?: boolean;
 }
 
 interface MenuItemDefinition {
@@ -67,11 +70,13 @@ function PageLayout(props: PageLayoutProps) {
     headerButtons = null,
     onChangeSearchText,
     searchPlaceholder,
+    showLanguageSelector = false,
   } = props;
 
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(
     null
   );
+  const [locale, setLocale] = useLocaleState();
 
   const [leftDrawerOpen, setLeftDrawerOpen] = useState(false);
   const [rightDrawerOpen, setRightDrawerOpen] = useState(false);
@@ -188,6 +193,13 @@ function PageLayout(props: PageLayoutProps) {
                 </MenuItem>
               ))}
             </Menu>
+          )}
+
+          {showLanguageSelector && (
+            <Select value={locale} onChange={(e) => setLocale(e.target.value)}>
+              <MenuItem value="en">English</MenuItem>
+              <MenuItem value="cs">Česky</MenuItem>
+            </Select>
           )}
         </Toolbar>
       </AppBar>
