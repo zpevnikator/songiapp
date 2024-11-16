@@ -9,7 +9,7 @@ export default function HomeCs() {
         určen k tisku písniček, doba pokročila a nový zpěvíkátor je určen hlavně
         pro hraní z tabletu, případně mobilu.
       </p>
-      <h4>Čím se nový zpěvníkátor liší od ostatních zpěníkových aplikací?</h4>
+      <h4>Čím se nový zpěvníkátor liší od ostatních zpěvníkových aplikací?</h4>
       <p>
         Tento projekt je naprosto otevřený (samozřejmě zdarma), a nezávislý na
         původním autorovi. Všechny zdrojové kódy jsou k dispozici na GitHubu, a
