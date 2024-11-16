@@ -28,6 +28,7 @@ import _ from "lodash";
 import { FormattedMessage, useIntl } from "react-intl";
 import { parseSongParts } from "./songpro";
 import MaterialLink from "@mui/material/Link";
+import useLocalStorage from "./useLocalStorage";
 
 export interface LayoutOptions {
   columns: number;
@@ -65,11 +66,14 @@ export default function SongPage() {
 
   const wakeLockRef = useRef<any>(null);
 
-  const [layout, setLayout] = useState<LayoutOptions>({
-    columns: 1,
-    fontSize: 16,
-    view: "normal",
-  });
+  const [layout, setLayout] = useLocalStorage<LayoutOptions>(
+    "songLayoutOptions",
+    {
+      columns: 1,
+      fontSize: 16,
+      view: "normal",
+    }
+  );
 
   const query = useQuery<LocalSong | undefined>({
     queryKey: ["song", songFullId],
