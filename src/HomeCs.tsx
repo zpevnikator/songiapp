@@ -6,7 +6,7 @@ export default function HomeCs() {
       <p>
         Zpěvníkátor.git je projekt vycházející z původního Zpěvníkátoru, který
         byl vytvořen na počátku 3. tisíciletí. Zatímco původní zpěvníkátor byl
-        určen k tisku písniček, doba pokročila a nový zpěvíkátor je určen hlavně
+        určen k tisku písniček, doba pokročila a nový zpěvníkátor je určen hlavně
         pro hraní z tabletu, případně mobilu.
       </p>
       <h4>Čím se nový zpěvníkátor liší od ostatních zpěvníkových aplikací?</h4>
