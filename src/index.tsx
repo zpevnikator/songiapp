@@ -20,12 +20,17 @@ import TranslationProvider from "./TranslationProvider";
 import EditLocalDatabasePage from "./EditLocalDatabasePage";
 import SongsAdminPage from "./SongsAdminPage";
 import SongListPage from "./SongListPage";
+import HomePage from "./HomePage";
 
 const queryClient = new QueryClient();
 
 const router = createHashRouter([
   {
     path: "/",
+    element: <HomePage />,
+  },
+  {
+    path: "/artists",
     element: <ArtistListPage />,
   },
   {

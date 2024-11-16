@@ -28,6 +28,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CancelIcon from "@mui/icons-material/Cancel";
 import InfoIcon from "@mui/icons-material/Info";
+import HomeIcon from "@mui/icons-material/Home";
 import LyricsIcon from "@mui/icons-material/Lyrics";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -78,6 +79,7 @@ function PageLayout(props: PageLayoutProps) {
   const location = useLocation();
   const bottomNavigationUrls = [
     "/",
+    "/artists",
     "/songs",
     "/databases",
     "/search",
@@ -203,6 +205,19 @@ function PageLayout(props: PageLayoutProps) {
         >
           <List>
             <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/")}>
+                <ListItemIcon>
+                  <HomeIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={intl.formatMessage({
+                    id: "home",
+                    defaultMessage: "Home",
+                  })}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
               <ListItemButton onClick={() => navigate("/databases")}>
                 <ListItemIcon>
                   <CloudIcon />
@@ -216,7 +231,7 @@ function PageLayout(props: PageLayoutProps) {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/")}>
+              <ListItemButton onClick={() => navigate("/artists")}>
                 <ListItemIcon>
                   <PeopleIcon />
                 </ListItemIcon>
@@ -295,10 +310,10 @@ function PageLayout(props: PageLayoutProps) {
               </ListItemButton>
             </ListItem>
           </List>
-          <ListItem disablePadding>
+          {/* <ListItem disablePadding>
             <ListItemButton
               onClick={() =>
-                window.open("https://github.com/songiapp/songiapp", "_blank")
+                window.open("https://github.com/zpevnikator/songiapp", "_blank")
               }
             >
               <ListItemIcon>
@@ -311,7 +326,7 @@ function PageLayout(props: PageLayoutProps) {
                 })}
               />
             </ListItemButton>
-          </ListItem>
+          </ListItem> */}
 
           {/* <Divider />
           <List>
@@ -362,6 +377,13 @@ function PageLayout(props: PageLayoutProps) {
         >
           <BottomNavigationAction
             label={intl.formatMessage({
+              id: "home",
+              defaultMessage: "Home",
+            })}
+            icon={<HomeIcon />}
+          />
+          <BottomNavigationAction
+            label={intl.formatMessage({
               id: "artists",
               defaultMessage: "Artists",
             })}
@@ -387,13 +409,6 @@ function PageLayout(props: PageLayoutProps) {
               defaultMessage: "Search",
             })}
             icon={<SearchIcon />}
-          />
-          <BottomNavigationAction
-            label={intl.formatMessage({
-              id: "settings",
-              defaultMessage: "Settings",
-            })}
-            icon={<SettingsIcon />}
           />
         </BottomNavigation>
       </Paper>
