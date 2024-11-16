@@ -69,6 +69,7 @@ export default function SearchField(props: SearchFieldProps) {
             defaultMessage: "Search",
           })
         }
+        type='search'
         inputProps={{ "aria-label": "search" }}
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
