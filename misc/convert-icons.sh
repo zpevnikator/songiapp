@@ -3,14 +3,14 @@ magick  \
     -size 1000x1000  xc:transparent \
     -fill '#ddddfa' \
     -draw "circle 500 500 500 1" \
-    -pointsize 500 \
+    -pointsize 1100 \
     -gravity center \
     -fill '#0000ff' \
-    -draw 'text 0,-200 "♪"' \
+    -draw 'text 0,0 "♪"' \
     -pointsize 400 \
     -font './Mcbungus-Regular.ttf' \
     -fill '#3a3a3a' \
-    -draw 'text 0,150 "git"' \
+    -draw 'push graphic-context translate -200,-140 rotate -45 text 0,0 "git" pop graphic-context' \
     icon_circle.png
 
 
@@ -18,14 +18,14 @@ magick  \
     -size 1000x1000  xc:transparent \
     -fill '#ddddfa' \
     -draw "rectangle 0,0 1000,1000" \
-    -pointsize 400 \
+    -pointsize 850 \
     -gravity center \
     -fill '#0000ff' \
-    -draw 'text 0,-150 "♪"' \
+    -draw 'text 0,0 "♪"' \
     -pointsize 300 \
     -font './Mcbungus-Regular.ttf' \
     -fill '#3a3a3a' \
-    -draw 'text 0,120 "git"' \
+    -draw 'push graphic-context translate -150,-120 rotate -45 text 0,0 "git" pop graphic-context' \
     icon_maskable.png
 
 
