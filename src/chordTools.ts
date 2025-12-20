@@ -81,13 +81,31 @@ export function extractChords(text: string) {
 
 export function getBaseTone(text?: string) {
   const chords = extractChords(text ?? "");
-  for (const chord of chords) {
-    const height = getChordTone(chord);
-    if (height != null) {
-      return height;
+  let maxScore = -1;
+  let bestCandidate: number | null = null;
+  for (let baseCandidate = 0; baseCandidate < 12; baseCandidate++) {
+    let score = 0;
+    for (const chord of chords) {
+      const height = getChordTone(chord);
+      if (height != null) {
+        const transposed = (height - baseCandidate + 5 * 12) % 12;
+        if (transposed == 0) {
+          score += 3;
+        } else if (transposed == 7) {
+          score += 2;
+        } else if (transposed == 5) {
+          score += 1;
+        } else if (transposed == 9 && chord.includes("m")) {
+          score += 3;
+        }
+      }
+    }
+    if (score > maxScore) {
+      maxScore = score;
+      bestCandidate = baseCandidate;
     }
   }
-  return null;
+  return bestCandidate;
 }
 
 export function transposeChordNumber(

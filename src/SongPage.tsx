@@ -165,7 +165,10 @@ export default function SongPage() {
               variant="contained"
               size="small"
               sx={{ m: 1 }}
-              onClick={() => setTranspDiff(0)}
+              onClick={() => {
+                setShowNumChords(false);
+                setTranspDiff(0);
+              }}
             >
               <FormattedMessage id="reset" defaultMessage="Reset" />
             </Button>
