@@ -117,7 +117,11 @@ export function transposeChordNumber(
     if (chord.startsWith(tone)) {
       const height = TONE_HEIGHTS[tone];
       const newHeight = (height - baseTone + 5 * 12 + d) % 12;
-      return `${TONE_NUMBER_NAMES[newHeight]}${chord.substring(tone.length)}`;
+      const chordType = chord.substring(tone.length);
+      if (chordType) {
+        return `${TONE_NUMBER_NAMES[newHeight]}:${chordType}`;
+      }
+      return TONE_NUMBER_NAMES[newHeight];
     }
   }
 
