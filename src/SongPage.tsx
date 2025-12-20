@@ -61,6 +61,7 @@ export default function SongPage() {
     parseInt(localStorage.getItem("lastUsedLocalFileDb")!) || 0
   );
   const [showSavedInfo, setShowSavedInfo] = useState(false);
+  const [showNumChords, setShowNumChords] = useState(false);
 
   const songFullId = `${dbid}/${artistid}/${songid}`;
 
@@ -88,8 +89,11 @@ export default function SongPage() {
 
   const [transpDiff, setTranspDiff] = useState(0);
   const transposedText = useMemo(
-    () => (transpDiff ? transposeText(text ?? "", transpDiff) : text),
-    [text, transpDiff]
+    () =>
+      transpDiff || showNumChords
+        ? transposeText(text ?? "", transpDiff, showNumChords)
+        : text,
+    [text, transpDiff, showNumChords]
   );
   const textColumns = useMemo(
     () => divideText(transposedText ?? "", layout.columns),
@@ -164,6 +168,18 @@ export default function SongPage() {
               onClick={() => setTranspDiff(0)}
             >
               <FormattedMessage id="reset" defaultMessage="Reset" />
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ m: 1 }}
+              onClick={() => setShowNumChords((x) => !x)}
+            >
+              {showNumChords ? (
+                <FormattedMessage id="tones" defaultMessage="Tones" />
+              ) : (
+                <FormattedMessage id="numbers" defaultMessage="Numbers" />
+              )}
             </Button>
           </Box>
           <Box>

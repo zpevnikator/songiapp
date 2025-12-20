@@ -107,6 +107,9 @@
   "normal": {
     "defaultMessage": "Normal"
   },
+  "numbers": {
+    "defaultMessage": "Numbers"
+  },
   "ok": {
     "defaultMessage": "OK"
   },
@@ -169,6 +172,9 @@
   },
   "succesfully-saved-db": {
     "defaultMessage": "Saved database, detected {songs} songs and {artists} artists"
+  },
+  "tones": {
+    "defaultMessage": "Tones"
   },
   "transpose": {
     "defaultMessage": "Tranpose"

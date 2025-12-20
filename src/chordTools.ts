@@ -40,6 +40,21 @@ export const TONE_BASE_NAMES = [
   "H",
 ];
 
+export const TONE_NUMBER_NAMES = [
+  "1",
+  "1#",
+  "2",
+  "3b",
+  "3",
+  "4",
+  "5b",
+  "5",
+  "5#",
+  "6",
+  "7b",
+  "7",
+];
+
 export function getChordTone(chord: string): number | undefined {
   for (const tone of TONE_ALL_NAMES) {
     if (chord.startsWith(tone)) {
@@ -75,7 +90,30 @@ export function getBaseTone(text?: string) {
   return null;
 }
 
-export function transposeText(text: string, d: number) {
+export function transposeChordNumber(
+  chord: string,
+  baseTone: number,
+  d: number
+) {
+  for (const tone of TONE_ALL_NAMES) {
+    if (chord.startsWith(tone)) {
+      const height = TONE_HEIGHTS[tone];
+      const newHeight = (height - baseTone + 5 * 12 + d) % 12;
+      return `${TONE_NUMBER_NAMES[newHeight]}${chord.substring(tone.length)}`;
+    }
+  }
+
+  return chord;
+}
+
+export function transposeText(text: string, d: number, showNumChords = false) {
+  if (showNumChords) {
+    const baseTone = getBaseTone(text);
+    return text.replace(
+      /\[([^\]]+)\]/g,
+      (m) => `[${transposeChordNumber(m.slice(1, -1), baseTone ?? 0, d)}]`
+    );
+  }
   if ((d + 5 * 12) % 12 == 0) {
     return text;
   }
