@@ -43,7 +43,11 @@ import type {
   SongDbList,
   SongDbListItem,
 } from "./types";
-import { getErrorMessage, matchSearchCriteria } from "./utils";
+import {
+  getErrorMessage,
+  matchSearchCriteria,
+  requestPersistence,
+} from "./utils";
 import _ from "lodash";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -438,6 +442,7 @@ export default function DownloadPage() {
   }
 
   async function downloadDatabase(db: SongDbListItem) {
+    await requestPersistence();
     setOperationQueue((x) => [...x, { db, op: "download" }]);
     setTimeout(processQueue, 10);
   }

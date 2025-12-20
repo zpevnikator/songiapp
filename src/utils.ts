@@ -63,3 +63,14 @@ export function getFirstLetter(s: string) {
 export function removeHtmlTags(text: string) {
   return text.replace(/<[^>]+>/g, "");
 }
+
+export async function requestPersistence() {
+  if (!('storage' in navigator)) return { supported: false };
+
+  const already = await navigator.storage.persisted();
+  let granted = already;
+  if (!already && navigator.storage.persist) {
+    granted = await navigator.storage.persist();
+  }
+  return { supported: true, granted };
+}
