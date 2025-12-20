@@ -173,7 +173,10 @@ export default function SongPage() {
               variant="contained"
               size="small"
               sx={{ m: 1 }}
-              onClick={() => setShowNumChords((x) => !x)}
+              onClick={() => {
+                setShowNumChords((x) => !x);
+                setTranspDiff(0);
+              }}
             >
               {showNumChords ? (
                 <FormattedMessage id="tones" defaultMessage="Tones" />
