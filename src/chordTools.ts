@@ -64,6 +64,12 @@ export function getChordTone(chord: string): number | undefined {
 }
 
 export function transposeChord(chord: string, d: number) {
+  const basIndex = chord.indexOf("/");
+  if (basIndex >= 0) {
+    const mainChord = chord.substring(0, basIndex);
+    const bassChord = chord.substring(basIndex + 1);
+    return `${transposeChord(mainChord, d)}/${transposeChord(bassChord, d)}`;
+  }
   for (const tone of TONE_ALL_NAMES) {
     if (chord.startsWith(tone)) {
       const height = TONE_HEIGHTS[tone];
@@ -113,6 +119,17 @@ export function transposeChordNumber(
   baseTone: number,
   d: number
 ) {
+  const basIndex = chord.indexOf("/");
+  if (basIndex >= 0) {
+    const mainChord = chord.substring(0, basIndex);
+    const bassChord = chord.substring(basIndex + 1);
+    return `${transposeChordNumber(
+      mainChord,
+      baseTone,
+      d
+    )}/${transposeChordNumber(bassChord, baseTone, d)}`;
+  }
+
   for (const tone of TONE_ALL_NAMES) {
     if (chord.startsWith(tone)) {
       const height = TONE_HEIGHTS[tone];
