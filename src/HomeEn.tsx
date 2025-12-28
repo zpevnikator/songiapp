@@ -12,7 +12,7 @@ export default function HomeEn() {
       </p>
       <p>
         All songs are stored as text files on GitHub in the{" "}
-        <a href="https://songpro.org/">SongPro</a> format, which is very easy to edit.
+        <a href="/songpro">SongPro</a> format, which is very easy to edit.
       </p>
       <h4>Extensible song databases</h4>
       <p>
