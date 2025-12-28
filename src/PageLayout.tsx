@@ -312,6 +312,15 @@ function PageLayout(props: PageLayoutProps) {
             <ListItem disablePadding>
               <ListItemButton
                 onClick={async () => {
+                  const upgrading = window.confirm(
+                    intl.formatMessage({
+                      id: "upgrade-app.confirm",
+                      defaultMessage: "This will reload the app and check for updates. Continue?",
+                    })
+                  );
+                  
+                  if (!upgrading) return;
+
                   // Force service worker to update - iOS/iPad compatible approach
                   if ('serviceWorker' in navigator) {
                     try {
