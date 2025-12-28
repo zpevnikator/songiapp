@@ -182,6 +182,9 @@
   "upgrade-all": {
     "defaultMessage": "Upgrade all"
   },
+  "upgrade-app": {
+    "defaultMessage": "Upgrade app"
+  },
   "use-dark-theme": {
     "defaultMessage": "Use dark theme"
   },

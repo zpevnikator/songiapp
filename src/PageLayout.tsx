@@ -34,6 +34,7 @@ import LyricsIcon from "@mui/icons-material/Lyrics";
 import SettingsIcon from "@mui/icons-material/Settings";
 import TextFormatIcon from "@mui/icons-material/TextFormat";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 import InstallAppSnackbar from "./InstallAppSnackbar";
 import _ from "lodash";
 import SearchField from "./SearchField";
@@ -304,6 +305,45 @@ function PageLayout(props: PageLayoutProps) {
                   primary={intl.formatMessage({
                     id: "songproFormat",
                     defaultMessage: "SongPro Format",
+                  })}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  // Force service worker to update
+                  if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then((registrations) => {
+                      for (const registration of registrations) {
+                        registration.update().then(() => {
+                          // If there's a waiting service worker, tell it to skip waiting
+                          if (registration.waiting) {
+                            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                            // Reload after the new service worker takes control
+                            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                              window.location.reload();
+                            });
+                          } else {
+                            // No update available, just reload to be sure
+                            window.location.reload();
+                          }
+                        });
+                      }
+                    });
+                  } else {
+                    // No service worker support, just reload
+                    window.location.reload();
+                  }
+                }}
+              >
+                <ListItemIcon>
+                  <SystemUpdateAltIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={intl.formatMessage({
+                    id: "upgrade-app",
+                    defaultMessage: "Upgrade app",
                   })}
                 />
               </ListItemButton>
