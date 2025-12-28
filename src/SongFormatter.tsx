@@ -153,6 +153,7 @@ export class ChordLineFormatter {
               const bassNote = chord.substring(divIndex + 1);
               const rootNote = chord.substring(0, colonIndex);
               const chordType = chord.substring(colonIndex + 1, divIndex);
+              const bassNoteColor = getChordColor(bassNote, isDarkMode || false, chordColor);
 
               currentChordRes.push(
                 <div
@@ -161,7 +162,8 @@ export class ChordLineFormatter {
                   style={{ color: getChordColor(chord, isDarkMode || false, chordColor) }}
                 >
                   {rootNote}
-                  <span className="song-chord-type">{chordType}</span>/{bassNote}
+                  <span className="song-chord-type">{chordType}</span>/
+                  <span style={{ color: bassNoteColor }}>{bassNote}</span>
                 </div>
               );
             } else {
@@ -179,15 +181,36 @@ export class ChordLineFormatter {
               );
             }
           } else {
-            currentChordRes.push(
-              <div
-                key={index++}
-                className="song-chord"
-                style={{ color: getChordColor(chord, isDarkMode || false, chordColor) }}
-              >
-                {chord}
-              </div>
-            );
+            // Handle chords without colon (e.g., "4/3", "1", "C/G")
+            const divIndex = chord.indexOf("/");
+            if (divIndex >= 0) {
+              // Chord with bass note but no chord type
+              const rootNote = chord.substring(0, divIndex);
+              const bassNote = chord.substring(divIndex + 1);
+              const rootColor = getChordColor(rootNote, isDarkMode || false, chordColor);
+              const bassNoteColor = getChordColor(bassNote, isDarkMode || false, chordColor);
+
+              currentChordRes.push(
+                <div
+                  key={index++}
+                  className="song-chord"
+                  style={{ color: rootColor }}
+                >
+                  {rootNote}/<span style={{ color: bassNoteColor }}>{bassNote}</span>
+                </div>
+              );
+            } else {
+              // Simple chord without bass note
+              currentChordRes.push(
+                <div
+                  key={index++}
+                  className="song-chord"
+                  style={{ color: getChordColor(chord, isDarkMode || false, chordColor) }}
+                >
+                  {chord}
+                </div>
+              );
+            }
           }
         }
 
