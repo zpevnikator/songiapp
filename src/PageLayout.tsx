@@ -297,7 +297,7 @@ function PageLayout(props: PageLayoutProps) {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("https://songspro.github.io/")}>
+              <ListItemButton onClick={() => window.open("https://songspro.github.io/", "_blank")}>
                 <ListItemIcon>
                   <TextFormatIcon />
                 </ListItemIcon>
@@ -311,30 +311,24 @@ function PageLayout(props: PageLayoutProps) {
             </ListItem>
             <ListItem disablePadding>
               <ListItemButton
-                onClick={() => {
-                  // Force service worker to update
+                onClick={async () => {
+                  // Force service worker to update - iOS/iPad compatible approach
                   if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then((registrations) => {
-                      for (const registration of registrations) {
-                        registration.update().then(() => {
-                          // If there's a waiting service worker, tell it to skip waiting
-                          if (registration.waiting) {
-                            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-                            // Reload after the new service worker takes control
-                            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                              window.location.reload();
-                            });
-                          } else {
-                            // No update available, just reload to be sure
-                            window.location.reload();
-                          }
-                        });
+                    try {
+                      const registrations = await navigator.serviceWorker.getRegistrations();
+                      // Unregister all service workers and reload
+                      await Promise.all(registrations.map(reg => reg.unregister()));
+                      // Clear all caches
+                      if ('caches' in window) {
+                        const cacheNames = await caches.keys();
+                        await Promise.all(cacheNames.map(name => caches.delete(name)));
                       }
-                    });
-                  } else {
-                    // No service worker support, just reload
-                    window.location.reload();
+                    } catch (error) {
+                      console.error('Error updating service worker:', error);
+                    }
                   }
+                  // Always reload to get fresh version
+                  window.location.reload();
                 }}
               >
                 <ListItemIcon>
