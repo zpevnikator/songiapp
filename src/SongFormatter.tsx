@@ -3,7 +3,7 @@ interface ChordLineSegment {
   text: string;
 }
 
-function getChordColor(chord: string, defaultColor?: string): string | undefined {
+function getChordColor(chord: string, isDarkMode: boolean, defaultColor?: string): string | undefined {
   const firstChar = chord.charAt(0);
   const numericNote = parseInt(firstChar);
   
@@ -12,16 +12,29 @@ function getChordColor(chord: string, defaultColor?: string): string | undefined
   }
   
   // Map numeric notation to solfège colors (Do-Re-Mi)
-  const colorMap: { [key: number]: string } = {
+  // Light theme - deeper colors
+  const lightColorMap: { [key: number]: string } = {
     1: '#D32F2F', // Do (C) - Red
-    2: '#F57C00', // Re (D) - Orange
-    3: '#FBC02D', // Mi (E) - Yellow
-    4: '#388E3C', // Fa (F) - Green
-    5: '#1976D2', // Sol (G) - Blue
-    6: '#7B1FA2', // La (A) - Purple
-    7: '#C2185B', // Ti (B) - Pink/Magenta
+    2: '#E65100', // Re (D) - Orange
+    3: '#F57F17', // Mi (E) - Yellow
+    4: '#2E7D32', // Fa (F) - Green
+    5: '#1565C0', // Sol (G) - Blue
+    6: '#6A1B9A', // La (A) - Purple
+    7: '#AD1457', // Ti (B) - Pink/Magenta
   };
   
+  // Dark theme - lighter, more vibrant colors for better visibility
+  const darkColorMap: { [key: number]: string } = {
+    1: '#EF5350', // Do (C) - Light Red
+    2: '#FF9800', // Re (D) - Light Orange
+    3: '#FFEB3B', // Mi (E) - Light Yellow
+    4: '#66BB6A', // Fa (F) - Light Green
+    5: '#42A5F5', // Sol (G) - Light Blue
+    6: '#AB47BC', // La (A) - Light Purple
+    7: '#EC407A', // Ti (B) - Light Pink
+  };
+  
+  const colorMap = isDarkMode ? darkColorMap : lightColorMap;
   return colorMap[numericNote] || defaultColor;
 }
 
@@ -87,7 +100,7 @@ export class ChordLineFormatter {
     this.hasChords = !!this.segments.find((x) => x.type == "chord");
   }
 
-  format(key: any, label: string, showLabel: boolean, chordColor?: string) {
+  format(key: any, label: string, showLabel: boolean, chordColor?: string, isDarkMode?: boolean) {
     if (!this.hasChords) {
       return (
         <div key={key}>
@@ -122,7 +135,7 @@ export class ChordLineFormatter {
       chords: [] as string[],
     };
 
-    function pushCurrent() {
+    const pushCurrent = () => {
       if (current.text || current.chords.length > 0) {
         if (current.chords.length == 0) {
           current.chords.push("\u00A0");
@@ -145,7 +158,7 @@ export class ChordLineFormatter {
                 <div
                   key={index++}
                   className="song-chord"
-                  style={{ color: getChordColor(chord, chordColor) }}
+                  style={{ color: getChordColor(chord, isDarkMode || false, chordColor) }}
                 >
                   {rootNote}
                   <span className="song-chord-type">{chordType}</span>/{bassNote}
@@ -158,7 +171,7 @@ export class ChordLineFormatter {
                 <div
                   key={index++}
                   className="song-chord"
-                  style={{ color: getChordColor(chord, chordColor) }}
+                  style={{ color: getChordColor(chord, isDarkMode || false, chordColor) }}
                 >
                   {mainChord}
                   <span className="song-chord-type">{chordType}</span>
@@ -170,7 +183,7 @@ export class ChordLineFormatter {
               <div
                 key={index++}
                 className="song-chord"
-                style={{ color: getChordColor(chord, chordColor) }}
+                style={{ color: getChordColor(chord, isDarkMode || false, chordColor) }}
               >
                 {chord}
               </div>
@@ -192,7 +205,7 @@ export class ChordLineFormatter {
           chords: [],
         };
       }
-    }
+    };
 
     for (const segment of this.segments) {
       if (segment.type == "chord") {
@@ -228,7 +241,7 @@ export class ChordLineFormatter {
 }
 
 export default class SongFormatter {
-  constructor(public text?: string, public chordColor?: string) {}
+  constructor(public text?: string, public chordColor?: string, public isDarkMode?: boolean) {}
 
   format() {
     const res: JSX.Element[] = [];
@@ -256,7 +269,8 @@ export default class SongFormatter {
             res.length,
             label,
             showLabel,
-            this.chordColor
+            this.chordColor,
+            this.isDarkMode
           )
         );
         showLabel = false;

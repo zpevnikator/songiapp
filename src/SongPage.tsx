@@ -365,7 +365,8 @@ export default function SongPage() {
                 <Typography sx={{ m: 1, fontSize: layout.fontSize }}>
                   {new SongFormatter(
                     textColumn,
-                    theme.palette.primary.main
+                    theme.palette.primary.main,
+                    theme.palette.mode === 'dark'
                   ).format()}
                 </Typography>
               </Grid>
