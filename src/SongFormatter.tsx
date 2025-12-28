@@ -3,6 +3,28 @@ interface ChordLineSegment {
   text: string;
 }
 
+function getChordColor(chord: string, defaultColor?: string): string | undefined {
+  const firstChar = chord.charAt(0);
+  const numericNote = parseInt(firstChar);
+  
+  if (isNaN(numericNote)) {
+    return defaultColor;
+  }
+  
+  // Map numeric notation to solfège colors (Do-Re-Mi)
+  const colorMap: { [key: number]: string } = {
+    1: '#D32F2F', // Do (C) - Red
+    2: '#F57C00', // Re (D) - Orange
+    3: '#FBC02D', // Mi (E) - Yellow
+    4: '#388E3C', // Fa (F) - Green
+    5: '#1976D2', // Sol (G) - Blue
+    6: '#7B1FA2', // La (A) - Purple
+    7: '#C2185B', // Ti (B) - Pink/Magenta
+  };
+  
+  return colorMap[numericNote] || defaultColor;
+}
+
 export class ChordLineFormatter {
   segments: ChordLineSegment[] = [];
   hasChords = false;
@@ -123,7 +145,7 @@ export class ChordLineFormatter {
                 <div
                   key={index++}
                   className="song-chord"
-                  style={{ color: chordColor }}
+                  style={{ color: getChordColor(chord, chordColor) }}
                 >
                   {rootNote}
                   <span className="song-chord-type">{chordType}</span>/{bassNote}
@@ -136,7 +158,7 @@ export class ChordLineFormatter {
                 <div
                   key={index++}
                   className="song-chord"
-                  style={{ color: chordColor }}
+                  style={{ color: getChordColor(chord, chordColor) }}
                 >
                   {mainChord}
                   <span className="song-chord-type">{chordType}</span>
@@ -148,7 +170,7 @@ export class ChordLineFormatter {
               <div
                 key={index++}
                 className="song-chord"
-                style={{ color: chordColor }}
+                style={{ color: getChordColor(chord, chordColor) }}
               >
                 {chord}
               </div>
