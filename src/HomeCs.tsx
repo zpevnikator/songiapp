@@ -19,7 +19,7 @@ export default function HomeCs() {
       </p>
       <p>
         Všechny písně jsou uložené jako textový soubor na githubu ve formátu{" "}
-        <a href="/songpro">songpro</a>, který je velmi jednoduchý na
+        <a href="https://songspro.github.io/">songpro</a>, který je velmi jednoduchý na
         editaci.
       </p>
       <h4>Rozšiřitelné databáze písní</h4>
@@ -60,7 +60,7 @@ export default function HomeCs() {
           </a>
         </li>
         <li>
-          <a href="https://songpro.org/" target="_blank">
+          <a href="https://songspro.github.io/" target="_blank">
             SongPro format
           </a>
         </li>

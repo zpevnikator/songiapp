@@ -21,7 +21,6 @@ import EditLocalDatabasePage from "./EditLocalDatabasePage";
 import SongsAdminPage from "./SongsAdminPage";
 import SongListPage from "./SongListPage";
 import HomePage from "./HomePage";
-import SongProPage from "./SongProPage";
 
 const queryClient = new QueryClient();
 
@@ -49,10 +48,6 @@ const router = createHashRouter([
   {
     path: "/settings",
     element: <SettingsPage />,
-  },
-  {
-    path: "/songpro",
-    element: <SongProPage />,
   },
   {
     path: "/by-artist/:dbid/:artistid",

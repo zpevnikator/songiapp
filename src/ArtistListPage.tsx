@@ -202,7 +202,7 @@ export default function ArtistListPage() {
             </MaterialLink>
           </Box>
           <Box sx={{ m: 1 }}>
-            <MaterialLink href="https://songpro.org" target="_blank">
+            <MaterialLink href="https://songspro.github.io/" target="_blank">
               SongPro format
             </MaterialLink>
           </Box>

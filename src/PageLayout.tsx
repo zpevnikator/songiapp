@@ -296,7 +296,7 @@ function PageLayout(props: PageLayoutProps) {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/songpro")}>
+              <ListItemButton onClick={() => navigate("https://songspro.github.io/")}>
                 <ListItemIcon>
                   <TextFormatIcon />
                 </ListItemIcon>
