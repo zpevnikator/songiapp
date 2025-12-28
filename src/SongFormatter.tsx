@@ -106,19 +106,59 @@ export class ChordLineFormatter {
           current.chords.push("\u00A0");
         }
 
-        res.push(
-          <div className="song-chord-line-item">
-            <div className="song-chords-group">
-              {current.chords.map((x, i) => (
+        const currentChordRes: JSX.Element[] = [];
+        let index = 0;
+        for (const chord of current.chords) {
+          const colonIndex = chord.indexOf(":");
+          if (colonIndex >= 0) {
+            const mainChord = chord.substring(0, colonIndex);
+            const divIndex = chord.indexOf("/");
+            if (divIndex >= 0 && divIndex > colonIndex) {
+              // Handle bass note in chord like "C:6/G"
+              const bassNote = chord.substring(divIndex + 1);
+              const rootNote = chord.substring(0, colonIndex);
+              const chordType = chord.substring(colonIndex + 1, divIndex);
+
+              currentChordRes.push(
                 <div
-                  key={i}
+                  key={index++}
                   className="song-chord"
                   style={{ color: chordColor }}
                 >
-                  {x}
+                  {rootNote}
+                  <span className="song-chord-type">{chordType}</span>/{bassNote}
                 </div>
-              ))}
-            </div>
+              );
+            } else {
+              const chordType = chord.substring(colonIndex + 1);
+
+              currentChordRes.push(
+                <div
+                  key={index++}
+                  className="song-chord"
+                  style={{ color: chordColor }}
+                >
+                  {mainChord}
+                  <span className="song-chord-type">{chordType}</span>
+                </div>
+              );
+            }
+          } else {
+            currentChordRes.push(
+              <div
+                key={index++}
+                className="song-chord"
+                style={{ color: chordColor }}
+              >
+                {chord}
+              </div>
+            );
+          }
+        }
+
+        res.push(
+          <div className="song-chord-line-item">
+            <div className="song-chords-group">{currentChordRes}</div>
             <div className="song-text-group">
               {current.text.replace(/ /g, "\u00A0")}
             </div>

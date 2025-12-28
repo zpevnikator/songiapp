@@ -41,3 +41,9 @@ code {
 .song-section-delimiter {
   height: 1em;
 }
+
+.song-chord-type {
+  font-size: 0.8em;
+  vertical-align: super;
+  line-height: 0;
+}
