@@ -28,7 +28,7 @@ export function parseSongDatabase(data: string): SongDatabase {
   }
 
   for (const line of data.split("\n")) {
-    if (line.match(/^\s*----*\s*$/)) {
+    if (line.match(/^\s*---*\s*$/)) {
       flushSong();
       continue;
     }
@@ -99,7 +99,7 @@ export function parseSongParts(source: string): Record<string, string> {
   const song = {};
   let text = "";
   for (const line of source?.split("\n") ?? []) {
-    if (line.match(/^\s*----*\s*$/)) {
+    if (line.match(/^\s*---*\s*$/)) {
       return {
         ...song,
         text,
