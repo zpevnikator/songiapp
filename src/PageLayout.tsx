@@ -32,6 +32,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import HomeIcon from "@mui/icons-material/Home";
 import LyricsIcon from "@mui/icons-material/Lyrics";
 import SettingsIcon from "@mui/icons-material/Settings";
+import TextFormatIcon from "@mui/icons-material/TextFormat";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import InstallAppSnackbar from "./InstallAppSnackbar";
 import _ from "lodash";
@@ -290,6 +291,19 @@ function PageLayout(props: PageLayoutProps) {
                   primary={intl.formatMessage({
                     id: "settings",
                     defaultMessage: "Settings",
+                  })}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/songpro")}>
+                <ListItemIcon>
+                  <TextFormatIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={intl.formatMessage({
+                    id: "songproFormat",
+                    defaultMessage: "SongPro Format",
                   })}
                 />
               </ListItemButton>
