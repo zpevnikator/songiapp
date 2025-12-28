@@ -146,6 +146,12 @@ export function transposeChordNumber(
 }
 
 export function transposeText(text: string, d: number, showNumChords = false) {
+  if (areNumberChords(text)) {
+    return text.replace(
+      /\[([^\]]+)\]/g,
+      (m) => `[${transposeChordNumberNumber(m.slice(1, -1), d)}]`
+    );
+  }
   if (showNumChords) {
     const baseTone = getBaseTone(text);
     return text.replace(
@@ -162,6 +168,37 @@ export function transposeText(text: string, d: number, showNumChords = false) {
   );
 }
 
+export function transposeChordNumberNumber(chord: string, d: number): string {
+  const basIndex = chord.indexOf("/");
+  if (basIndex >= 0) {
+    const mainChord = chord.substring(0, basIndex);
+    const bassChord = chord.substring(basIndex + 1);
+    return `${transposeChordNumberNumber(mainChord, d)}/${transposeChordNumberNumber(bassChord, d)}`;
+  }
+
+  // Find which number tone the chord starts with
+  for (let i = 0; i < TONE_NUMBER_NAMES.length; i++) {
+    const numTone = TONE_NUMBER_NAMES[i];
+    if (chord.startsWith(numTone)) {
+      const newIndex = (i + 5 * 12 + d) % 12;
+      const chordType = chord.substring(numTone.length);
+      // Remove leading colon if present (from conversion)
+      const cleanType = chordType.startsWith(':') ? chordType.substring(1) : chordType;
+      return `${TONE_NUMBER_NAMES[newIndex]}${cleanType}`;
+    }
+  }
+
+  return chord;
+}
+
 export function removeChords(text: string) {
   return text.replace(/\[([^\]]+)\]/g, "");
+}
+
+export function areNumberChords(text: string): boolean {
+  const chords = extractChords(text);
+  if (chords.length === 0) {
+    return false;
+  }
+  return chords.every((chord) => /^\d/.test(chord));
 }
