@@ -26,12 +26,17 @@
     "react-router-dom": "^6.17.0",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "workbox-core": "^7.4.0",
+    "workbox-expiration": "^7.4.0",
+    "workbox-precaching": "^7.4.0",
+    "workbox-routing": "^7.4.0",
+    "workbox-strategies": "^7.4.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
     "eject": "react-scripts eject",
     "i18n:compile": "formatjs compile \"src/i18n/en-extracted.json\" --out-file src/i18n/en.json",
     "i18n:extract": "formatjs extract \"src/**/!(*.d).ts*\" --out-file src/i18n/en-extracted.json",
@@ -55,5 +60,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@craco/craco": "^7.1.0",
+    "workbox-webpack-plugin": "^7.4.0"
   }
 }
