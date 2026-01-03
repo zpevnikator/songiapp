@@ -65,6 +65,7 @@ function DatabaseItem(props: {
   deleteFileDatabase: (id: number) => void;
   activateFileDatabase: (db: LocalFileDatabase) => void;
   deactivateFileDatabase: (db: LocalFileDatabase) => void;
+  refreshDatabase: (x: SongDbListItem) => void;
   isProcessed: boolean;
   isWaiting: boolean;
   isFinished: boolean;
@@ -79,6 +80,7 @@ function DatabaseItem(props: {
     deleteFileDatabase,
     activateFileDatabase,
     deactivateFileDatabase,
+    refreshDatabase,
     isProcessed,
     isWaiting,
     isFinished,
@@ -216,6 +218,20 @@ function DatabaseItem(props: {
               }}
             >
               <FormattedMessage id="delete" defaultMessage="Delete" />
+            </MenuItem>
+          )}
+
+          {localDb && !localFileDb && (
+            <MenuItem
+              onClick={() => {
+                setMenuAnchorEl(null);
+                refreshDatabase(db);
+              }}
+            >
+              <FormattedMessage
+                id="refresh-database"
+                defaultMessage="Download new version"
+              />
             </MenuItem>
           )}
           {localDb && (
@@ -434,6 +450,16 @@ export default function DownloadPage() {
           setError(getErrorMessage(err));
         }
         break;
+      case "refresh":
+        try {
+          await deleteSongDb(db.id);
+          const dbText = await fetch(db.url).then((res) => res.text());
+          const dbData = parseSongDatabase(dbText);
+          await saveSongDb(db, dbData);
+        } catch (err) {
+          setError(getErrorMessage(err));
+        }
+        break;
     }
     setProcessedDatabase(null);
     setFinishedDatabases((x) => [...x, db.id]);
@@ -449,6 +475,11 @@ export default function DownloadPage() {
 
   async function deleteDatabase(db: SongDbListItem) {
     setOperationQueue((x) => [...x, { db, op: "delete" }]);
+    setTimeout(processQueue, 10);
+  }
+
+  async function refreshDatabase(db: SongDbListItem) {
+    setOperationQueue((x) => [...x, { db, op: "refresh" }]);
     setTimeout(processQueue, 10);
   }
 
@@ -566,6 +597,7 @@ export default function DownloadPage() {
                 isWaiting={!!operationQueue.find((x) => x.db.id == db.id)}
                 activateFileDatabase={activateFileDatabase}
                 deactivateFileDatabase={deactivateFileDatabase}
+                refreshDatabase={refreshDatabase}
                 setActiveDb={async (dbid, value) => {
                   try {
                     setIsWorking(true);
