@@ -272,7 +272,18 @@ export default class SongFormatter {
     let showLabel = false;
 
     for (const line of this.text?.split("\n") || "") {
-      if (line.startsWith("#")) {
+      if (line.startsWith("##")) {
+        const heading = line.substring(2).trim();
+        if (heading) {
+          res.push(
+            <div key={res.length} className="song-heading">
+              {heading}
+            </div>
+          );
+        }
+        label = "";
+        showLabel = false;
+      } else if (line.startsWith("#")) {
         if (label && showLabel) {
           res.push(
             <div key={res.length}>

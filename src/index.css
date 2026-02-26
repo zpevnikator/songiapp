@@ -42,6 +42,11 @@ code {
   height: 1em;
 }
 
+.song-heading {
+  font-weight: bold;
+  margin: 0.5em 0 0.25em;
+}
+
 .song-chord-type {
   font-size: 0.8em;
   vertical-align: super;
